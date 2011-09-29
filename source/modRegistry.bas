@@ -87,10 +87,10 @@ End Sub
 Function QueryValue(ByVal key As Long, ByVal valueName As String, ByRef value As String) As Long
     Dim ret As Long
     Dim keyType As Long
-    Dim dataSize As Long
+    Dim datasize As Long
     
     'determine the type and size of value to be read
-    ret = RegQueryValueEx(key, valueName, 0, keyType, 0, dataSize)
+    ret = RegQueryValueEx(key, valueName, 0, keyType, 0, datasize)
     If ret <> ERROR_SUCCESS And ret <> ERROR_MORE_DATA Then
         Echo ">>> QueryValue > RegQueryValueEx failed with return value " & ret
         QueryValue = ret
@@ -106,10 +106,10 @@ Function QueryValue(ByVal key As Long, ByVal valueName As String, ByRef value As
     
     'allocate buffer for read-back
     Dim strbuffer As String
-    strbuffer = String(dataSize, 0)
+    strbuffer = String(datasize, 0)
     
     'read the string
-    ret = RegQueryValueExString(key, valueName, 0, keyType, strbuffer, dataSize)
+    ret = RegQueryValueExString(key, valueName, 0, keyType, strbuffer, datasize)
     If ret <> ERROR_SUCCESS Then
         Echo ">>> QueryValue > RegQueryValueExString failed with return value " & ret
         QueryValue = ret
@@ -117,7 +117,7 @@ Function QueryValue(ByVal key As Long, ByVal valueName As String, ByRef value As
     End If
     
     'set value
-    value = Left$(strbuffer, dataSize - 1)
+    value = Left$(strbuffer, datasize - 1)
     
     QueryValue = ERROR_SUCCESS
 End Function
@@ -213,7 +213,7 @@ Public Sub SetFileAssoc(ByRef ext As String, ByVal create As Boolean)
         bindingName = App.Title & ext
         
         Dim exePath As String
-        exePath = App.path & "\" & App.EXEName & ".exe %1"
+        exePath = Chr(34) & App.path & "\" & App.EXEName & ".exe" & Chr(34) & " %1"
         
         Dim description As String
         description = UCase(Right(ext, Len(ext) - 1)) & " File"

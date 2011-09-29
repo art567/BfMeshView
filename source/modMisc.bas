@@ -120,6 +120,7 @@ End Function
 Public Function GetFileExt(ByVal str As String) As String
 Dim dot As Long
     dot = InStrRev(str, ".")
+    'GetFileExt = Right$(str, Len(str) - dot)
     GetFileExt = Mid(str, dot + 1, Len(str))
 End Function
 
@@ -161,7 +162,7 @@ Public Sub SetStatus(ByVal key As String, ByRef str As String)
     'DoEvents
     Exit Sub
 errhandler:
-    MsgBox "SetStatus" & vbLf & err.Description, vbCritical
+    MsgBox "SetStatus" & vbLf & err.description, vbCritical
 End Sub
 
 

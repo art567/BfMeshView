@@ -72,7 +72,8 @@ Public Function OpenMeshFile(ByRef filename As String) As Boolean
     Case "bfmv"
         r = LoadWorkspace(filename)
     Case Else
-        MsgBox "Unknown file type.", vbExclamation
+        MsgBox "Unknown file type " & Chr(34) & ext & Chr(34), vbExclamation
+        'MsgBox filename
         r = False
     End Select
     
