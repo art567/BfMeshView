@@ -140,7 +140,24 @@ Public Sub BuildShader(ByRef mat As bf2_mat, ByRef filename As String)
             .layernum = 1
             SetBase mat, 1
             
-            'shadow/wreck
+            'wreck (no bump)
+            If .mapnum = 3 Then
+                .layer(1).depthWrite = GL_TRUE
+                
+                .layernum = 2
+                .layer(2).texcoff = 0
+                .layer(2).texmapid = mat.texmapid(2)
+                .layer(2).depthfunc = GL_EQUAL
+                .layer(2).depthWrite = GL_FALSE
+                If .alphamode = 1 Then .layer(2).depthfunc = GL_EQUAL 'note: does not render correctly, but we don't care
+                If .alphamode = 2 Then .layer(2).depthfunc = GL_EQUAL
+                .layer(2).blend = True
+                .layer(2).blendsrc = GL_ZERO
+                .layer(2).blenddst = GL_SRC_COLOR
+                .layer(2).lighting = False
+            End If
+            
+            'wreck
             If .mapnum = 4 Then
                 .layer(1).depthWrite = GL_TRUE
                 
