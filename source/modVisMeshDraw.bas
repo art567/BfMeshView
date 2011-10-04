@@ -23,24 +23,25 @@ Public Sub DrawVisMesh()
     On Error GoTo errorhandler
     
     With vmesh
-        If .loadok Then
+        If Not .loadok Then Exit Sub
             
-            'deform mesh
-            If bf2baf.loaded Then
-                BF2MeshDeform
-            End If
-            
-            'draw mesh
-            Select Case draw_mode
-            Case dm_normal
-                DrawVisMeshLod .geom(selgeom).lod(sellod)
-            Case dm_vertorder
-                DrawVisMeshIndexColors .geom(selgeom).lod(sellod)
-            Case dm_overdraw
-                DrawVisMeshOverdraw .geom(selgeom).lod(sellod)
-            End Select
-            
-        Else
+        'deform mesh
+        If bf2baf.loaded Then
+            BF2MeshDeform
+        End If
+        
+        'draw mesh
+        Select Case draw_mode
+        Case dm_normal
+            DrawVisMeshLod .geom(selgeom).lod(sellod)
+        Case dm_vertorder
+            DrawVisMeshIndexColors .geom(selgeom).lod(sellod)
+        Case dm_overdraw
+            DrawVisMeshOverdraw .geom(selgeom).lod(sellod)
+        End Select
+        
+        
+        If 666 = 777 Then
             
             StartAAPoint 4
             
