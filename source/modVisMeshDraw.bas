@@ -311,8 +311,10 @@ Dim texchans As Long
             'draw selected UV verts
             Dim showvertsel As Boolean
             If uveditor_isloaded Then
-                frmUvEdit.SetVertFlags
-                showvertsel = True
+                If frmUvEdit.Visible Then
+                    frmUvEdit.SetVertFlags
+                    showvertsel = True
+                End If
             End If
             If frmTransform.Visible Then
                 showvertsel = True
@@ -359,18 +361,18 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride)
                             
                             'get vertex
-                            v.x = vmesh.vert(vi + 0)
-                            v.y = vmesh.vert(vi + 1)
+                            v.X = vmesh.vert(vi + 0)
+                            v.Y = vmesh.vert(vi + 1)
                             v.z = vmesh.vert(vi + 2)
                             
                             'get normal
-                            n.x = vmesh.vert(vi + normoff + 0)
-                            n.y = vmesh.vert(vi + normoff + 1)
+                            n.X = vmesh.vert(vi + normoff + 0)
+                            n.Y = vmesh.vert(vi + normoff + 1)
                             n.z = vmesh.vert(vi + normoff + 2)
                             
                             'get tangent
-                            t.x = vmesh.vert(vi + tangoff + 0)
-                            t.y = vmesh.vert(vi + tangoff + 1)
+                            t.X = vmesh.vert(vi + tangoff + 0)
+                            t.Y = vmesh.vert(vi + tangoff + 1)
                             t.z = vmesh.vert(vi + tangoff + 2)
                             
                             'get binormal
@@ -378,22 +380,22 @@ Dim texchans As Long
                             ti = ((.mat(j).vstart + k) * stride) + 20
                             
                             'rescale
-                            t.x = v.x + t.x * s
-                            t.y = v.y + t.y * s
+                            t.X = v.X + t.X * s
+                            t.Y = v.Y + t.Y * s
                             t.z = v.z + t.z * s
-                            b.x = v.x + b.x * s
-                            b.y = v.y + b.y * s
+                            b.X = v.X + b.X * s
+                            b.Y = v.Y + b.Y * s
                             b.z = v.z + b.z * s
                             
                             'draw tangent
                             glColor4f 1, 0.5, 0.5, 0.5
-                            glVertex3fv v.x
-                            glVertex3fv t.x
+                            glVertex3fv v.X
+                            glVertex3fv t.X
                             
                             'draw bitangent
                             glColor4f 0.5, 1, 0.5, 0.5
-                            glVertex3fv v.x
-                            glVertex3fv b.x
+                            glVertex3fv v.X
+                            glVertex3fv b.X
                             
                         Next k
                     Next j
@@ -413,12 +415,12 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride) + 0
                             ni = ((.mat(j).vstart + k) * stride) + 3
                             
-                            n.x = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
-                            n.y = vmesh.vert(vi + 1) + vmesh.vert(ni + 1) * s
+                            n.X = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
+                            n.Y = vmesh.vert(vi + 1) + vmesh.vert(ni + 1) * s
                             n.z = vmesh.vert(vi + 2) + vmesh.vert(ni + 2) * s
                             
                             glVertex3fv vmesh.vert(vi)
-                            glVertex3fv n.x
+                            glVertex3fv n.X
                             
                         Next k
                     Next j

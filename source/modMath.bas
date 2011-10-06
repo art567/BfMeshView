@@ -386,8 +386,12 @@ Public Function GetInverseMat4(ByRef m() As Single, ByRef dst() As Single)
     dst(14) = m(2) * m(5) * m(12) - m(1) * m(6) * m(12) - m(2) * m(4) * m(13) + m(0) * m(6) * m(13) + m(1) * m(4) * m(14) - m(0) * m(5) * m(14)
     dst(15) = m(1) * m(6) * m(8) - m(2) * m(5) * m(8) + m(2) * m(4) * m(9) - m(0) * m(6) * m(9) - m(1) * m(4) * m(10) + m(0) * m(5) * m(10)
     
+    Dim det As Single
+    det = GetDeterminantMat4(m)
+    If det = 0 Then Exit Function
+    
     Dim d As Single
-    d = 1 / GetDeterminantMat4(m)
+    d = 1 / det
     
     dst(0) = dst(0) * d
     dst(5) = dst(5) * d

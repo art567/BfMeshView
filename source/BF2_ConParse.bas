@@ -71,6 +71,7 @@ Public Sub LoadCon(ByRef filename As String)
     ff = FreeFile
     Open filename For Input As #ff
     
+    Dim linenum As Long
     Dim ln As String
     Dim str() As String
     Dim skip As Boolean
@@ -83,6 +84,7 @@ Public Sub LoadCon(ByRef filename As String)
         .filename = filename
         
         Do Until EOF(ff)
+            linenum = linenum + 1
             Line Input #ff, ln
             
             'remove whitespaces
@@ -111,16 +113,16 @@ Public Sub LoadCon(ByRef filename As String)
                 Case "ObjectTemplate.setPosition"
                     str = Split(str(1), "/")
                     Dim pos As float3
-                    pos.x = val(str(0))
-                    pos.y = val(str(1))
+                    pos.X = val(str(0))
+                    pos.Y = val(str(1))
                     pos.z = val(str(2))
                     mat4setpos .node(tnode).transform, pos
                     
                 Case "ObjectTemplate.setRotation"
                     str = Split(str(1), "/")
                     Dim rot As float3
-                    rot.x = val(str(1))
-                    rot.y = val(str(0))
+                    rot.X = val(str(1))
+                    rot.Y = val(str(0))
                     rot.z = val(str(2))
                     mat4setrotYXZ .node(tnode).transform, rot
                     
@@ -191,7 +193,7 @@ Public Sub LoadCon(ByRef filename As String)
     
     'error
 errhandler:
-    MsgBox "LoadCon" & vbCrLf & err.description, vbCritical
+    'MsgBox "LoadCon" & vbLf & err.description & vbLf & filename & " (" & linenum & ")", vbCritical
     Close ff
     On Error GoTo 0
 End Sub
@@ -219,11 +221,11 @@ Public Sub DrawConNodes()
             Const s = 0.01
             Dim min As float3
             Dim max As float3
-            min.x = -s
-            min.y = -s
+            min.X = -s
+            min.Y = -s
             min.z = -s
-            max.x = s
-            max.y = s
+            max.X = s
+            max.Y = s
             max.z = s
             
             glDisable GL_LIGHTING

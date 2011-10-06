@@ -295,7 +295,7 @@ Private Sub cmdInput_Click()
         .filename = ""
         On Error Resume Next
         .ShowOpen
-        If Not Err.Number = cdlCancel Then
+        If Not err.Number = cdlCancel Then
             On Error GoTo 0
             
             nmap_folder = .filename
@@ -315,7 +315,7 @@ Private Sub cmdOutput_Click()
         .filename = ""
         On Error Resume Next
         .ShowSave
-        If Not Err.Number = cdlCancel Then
+        If Not err.Number = cdlCancel Then
             On Error GoTo 0
             
             nmap_folder = .filename
@@ -490,12 +490,12 @@ Dim flatten As Single
         
         For i = 0 To facenum - 1
             
-            Me.pgbBar.Value = (i / facenum) * 100
+            Me.pgbBar.value = (i / facenum) * 100
             
             'get face vert indices
-            v1 = (vstart + .index(istart + (i * 3) + 0)) * stride
-            v2 = (vstart + .index(istart + (i * 3) + 1)) * stride
-            v3 = (vstart + .index(istart + (i * 3) + 2)) * stride
+            v1 = (vstart + .Index(istart + (i * 3) + 0)) * stride
+            v2 = (vstart + .Index(istart + (i * 3) + 1)) * stride
+            v3 = (vstart + .Index(istart + (i * 3) + 2)) * stride
             
             'get face texcoords
             n1.x = .vert(v1 + normoff + 0)
@@ -598,7 +598,7 @@ Dim flatten As Single
     Dim vec As float3
     Dim c As bgra
     For i = 0 To size - 1
-        Me.pgbBar.Value = (i / size) * 100
+        Me.pgbBar.value = (i / size) * 100
         
         If flag(i) Then
             
@@ -682,11 +682,11 @@ Dim flatten As Single
     
     'done
     'MsgBox "Done.", vbInformation
-    Me.pgbBar.Value = 0
+    Me.pgbBar.value = 0
     
     Exit Sub
 errorhandler:
-    MsgBox "ConvertMap" & vbLf & Err.Description, vbCritical
+    MsgBox "ConvertMap" & vbLf & err.description, vbCritical
 End Sub
 
 
@@ -727,12 +727,12 @@ Private Function Determinant(ByRef mat As mat3) As Single
 End Function
 
 'inverts matrix
-Private Sub InvertMatrix(ByRef mat As mat3)
-Dim tmp As mat3
-    
-    '1 / Determinant(mat)
-    
-End Sub
+'Private Sub InvertMatrix(ByRef mat As mat3)
+'Dim tmp As mat3
+'
+'    '1 / Determinant(mat)
+'
+'End Sub
 
 'computes pixel index from coordinates
 Private Function pPos(ByVal x As Long, ByVal y As Long, ByRef w As Long) As Long
@@ -838,6 +838,6 @@ Dim p As Long
     
     Exit Sub
 errhandler:
-    MsgBox Err.Description
+    MsgBox err.description
 End Sub
 

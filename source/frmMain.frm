@@ -252,36 +252,42 @@ Begin VB.Form frmMain
          BeginProperty Panel1 {0713E89F-850A-101B-AFC0-4210102A8DA7} 
             AutoSize        =   1
             Object.Width           =   13229
+            TextSave        =   ""
             Key             =   "info"
             Object.Tag             =   ""
          EndProperty
          BeginProperty Panel2 {0713E89F-850A-101B-AFC0-4210102A8DA7} 
             Object.Width           =   1323
             MinWidth        =   1323
+            TextSave        =   ""
             Key             =   "geom"
             Object.Tag             =   ""
          EndProperty
          BeginProperty Panel3 {0713E89F-850A-101B-AFC0-4210102A8DA7} 
             Object.Width           =   1323
             MinWidth        =   1323
+            TextSave        =   ""
             Key             =   "lod"
             Object.Tag             =   ""
          EndProperty
          BeginProperty Panel4 {0713E89F-850A-101B-AFC0-4210102A8DA7} 
             Object.Width           =   2117
             MinWidth        =   2117
+            TextSave        =   ""
             Key             =   "mat"
             Object.Tag             =   ""
          EndProperty
          BeginProperty Panel5 {0713E89F-850A-101B-AFC0-4210102A8DA7} 
             Object.Width           =   2117
             MinWidth        =   2117
+            TextSave        =   ""
             Key             =   "tri"
             Object.Tag             =   ""
          EndProperty
          BeginProperty Panel6 {0713E89F-850A-101B-AFC0-4210102A8DA7} 
             Object.Width           =   2646
             MinWidth        =   2646
+            TextSave        =   ""
             Key             =   "mem"
             Object.Tag             =   ""
          EndProperty
@@ -585,7 +591,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Private hglrc As Long
+Public hglrc As Long
 Private viewport_w As Long
 Private viewport_h As Long
 
@@ -603,7 +609,6 @@ Private idemode As Boolean
 Private current_file As String
 Private current_filterindex As Integer
 Private treeview_width As Long
-Private menu_height As Long
 Private splitdrag As Boolean
 Private mousex As Single
 Private mousey As Single
@@ -612,6 +617,7 @@ Private animtime As Single
 Private copymatset As Boolean
 Private copymat As bf2_mat
 
+Public blockdraw As Boolean
 Public quitguard As Boolean
 
 Private treemouseup As Boolean
@@ -622,17 +628,11 @@ Private treemousey As Single
 
 'form load
 Private Sub Form_Load()
-Dim pfd As PIXELFORMATDESCRIPTOR
-Dim fmt As Long
-    
-    treeview_width = 270
-    'menu_height = 30
-    menu_height = 0
-    
-    'set config filename
-    app_configfile = App.path & "\config.ini"
+    blockdraw = True
     
     'setup opengl
+    Dim pfd As PIXELFORMATDESCRIPTOR
+    Dim fmt As Long
     pfd.nSize = Len(pfd)
     pfd.nVersion = 1
     pfd.dwFlags = PFD_SUPPORT_OPENGL Or PFD_DRAW_TO_WINDOW Or PFD_DOUBLEBUFFER Or PFD_TYPE_RGBA
@@ -650,9 +650,11 @@ Dim fmt As Long
     hglrc = wglCreateContext(Me.picMain.hdc)
     wglMakeCurrent Me.picMain.hdc, hglrc
     
+    'init extensions
+    glextInit
+    
     'default states
     glTexEnvi GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE
-    glHint GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST
     glLightModeli GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE
     'glEnable GL_NORMALIZE 'don't enable, allows us to see normal defects in models!
     
@@ -670,9 +672,6 @@ Dim fmt As Long
     '    'glMultiTexCoord2f GL_TEXTURE0, 0, 0
     'End If
     
-    'init extensions
-    glextInit
-    
     'light and material
     Dim dif(3) As GLfloat
     Dim amb(3) As GLfloat
@@ -685,18 +684,24 @@ Dim fmt As Long
     glEnable GL_LIGHT0
     glEnable GL_COLOR_MATERIAL
     
+    'generate random color table
+    GenColorTable
+    
+    'form settings
+    treeview_width = 270
+    
     'default camera rotation
     camrotx = 10
     camroty = -30
     camzoom = 10
     
-    'generate random color table
-    GenColorTable
-    
     'clean up
     CloseFile
     current_folder = App.path
     current_filterindex = 17
+    
+    'set config filename
+    app_configfile = App.path & "\config.ini"
     
     'default config
     LoadDefaultConfig
@@ -720,26 +725,27 @@ Dim fmt As Long
         Me.WindowState = vbMaximized
     End If
     
-    'show form
-    Me.Show
-    Me.Refresh
-    
     'timer
     Me.tmrTime.Interval = 1000 / 60
     SetTime 0
     
-    quitguard = True
+    'show form
+    Me.Show
+    
+    'redraw to clear viewport and show grid
+    blockdraw = False
+    picMain_Paint
+    blockdraw = True
     
     'command line
-Dim cmd As String
+    Dim cmd As String
     cmd = Replace(Command$(), Chr(34), "")
     If Len(cmd) Then
         OpenFile cmd
     End If
     
-    quitguard = False
-    
     'fix for Win7
+    blockdraw = False
     picMain_Paint
     
 End Sub
@@ -850,7 +856,7 @@ Public Sub Form_Resize()
         End If
         
         Dim yoff As Long
-        yoff = menu_height + 1
+        yoff = 1
         
         Dim animHeight As Long
         If picAnim.Visible Then
@@ -886,39 +892,39 @@ errorhandler:
     'nothing
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Button = 1 Then
-        If SplitHover(x, y) Then
+        If SplitHover(X, Y) Then
             splitdrag = True
         End If
     End If
-    mousex = x
-    mousey = y
+    mousex = X
+    mousey = Y
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If splitdrag Then
-        treeview_width = treeview_width + (x - mousex)
+        treeview_width = treeview_width + (X - mousex)
         treeview_width = Clamp(treeview_width, 20, 3 * (Me.ScaleWidth / 4))
         Form_Resize
     End If
     
     'hover
-    If SplitHover(x, y) Then
+    If SplitHover(X, Y) Then
         Me.MousePointer = vbSizeWE
     Else
         Me.MousePointer = vbDefault
     End If
     
-    mousex = x
-    mousey = y
+    mousex = X
+    mousey = Y
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     splitdrag = False
 End Sub
 
-Private Function SplitHover(ByVal x As Single, ByVal y As Single) As Boolean
+Private Function SplitHover(ByVal X As Single, ByVal Y As Single) As Boolean
 Dim minx As Single
 Dim maxx As Single
     minx = Me.trvMain.Left + Me.trvMain.width
@@ -926,11 +932,11 @@ Dim maxx As Single
 
 Dim miny As Single
 Dim maxy As Single
-    miny = menu_height
+    miny = 0
     maxy = Me.ScaleHeight - Me.stsMain.height
     
-    If x > minx And x < maxx Then
-        If y > menu_height And y < maxy Then
+    If X > minx And X < maxx Then
+        If Y > 0 And Y < maxy Then
             SplitHover = True
         End If
     End If
@@ -939,11 +945,14 @@ End Function
 
 'picMain paint event
 Public Sub picMain_Paint()
+    If blockdraw Then Exit Sub
     If lmrender Then Exit Sub
     If hglrc = 0 Then Exit Sub
     
     If viewport_w = 0 Then Exit Sub
     If viewport_h = 0 Then Exit Sub
+    
+    wglMakeCurrent Me.picMain.hdc, hglrc
     
     glViewport 0, 0, viewport_w, viewport_h
     camasp = viewport_w / viewport_h
@@ -993,9 +1002,9 @@ Private Sub picMain_KeyDown(KeyCode As Integer, Shift As Integer)
     Form_KeyDown KeyCode, Shift
 End Sub
 
-Private Sub Pan(ByVal x As Single, ByVal y As Single)
-    campanx = campanx + ((x * 0.1) * camzoom)
-    campany = campany - ((y * 0.1) * camzoom)
+Private Sub Pan(ByVal X As Single, ByVal Y As Single)
+    campanx = campanx + ((X * 0.1) * camzoom)
+    campany = campany - ((Y * 0.1) * camzoom)
 End Sub
 
 Private Sub zoom(ByVal v As Single)
@@ -1003,41 +1012,41 @@ Private Sub zoom(ByVal v As Single)
     If camzoom < 0.001 Then camzoom = 0.001
 End Sub
 
-Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     mouse_down = True
-    mouse_px = x
-    mouse_py = y
+    mouse_px = X
+    mouse_py = Y
 End Sub
 
-Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
 Dim v As float3
     If mouse_down = True Then
         If Button = 1 Then
-            camrotx = camrotx + ((y - mouse_py) * 0.5)
-            camroty = camroty + ((x - mouse_px) * 0.5)
+            camrotx = camrotx + ((Y - mouse_py) * 0.5)
+            camroty = camroty + ((X - mouse_px) * 0.5)
         End If
         If Button = 2 Then
-            zoom ((mouse_py - y) * 0.1)
+            zoom ((mouse_py - Y) * 0.1)
         End If
         If Button = 4 Then
-            Pan ((x - mouse_px) * 0.01), ((y - mouse_py) * 0.01)
+            Pan ((X - mouse_px) * 0.01), ((Y - mouse_py) * 0.01)
         End If
         picMain_Paint
     End If
     Me.MousePointer = vbDefault
-    mouse_px = x
-    mouse_py = y
+    mouse_px = X
+    mouse_py = Y
 End Sub
 
-Public Sub MouseWheel(ByVal MouseKeys As Long, ByVal value As Long, ByVal x As Long, ByVal y As Long)
+Public Sub MouseWheel(ByVal MouseKeys As Long, ByVal value As Long, ByVal X As Long, ByVal Y As Long)
     zoom value
     picMain_Paint
 End Sub
 
-Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     mouse_down = False
-    mouse_px = x
-    mouse_py = y
+    mouse_px = X
+    mouse_py = Y
 End Sub
 
 '--- anim ---------------------------------------------------------------------------------------------------------------
@@ -1109,14 +1118,17 @@ Public Sub SetTime(ByVal t As Single, Optional redraw As Boolean = True)
     End If
 End Sub
 
-Private Sub picTime_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
-    picTime_MouseMove Button, Shift, x, y
+Private Sub picTime_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    picTime_MouseMove Button, Shift, X, Y
 End Sub
 
-Private Sub picTime_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picTime_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Button Then
+        Dim w  As Single
+        w = (picTime.width - 2)
+        If w = 0 Then Exit Sub
         Dim val As Single
-        val = (x - 1) / (picTime.width - 2)
+        val = (X - 1) / w
         If val < 0 Then val = 0
         If val > 1 Then val = 1
         SetTime val
@@ -1525,6 +1537,7 @@ Private Sub mnuToolsUvEditor_Click()
         Exit Sub
     End If
     frmUvEdit.Show
+    picMain_Paint
 End Sub
 
 Private Sub mnuToolsSkin_Click()
@@ -1663,12 +1676,12 @@ Private Sub trvMain_KeyUp(KeyCode As Integer, Shift As Integer)
     picMain_Paint
 End Sub
 
-Private Sub trvMain_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub trvMain_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     On Error GoTo hell
     
     'select node under cursor
     Dim n As MSComctlLib.node
-    Set n = Me.trvMain.HitTest(x, y)
+    Set n = Me.trvMain.HitTest(X, Y)
     If Not n Is Nothing Then
         SelectMesh n.tag, n.key
         picMain_Paint
@@ -1680,7 +1693,7 @@ hell:
     picMain_Paint
 End Sub
 
-Private Sub trvMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub trvMain_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     On Error GoTo errhandler
     
     'note: we show the context menu on MouseDown because NodeClick steals the MouseUp event
@@ -1711,8 +1724,8 @@ Private Sub trvMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y 
         
         'show context menu
         PopupMenu Me.mnuTreeContext, vbPopupMenuRightButton, _
-                  trvMain.Left + (x / 15) + 2, _
-                  trvMain.top + (y / 15) + 2, mnuTreeContextViewTex
+                  trvMain.Left + (X / 15) + 2, _
+                  trvMain.top + (Y / 15) + 2, mnuTreeContextViewTex
         
     End If
     
@@ -1782,6 +1795,7 @@ Public Sub SelectMesh(ByVal id As Long, Optional ByVal key As String)
         
         'redraw UV editor
         UvEdit_Paint
+        frmUvEdit.FillMaterialList
     End If
     
     If cmesh.loadok Then
@@ -1872,6 +1886,9 @@ Public Sub DropFile(ByRef str As String)
 End Sub
 
 Private Sub OpenFile(ByVal filename As String)
+    quitguard = True
+    blockdraw = True
+    
     CloseFile
     
     copymatset = False
@@ -1882,6 +1899,7 @@ Private Sub OpenFile(ByVal filename As String)
     
     OpenMeshFile filename
     FillTreeView
+    frmUvEdit.FillChannelList
     'ZoomExtends
     
     SetStatus "info", "Done."
@@ -1896,9 +1914,14 @@ Private Sub OpenFile(ByVal filename As String)
     mnuFileReload.Enabled = True
     mnuFileExport.Enabled = True
     
+    'update UI
     UpdateCaption
-    'picMain_Paint
     Form_Resize
+    
+    blockdraw = False
+    quitguard = False
+    
+    picMain_Paint
     UvEdit_Paint
 End Sub
 
@@ -1948,14 +1971,14 @@ Private Sub UpdateCaption()
 End Sub
 
 'reset mousepointer
-Private Sub stsMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub stsMain_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Me.MousePointer = vbDefault
 End Sub
-Private Sub trvMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub trvMain_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Me.MousePointer = vbDefault
 End Sub
 
-Private Sub txtLog_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub txtLog_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Me.MousePointer = vbDefault
 End Sub
 
