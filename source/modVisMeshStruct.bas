@@ -155,7 +155,7 @@ Public Type bf2mesh
     
     'indices
     indexnum As Long
-    index() As Integer
+    Index() As Integer
     
     'unknown
     u2 As Long 'always 8?
@@ -170,6 +170,7 @@ Public Type bf2mesh
     drawok As Boolean        'mesh rendered properly
     vertsel() As Byte        'vertex selection flags
     vertflag() As Byte       'per vertex flag for various things
+    uvnum As Long            'number of detected uv channels
     
     hasSkinVerts As Boolean  'deformed vertices flag
     skinvert() As float3     'deformed vertices

@@ -8,6 +8,7 @@ Public Enum dw_drawmode
 End Enum
 
 Public draw_mode As Long
+Public bakemode As Long
 
 Public selgeom As Long
 Public selsub As Long
@@ -15,6 +16,8 @@ Public sellod As Long
 Public selmat As Long
 Public seltex As Long
 Public seldefault As Long
+
+Private lmUVptr As Long 'current lightmap UV pointer
 
 
 'draws mesh
@@ -93,7 +96,7 @@ End Sub
 
 
 'draws mesh
-Private Sub DrawVisMeshLod(ByRef mesh As bf2_lod)
+Public Sub DrawVisMeshLod(ByRef mesh As bf2_lod)
 Dim i As Long
 Dim j As Long
 Dim vptr As Long 'vertex array pointer
@@ -102,7 +105,7 @@ Dim nptr As Long 'normal array pointer
 Dim iptr As Long 'index array pointer
 Dim stride As Long
 Dim texchans As Long
-
+    
     'array start pointers
     With vmesh 'TODO: use vertex attribute table!
         Select Case .vertstride
@@ -139,7 +142,6 @@ Dim texchans As Long
             texchans = 1
         End Select
         iptr = VarPtr(.Index(0))
-        
         stride = .vertstride / 4
     End With
     
@@ -155,6 +157,8 @@ Dim texchans As Long
                 If nptr Then nptroff = nptr + (.vstart * vmesh.vertstride)
                 If tptr Then tptroff = tptr + (.vstart * vmesh.vertstride)
                 If iptr Then iptroff = iptr + (.istart * 2) 'sizeof(uint16)
+                
+                lmUVptr = tptroff + (8 * (vmesh.uvnum - 1))
                 
                 If vmesh.hasSkinVerts Then
                     vptroff = VarPtr(vmesh.skinvert(0)) + (.vstart * 12)
@@ -182,10 +186,10 @@ Dim texchans As Long
                     Dim texcoff As Long
                     If view_textures And .layernum > 0 Then
                         If seltex > -1 And selmat = i Then
-                            'render single pass with texture
                             
-                            'no lighting
-                            glDisable GL_LIGHTING
+                            'render single unlit pass with texture
+                            
+                            If view_lighting Then glDisable GL_LIGHTING
                             glBindTexture GL_TEXTURE_2D, texmap(.texmapid(seltex)).tex
                             glEnable GL_TEXTURE_2D
                             glColor3f 1, 1, 1
@@ -198,7 +202,7 @@ Dim texchans As Long
                             
                             'reset stuff
                             glDisable GL_TEXTURE_2D
-                            glEnable GL_LIGHTING
+                            If view_lighting Then glEnable GL_LIGHTING
                             
                         Else
                             
@@ -208,7 +212,6 @@ Dim texchans As Long
                                 'get texture for this layer
                                 Dim texmapid As Long
                                 texmapid = .layer(j).texmapid
-                                
                                 
                                 If texmapid > 0 Then
                                     
@@ -498,6 +501,7 @@ End Sub
 Private Sub drawfaces(ByVal vptr As Long, ByVal nptr As Long, ByVal tptr As Long, ByVal iptr As Long, ByVal inum As Long)
     With vmesh
         
+        'no vertex stride if skin is deformed
         Dim vs As Long
         If vmesh.hasSkinVerts Then
             vs = 0
@@ -505,7 +509,21 @@ Private Sub drawfaces(ByVal vptr As Long, ByVal nptr As Long, ByVal tptr As Long
             vs = .vertstride
         End If
         
-        If vptr Then glVertexPointer 3, GL_FLOAT, vs, ByVal vptr
+        'substitute vertex coordinates for texcoords when baking
+        Dim vertFrags As Long
+        Dim vrealptr As Long
+        If bakemode Then
+            vertFrags = 2
+            vrealptr = lmUVptr
+            glDisable GL_LIGHTING
+            glDisable GL_CULL_FACE
+            glDisable GL_DEPTH_TEST
+        Else
+            vertFrags = 3
+            vrealptr = vptr
+        End If
+        
+        If vptr Then glVertexPointer vertFrags, GL_FLOAT, vs, ByVal vrealptr
         If nptr Then glNormalPointer GL_FLOAT, vs, ByVal nptr
         If tptr Then glTexCoordPointer 2, GL_FLOAT, .vertstride, ByVal tptr
         
@@ -518,6 +536,10 @@ Private Sub drawfaces(ByVal vptr As Long, ByVal nptr As Long, ByVal tptr As Long
         If vptr Then glDisableClientState GL_VERTEX_ARRAY
         If nptr Then glDisableClientState GL_NORMAL_ARRAY
         If tptr Then glDisableClientState GL_TEXTURE_COORD_ARRAY
+        
+        If bakemode Then
+            glEnable GL_DEPTH_TEST
+        End If
         
     End With
 End Sub

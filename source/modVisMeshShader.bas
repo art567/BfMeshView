@@ -217,8 +217,9 @@ Public Sub BuildShader(ByRef mat As bf2_mat, ByRef filename As String)
                 End If
                 
             Case "BaseDetail", _
-                 "BaseDetailNDetail"
-            
+                 "BaseDetailNDetail", _
+                 "BaseDetailNDetailenvmap"
+                
                 If veggie Then
                     
                     .layernum = 2
@@ -262,7 +263,11 @@ Public Sub BuildShader(ByRef mat As bf2_mat, ByRef filename As String)
                 
                 .layer(1).texcoff = 0
                 .layer(2).texcoff = 1
-                .layer(3).texcoff = 2
+                'If vmesh.isbf2 Then
+                    .layer(3).texcoff = 2
+                'Else
+                '    .layer(3).texcoff = 3
+                'End If
                 
                 .layer(1).texmapid = .texmapid(0)
                 .layer(2).texmapid = .texmapid(1)

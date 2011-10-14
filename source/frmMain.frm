@@ -446,6 +446,9 @@ Begin VB.Form frmMain
       Begin VB.Menu mnuViewLine5 
          Caption         =   "-"
       End
+      Begin VB.Menu mnuViewBakePreview 
+         Caption         =   "Texture Bake Preview"
+      End
       Begin VB.Menu mnuViewSamplesBitmap 
          Caption         =   "Samples Bitmap"
       End
@@ -463,6 +466,9 @@ Begin VB.Form frmMain
       End
       Begin VB.Menu mnuToolsRenderLighting 
          Caption         =   "Render Lighting..."
+      End
+      Begin VB.Menu mnuToolsBakeTexture 
+         Caption         =   "Bake Texture..."
       End
       Begin VB.Menu mnuToolsConvertNormalMap 
          Caption         =   "Convert Normal Map..."
@@ -637,18 +643,22 @@ Private Sub Form_Load()
     pfd.nVersion = 1
     pfd.dwFlags = PFD_SUPPORT_OPENGL Or PFD_DRAW_TO_WINDOW Or PFD_DOUBLEBUFFER Or PFD_TYPE_RGBA
     pfd.iPixelType = PFD_TYPE_RGBA
-    pfd.cColorBits = 24
+    pfd.cColorBits = 32
     pfd.cDepthBits = 16
+    pfd.cRedBits = 8
+    pfd.cGreenBits = 8
+    pfd.cBlueBits = 8
+    pfd.cAlphaBits = 8
     pfd.cStencilBits = 8
     pfd.iLayerType = PFD_MAIN_PLANE
-    fmt = ChoosePixelFormat(Me.picMain.hdc, pfd)
+    fmt = ChoosePixelFormat(Me.picMain.hDC, pfd)
     If fmt = 0 Then
         MsgBox "OpenGL initalization failed.", vbCritical
         Exit Sub
     End If
-    fmt = SetPixelFormat(Me.picMain.hdc, fmt, pfd)
-    hglrc = wglCreateContext(Me.picMain.hdc)
-    wglMakeCurrent Me.picMain.hdc, hglrc
+    fmt = SetPixelFormat(Me.picMain.hDC, fmt, pfd)
+    hglrc = wglCreateContext(Me.picMain.hDC)
+    wglMakeCurrent Me.picMain.hDC, hglrc
     
     'init extensions
     glextInit
@@ -952,7 +962,7 @@ Public Sub picMain_Paint()
     If viewport_w = 0 Then Exit Sub
     If viewport_h = 0 Then Exit Sub
     
-    wglMakeCurrent Me.picMain.hdc, hglrc
+    wglMakeCurrent Me.picMain.hDC, hglrc
     
     glViewport 0, 0, viewport_w, viewport_h
     camasp = viewport_w / viewport_h
@@ -961,7 +971,7 @@ Public Sub picMain_Paint()
     DrawScene
     
     'flip buffers
-    SwapBuffers Me.picMain.hdc
+    SwapBuffers Me.picMain.hDC
 End Sub
 
 'form key input
@@ -1076,7 +1086,7 @@ Private Sub picTime_Paint()
     'white background
     picTime.FillColor = RGB(255, 255, 255)
     picTime.ForeColor = RGB(127, 127, 127)
-    DrawRect picTime.hdc, 0, 0, w, h
+    DrawRect picTime.hDC, 0, 0, w, h
     
     'time
     If wt > 0 Then
@@ -1084,17 +1094,17 @@ Private Sub picTime_Paint()
         'picTime.ForeColor = RGB(200, 200, 200)
         picTime.FillColor = RGB(140, 214, 213)
         picTime.ForeColor = RGB(140, 214, 213)
-        DrawRect picTime.hdc, 1, 1, wt + 1, (h / 2)
+        DrawRect picTime.hDC, 1, 1, wt + 1, (h / 2)
         
         picTime.FillColor = RGB(41, 165, 173)
         picTime.ForeColor = RGB(41, 165, 173)
-        DrawRect picTime.hdc, 1, (h / 2), wt + 1, h - 1
+        DrawRect picTime.hDC, 1, (h / 2), wt + 1, h - 1
     End If
     
     'draw slider
     picTime.FillColor = RGB(200, 63, 63)
     picTime.ForeColor = RGB(200, 63, 63)
-    DrawRect picTime.hdc, wt + 1 - 2, 0, wt + 1 + 2, h
+    DrawRect picTime.hDC, wt + 1 - 2, 0, wt + 1 + 2, h
     
 End Sub
 
@@ -1394,6 +1404,12 @@ Private Sub mnuViewModeOverdraw_Click()
     picMain_Paint
 End Sub
 
+Private Sub mnuViewBakePreview_Click()
+    bakemode = Not bakemode
+    Me.mnuViewBakePreview.Checked = False
+    picMain_Paint
+End Sub
+
 Private Sub mnuViewSamplesBitmap_Click()
     mnuViewSamplesBitmap.Checked = Not mnuViewSamplesBitmap.Checked
     'Me.txtLog.Visible = Not mnuViewSamplesBitmap.Checked
@@ -1456,6 +1472,14 @@ End Sub
 
 Private Sub mnuToolsRenderLighting_Click()
     frmRender.Show 'vbModal
+End Sub
+
+Private Sub mnuToolsBakeTexture_Click()
+    If Not vmesh.loadok Then
+        MsgBox "No BF2 mesh loaded.", vbExclamation
+        Exit Sub
+    End If
+    frmBake.Show vbModal
 End Sub
 
 Private Sub mnuToolsConvertNormalMap_Click()

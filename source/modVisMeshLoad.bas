@@ -121,8 +121,8 @@ Dim j As Long
         
         Get #ff, , .indexnum
         Echo " indexnum: " & .indexnum
-        ReDim .index(0 To .indexnum - 1)
-        Get #ff, , .index()
+        ReDim .Index(0 To .indexnum - 1)
+        Get #ff, , .Index()
         
         Echo "index block end at " & loc(ff)
         Echo ""
@@ -203,6 +203,18 @@ Dim j As Long
             End If
         End With
     End If
+    
+    'detect UV channels
+    With vmesh
+        .uvnum = 0
+        For i = 0 To .vertattribnum - 1
+            If Not .vertattrib(i).flag = 255 Then
+                If .vertattrib(i).vartype = 1 Then
+                    .uvnum = .uvnum + 1
+                End If
+            End If
+        Next i
+    End With
     
     LoadBF2Mesh = True
     Exit Function
@@ -435,7 +447,7 @@ Public Sub UnloadBF2Mesh()
         
         Erase .vertattrib()
         Erase .vert()
-        Erase .index()
+        Erase .Index()
         Erase .geom()
         
         'internal

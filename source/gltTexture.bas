@@ -180,14 +180,14 @@ Public Function WriteTGA(ByVal filename As String, ByVal w As Long, ByVal h As L
             'indexed grayscale
             .colortype = 1
             .imagetype = 1
+            .colormapstart = 0
+            .colormaplength = 256
+            .colormapbits = 24
         Else
-            'rgb
+            'rgb/rgba
             .colortype = 0
             .imagetype = 2
         End If
-        .colormapstart = 0
-        .colormaplength = 256
-        .colormapbits = 24
         .xstart = 0
         .ystart = 0
         .width = w
@@ -213,14 +213,16 @@ Public Function WriteTGA(ByVal filename As String, ByVal w As Long, ByVal h As L
     End With
     
     'write palette
-    Dim i As Long
-    Dim c As Byte
-    For i = 0 To 255
-        c = i
-        Put #ff, , c
-        Put #ff, , c
-        Put #ff, , c
-    Next i
+    If bits = 8 Then
+        Dim i As Long
+        Dim c As Byte
+        For i = 0 To 255
+            c = i
+            Put #ff, , c
+            Put #ff, , c
+            Put #ff, , c
+        Next i
+    End If
     
     'write pixels
     Put #ff, , data()
@@ -232,6 +234,59 @@ Public Function WriteTGA(ByVal filename As String, ByVal w As Long, ByVal h As L
     Exit Function
 errorhandler:
     MsgBox "WriteTGA" & vbLf & err.description, vbCritical
+    Close #ff
+End Function
+
+
+'writes 32-bit TGA
+Public Function WriteTGA32(ByVal filename As String, ByVal w As Long, ByVal h As Long, ByRef data() As bgra)
+    On Error GoTo errorhandler
+    
+    'open file
+    Dim ff As Integer
+    ff = FreeFile
+    Open filename For Binary As #ff
+    
+    'create header
+    Dim head As tga_header
+    With head
+        .offset = 0
+        .colortype = 0
+        .imagetype = 2
+        .xstart = 0
+        .ystart = 0
+        .width = w
+        .height = h
+        .bits = 32
+        .flip = 0
+    End With
+    
+    'write header
+    With head
+        Put #ff, , .offset
+        Put #ff, , .colortype
+        Put #ff, , .imagetype
+        Put #ff, , .colormapstart
+        Put #ff, , .colormaplength
+        Put #ff, , .colormapbits
+        Put #ff, , .xstart
+        Put #ff, , .ystart
+        Put #ff, , .width
+        Put #ff, , .height
+        Put #ff, , .bits
+        Put #ff, , .flip
+    End With
+    
+    'write pixels
+    Put #ff, , data()
+    
+    'close file
+    Close #ff
+    
+    WriteTGA32 = True
+    Exit Function
+errorhandler:
+    MsgBox "WriteTGA32" & vbLf & err.description, vbCritical
     Close #ff
 End Function
 

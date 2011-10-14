@@ -160,7 +160,7 @@ Public Sub RenderLighting()
     For pass = 1 To lmpasses
         
         'progress bar update
-        frmRender.pgbTotal.Value = pass
+        frmRender.pgbTotal.value = pass
         DoEvents
         
         'depth testing
@@ -194,7 +194,7 @@ Public Sub RenderLighting()
                 sec = Round((t2 - t1) / 1000, 1)
                 frmRender.labStats.Caption = "Samples: " & i & "/" & samplenum & " Time taken: " & sec & " sec"
                 
-                frmRender.pgbPass.Value = prog
+                frmRender.pgbPass.value = prog
                 
                 'draw to output window
                 If lmshowoutput Then
@@ -550,7 +550,7 @@ Dim a As Long
     
     Exit Sub
 errh:
-    MsgBox Err.Description
+    MsgBox err.description
 End Sub
 
 Private Sub MergeSamples(ByRef a As sample_type, ByRef b As sample_type, dst As sample_type)
