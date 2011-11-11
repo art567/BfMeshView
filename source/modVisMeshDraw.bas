@@ -90,6 +90,12 @@ Public Sub DrawVisMesh()
     'succes
     Exit Sub
 errorhandler:
+    
+    If err.Number = 11 Then
+        'ignore, Intel I5 bug it seems
+        Exit Sub
+    End If
+    
     vmesh.drawok = False
     MsgBox "DrawVisMesh" & vbLf & err.description, vbCritical
 End Sub
