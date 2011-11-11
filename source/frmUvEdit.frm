@@ -234,15 +234,15 @@ Private Sub Form_Load()
     pfd.cColorBits = 24
     pfd.cDepthBits = 0
     pfd.iLayerType = PFD_MAIN_PLANE
-    fmt = ChoosePixelFormat(Me.picMain.hdc, pfd)
+    fmt = ChoosePixelFormat(Me.picMain.hDC, pfd)
     If fmt = 0 Then
         MsgBox "OpenGL initalization failed.", vbCritical
         Exit Sub
     End If
-    fmt = SetPixelFormat(Me.picMain.hdc, fmt, pfd)
-    hglrc = wglCreateContext(Me.picMain.hdc)
+    fmt = SetPixelFormat(Me.picMain.hDC, fmt, pfd)
+    hglrc = wglCreateContext(Me.picMain.hDC)
     wglShareLists frmMain.hglrc, hglrc
-    wglMakeCurrent Me.picMain.hdc, hglrc
+    wglMakeCurrent Me.picMain.hDC, hglrc
     
     'default states
     glTexEnvi GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE
@@ -294,34 +294,34 @@ Private Sub picMain_KeyUp(KeyCode As Integer, Shift As Integer)
     If KeyCode = vbKeyMenu Then keyalt = False
 End Sub
 
-Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     mousedown = True
-    mousex = x
-    mousey = y
+    mousex = X
+    mousey = Y
     
-    dragx = x
-    dragy = y
+    dragx = X
+    dragy = Y
     
     picMain_Paint
 End Sub
 
-Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If mousedown Then
         
         Dim vx As Single
         Dim vy As Single
-        vx = (x - mousex)
-        vy = (y - mousey)
+        vx = (X - mousex)
+        vy = (Y - mousey)
         
         If Button = vbLeftButton Then
             Select Case toolmode
             Case tool_select
                 
                 sel_vis = True
-                sel_minx = (min(dragx, x) - offx) / dsx
-                sel_miny = (min(dragy, y) - offy) / dsy
-                sel_maxx = (max(dragx, x) - offx) / dsx
-                sel_maxy = (max(dragy, y) - offy) / dsy
+                sel_minx = (min(dragx, X) - offx) / dsx
+                sel_miny = (min(dragy, Y) - offy) / dsy
+                sel_maxx = (max(dragx, X) - offx) / dsx
+                sel_maxy = (max(dragy, Y) - offy) / dsy
                 
             Case tool_move
                 MoveVerts vx / dsx, vy / dsy
@@ -361,12 +361,12 @@ Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, x As Single, 
         picMain_Paint
         frmMain.picMain_Paint
     End If
-    mousex = x
-    mousey = y
+    mousex = X
+    mousey = Y
 End Sub
 
 
-Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     
     'ignore MouseUp after minimizing/maximizing window
     If Not mousedown Then Exit Sub
@@ -378,8 +378,8 @@ Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y 
             If sel_vis Then
                 SelVerts sel_minx, sel_miny, sel_maxx, sel_maxy
             Else
-                SelVerts ((x - 3) - offx) / dsx, ((y - 3) - offy) / dsy, _
-                         ((x + 3) - offx) / dsx, ((y + 3) - offy) / dsy
+                SelVerts ((X - 3) - offx) / dsx, ((Y - 3) - offy) / dsy, _
+                         ((X + 3) - offx) / dsx, ((Y + 3) - offy) / dsy
             End If
             
         End If
@@ -391,41 +391,17 @@ Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y 
     frmMain.picMain_Paint
 End Sub
 
-Private Sub cbbMaterial_Click()
-    uvmatsel = Me.cbbMaterial.ListIndex
-    
-    ClearVertSelection
-    picMain_Paint
-    frmMain.picMain_Paint
-End Sub
-
-Private Sub cbbChannel_Click()
-    uvchan = Me.cbbChannel.ListIndex
-    If uvchan < 0 Then uvchan = 0
-    If uvchan > 4 Then uvchan = 4
-    If (uvchan < 4) Then
-        Me.cbbMaterial.BackColor = &H80000005
-        Me.cbbMaterial.Enabled = True
-        uvmatsel = Me.cbbMaterial.ListIndex
-    Else
-        Me.cbbMaterial.BackColor = &H8000000F
-        Me.cbbMaterial.Enabled = False
-        uvmatsel = -1
-    End If
-    
-    SetVertFlags
-    ClearVertSelection
-    picMain_Paint
-    frmMain.picMain_Paint
-End Sub
 
 'fills dropdown lists
 Public Sub FillChannelList()
+    On Error GoTo errhandler
+    Me.cbbChannel.Clear
+    
+    uvchan = 0
+    uvmatsel = 0
+    
     With vmesh
         If Not .loadok Then Exit Sub
-        
-        Me.cbbChannel.Clear
-        
         If .uvnum = 5 Then
             Dim i As Long
             For i = 0 To .vertattribnum - 1
@@ -444,20 +420,33 @@ Public Sub FillChannelList()
                 Me.cbbChannel.AddItem "UV " & (i + 1)
             Next i
         End If
-        
-        Me.cbbChannel.ListIndex = uvchan
-        
-        SetVertFlags
-        ClearVertSelection
     End With
+    
+    Me.cbbChannel.ListIndex = uvchan
+    
+    ClearVertSelection
+    'SetVertFlags
+    
+    Exit Sub
+errhandler:
+    MsgBox "FillChannelList" & vbLf & err.description, vbCritical
 End Sub
+
 
 'fills dropdown lists
 Public Sub FillMaterialList()
+    On Error GoTo errhandler
+    
+    Me.cbbMaterial.Clear
     With vmesh
         If Not .loadok Then Exit Sub
         
-        Me.cbbMaterial.Clear
+        If selgeom < 0 Then Exit Sub
+        If selgeom > .geomnum - 1 Then Exit Sub
+        
+        If sellod < 0 Then Exit Sub
+        If sellod > .geom(selgeom).lodnum - 1 Then Exit Sub
+        
         With .geom(selgeom).lod(sellod)
             Dim i As Long
             For i = 0 To .matnum - 1
@@ -470,7 +459,55 @@ Public Sub FillMaterialList()
         'SetVertFlags
         'ClearVertSelection
     End With
+    
+    Exit Sub
+errhandler:
+    MsgBox "FillMaterialList" & vbLf & err.description, vbCritical
 End Sub
+
+
+'selects channel
+Private Sub cbbChannel_Click()
+    On Error GoTo errhandler
+    
+    If Not vmesh.loadok Then Exit Sub
+    
+    uvchan = Me.cbbChannel.ListIndex
+    If uvchan < 0 Then uvchan = 0
+    If uvchan > 4 Then uvchan = 4
+    If (uvchan < 4) Then
+        Me.cbbMaterial.BackColor = &H80000005
+        Me.cbbMaterial.Enabled = True
+        uvmatsel = Me.cbbMaterial.ListIndex
+    Else
+        Me.cbbMaterial.BackColor = &H8000000F
+        Me.cbbMaterial.Enabled = False
+        uvmatsel = -1
+    End If
+    
+    SetVertFlags
+    ClearVertSelection
+    
+    picMain_Paint
+    frmMain.picMain_Paint
+    
+    Exit Sub
+errhandler:
+    MsgBox "cbbChannel_Click" & vbLf & err.description, vbCritical
+End Sub
+
+
+'selects material
+Private Sub cbbMaterial_Click()
+    uvmatsel = Me.cbbMaterial.ListIndex
+    
+    SetVertFlags
+    ClearVertSelection
+    
+    picMain_Paint
+    frmMain.picMain_Paint
+End Sub
+
 
 'selects UV vertices within rectangular boundaries
 Private Sub SelVerts(ByVal minx As Single, ByVal miny As Single, ByVal maxx As Single, ByVal maxy As Single)
@@ -490,19 +527,19 @@ Dim i As Long
         For i = 0 To .vertnum - 1
             If .vertflag(i) Then
             
-                Dim x As Single
-                Dim y As Single
-                x = .vert(i * stride + uvoffset + 0)
-                y = .vert(i * stride + uvoffset + 1)
+                Dim X As Single
+                Dim Y As Single
+                X = .vert(i * stride + uvoffset + 0)
+                Y = .vert(i * stride + uvoffset + 1)
                 
                 'clear vert selection
                 If Not keyctrl And Not keyalt Then
                     .vertsel(i) = 0
                 End If
-                If x >= minx Then
-                    If x <= maxx Then
-                        If y > miny Then
-                            If y < maxy Then
+                If X >= minx Then
+                    If X <= maxx Then
+                        If Y > miny Then
+                            If Y < maxy Then
                                 
                                 If keyalt Then
                                     .vertsel(i) = 0
@@ -540,17 +577,17 @@ Dim i As Long
             If .vertflag(i) Then
             If .vertsel(i) Then
                 
-                Dim x As Single
-                Dim y As Single
+                Dim X As Single
+                Dim Y As Single
                 
-                x = .vert(i * stride + uvoffset + 0)
-                y = .vert(i * stride + uvoffset + 1)
+                X = .vert(i * stride + uvoffset + 0)
+                Y = .vert(i * stride + uvoffset + 1)
                 
-                x = x + vx
-                y = y + vy
+                X = X + vx
+                Y = Y + vy
                 
-                .vert(i * stride + uvoffset + 0) = x
-                .vert(i * stride + uvoffset + 1) = y
+                .vert(i * stride + uvoffset + 0) = X
+                .vert(i * stride + uvoffset + 1) = Y
                 
             End If
             End If
@@ -608,14 +645,14 @@ Dim i As Long
             If .vertflag(i) Then
             If .vertsel(i) Then
                 
-                Dim x As Single
-                Dim y As Single
+                Dim X As Single
+                Dim Y As Single
                 
-                x = .vert(i * stride + uvoffset + 0)
-                y = .vert(i * stride + uvoffset + 1)
+                X = .vert(i * stride + uvoffset + 0)
+                Y = .vert(i * stride + uvoffset + 1)
                 
-                .vert(i * stride + uvoffset + 0) = y
-                .vert(i * stride + uvoffset + 1) = x
+                .vert(i * stride + uvoffset + 0) = Y
+                .vert(i * stride + uvoffset + 1) = X
                 
             End If
             End If
@@ -694,16 +731,16 @@ Dim i As Long
         For i = 0 To .vertnum - 1
             If .vertsel(i) Then
                 
-                Dim x As Single
-                Dim y As Single
+                Dim X As Single
+                Dim Y As Single
                 
-                x = .vert(i * stride + uvoffset + 0)
-                y = .vert(i * stride + uvoffset + 1)
+                X = .vert(i * stride + uvoffset + 0)
+                Y = .vert(i * stride + uvoffset + 1)
                 
-                minx = min(minx, x)
-                miny = min(miny, y)
-                maxx = max(maxx, x)
-                maxy = max(maxy, y)
+                minx = min(minx, X)
+                miny = min(miny, Y)
+                maxx = max(maxx, X)
+                maxy = max(maxy, Y)
             End If
         Next i
         
@@ -752,8 +789,12 @@ Public Sub SetVertFlags()
     Dim i As Long
     With vmesh
         If Not .loadok Then Exit Sub
+        
         If selgeom < 0 Then Exit Sub
+        If selgeom > .geomnum - 1 Then Exit Sub
+        
         If sellod < 0 Then Exit Sub
+        If sellod > .geom(selgeom).lodnum - 1 Then Exit Sub
         
         'clear vert flags
         For i = 0 To .vertnum - 1
@@ -768,15 +809,23 @@ Public Sub SetVertFlags()
         
         With .geom(selgeom).lod(sellod)
             
+            'MsgBox "selgeom: " & selgeom
+            'MsgBox "sellod: " & sellod
+            
             Dim matmin As Long
             Dim matmax As Long
             If uvmatsel < 0 Then
                 matmin = 0
                 matmax = .matnum - 1
+                'MsgBox "a"
             Else
                 matmin = uvmatsel
                 matmax = uvmatsel
+                'MsgBox "b"
             End If
+            
+            'MsgBox "matmin: " & matmin
+            'MsgBox "matmax: " & matmax
             
             Dim m As Long
             For m = matmin To matmax
@@ -806,6 +855,9 @@ Public Sub SetVertFlags()
                     Next i
                 End With
             Next m
+            
+            'MsgBox "c"
+            
         End With
     End With
     
@@ -828,7 +880,7 @@ Public Sub picMain_Paint()
     dsy = zoom * 200
     
     DrawGL
-    SwapBuffers Me.picMain.hdc
+    SwapBuffers Me.picMain.hDC
     
     Exit Sub
 errhandler:
@@ -846,7 +898,7 @@ Private Sub DrawGL()
     If w = 0 Then Exit Sub
     If h = 0 Then Exit Sub
     
-    wglMakeCurrent Me.picMain.hdc, hglrc
+    wglMakeCurrent Me.picMain.hDC, hglrc
     
     glViewport 0, 0, w, h
     glClearColor 0.25, 0.25, 0.25, 0
@@ -1003,20 +1055,20 @@ Private Sub DrawGL()
 End Sub
 
 
-Private Function TFX(ByVal x As Single) As Single
-    TFX = (x * zoom) + offx
+Private Function TFX(ByVal X As Single) As Single
+    TFX = (X * zoom) + offx
 End Function
 
-Private Function TFY(ByVal y As Single) As Single
-    TFY = (y * zoom) + offy
+Private Function TFY(ByVal Y As Single) As Single
+    TFY = (Y * zoom) + offy
 End Function
 
-Private Function TFXi(ByVal x As Single) As Single
-    TFXi = (x - offx) / zoom
+Private Function TFXi(ByVal X As Single) As Single
+    TFXi = (X - offx) / zoom
 End Function
 
-Private Function TFYi(ByVal y As Single) As Single
-    TFYi = (y - offy) / zoom
+Private Function TFYi(ByVal Y As Single) As Single
+    TFYi = (Y - offy) / zoom
 End Function
 
 Private Sub tlbTools_ButtonClick(ByVal Button As MSComctlLib.Button)

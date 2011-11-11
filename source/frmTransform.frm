@@ -128,8 +128,6 @@ Option Explicit
 
 Private Sub Form_Load()
     SetTopMostWindow Me.hWnd, True
-    
-    cmdSelect_Click
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
@@ -202,6 +200,7 @@ End Sub
 
 'sets vertex flags
 Private Sub UpdateSelection()
+    
     SetVertFlags2 selgeom, sellod
     
 Dim i As Long

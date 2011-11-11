@@ -140,6 +140,11 @@ Public Sub BuildShader(ByRef mat As bf2_mat, ByRef filename As String)
             .layernum = 1
             SetBase mat, 1
             
+            'uvmap
+            'If InStr(1, .technique, "AnimatedUV", vbTextCompare) > 0 Then
+            '    .layer(1).texcoff = 1
+            'End If
+            
             'wreck (no bump)
             If .mapnum = 3 Then
                 .layer(1).depthWrite = GL_TRUE

@@ -1406,7 +1406,7 @@ End Sub
 
 Private Sub mnuViewBakePreview_Click()
     bakemode = Not bakemode
-    Me.mnuViewBakePreview.Checked = False
+    Me.mnuViewBakePreview.Checked = bakemode
     picMain_Paint
 End Sub
 

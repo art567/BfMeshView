@@ -191,7 +191,7 @@ Dim c As Long
     LoadBF2Col = True
     Exit Function
 errorhandler:
-    MsgBox "LoadBF2Col" & vbLf & err.Description, vbCritical
+    MsgBox "LoadBF2Col" & vbLf & err.description, vbCritical
     Echo ">>> error at " & loc(ff)
     Echo ">>> file size " & LOF(ff)
     GenColNormals
@@ -523,7 +523,7 @@ Public Sub FillTreeColMesh(ByRef tree As MSComctlLib.TreeView)
     End With
     Exit Sub
 errhandler:
-    MsgBox "FillTreeColMesh" & vbLf & err.Description, vbCritical
+    MsgBox "FillTreeColMesh" & vbLf & err.description, vbCritical
 End Sub
 
 
@@ -558,7 +558,7 @@ Public Sub DrawColMesh()
     
     Exit Sub
 errorhandler:
-    MsgBox "DrawColMesh" & vbLf & err.Description, vbCritical
+    MsgBox "DrawColMesh" & vbLf & err.description, vbCritical
     cmesh.drawok = False
 End Sub
 
@@ -604,7 +604,7 @@ Private Sub DrawColLod(ByRef geom As bf2collod)
         If view_verts Then
             StartAAPoint 4
             glColor3f 1, 1, 1
-            glVertexPointer 3, GL_FLOAT, 0, .vert(0).x
+            glVertexPointer 3, GL_FLOAT, 0, .vert(0).X
             glEnableClientState GL_VERTEX_ARRAY
             
             glDrawArrays GL_POINTS, 0, .vertnum
@@ -625,7 +625,7 @@ Private Sub DrawColLod(ByRef geom As bf2collod)
     
     Exit Sub
 errorhandler:
-    MsgBox "DrawColMeshGeom" & vbLf & err.Description, vbCritical
+    MsgBox "DrawColMeshGeom" & vbLf & err.description, vbCritical
     cmesh.drawok = False
 End Sub
 
@@ -650,11 +650,11 @@ Dim cc As Long
             cc = Clamp(m, 0, maxcolors)
             glColor4fv colortable(cc).r
             
-            glNormal3fv .norm(i).x
+            glNormal3fv .norm(i).X
             
-            glVertex3fv .vert(v1).x
-            glVertex3fv .vert(v2).x
-            glVertex3fv .vert(v3).x
+            glVertex3fv .vert(v1).X
+            glVertex3fv .vert(v2).X
+            glVertex3fv .vert(v3).X
         Next i
         glEnd
     End With
@@ -686,7 +686,7 @@ Private Sub GenColNormals()
 errorhandler:
     'only raise error if file was loaded properly
     If cmesh.loadok Then
-        MsgBox "GenColNormals" & vbLf & err.Description, vbCritical
+        MsgBox "GenColNormals" & vbLf & err.description, vbCritical
     End If
 End Sub
 

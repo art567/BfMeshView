@@ -114,6 +114,10 @@ Dim j As Long
         'internal stuff
         ReDim .vertsel(0 To .vertnum - 1)
         ReDim .vertflag(0 To .vertnum - 1)
+        For i = 0 To .vertnum - 1
+            .vertsel(i) = 0
+            .vertflag(i) = 0
+        Next i
         
         '--- indices ------------------------------------------------------------------------------
         
