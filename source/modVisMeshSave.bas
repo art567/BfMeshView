@@ -94,7 +94,7 @@ End Function
 
 
 'writes mesh bounds
-Private Sub WriteBF2MeshLodRig(ByRef ff As Integer, ByRef lod As bf2_lod)
+Private Sub WriteBF2MeshLodRig(ByRef ff As Integer, ByRef lod As bf2lod)
 Dim i As Long
 Dim j As Long
     With lod
@@ -164,7 +164,7 @@ End Sub
 
 
 'writes material chunk
-Private Sub WriteBF2MeshMat(ByRef ff As Integer, ByRef mat As bf2_mat)
+Private Sub WriteBF2MeshMat(ByRef ff As Integer, ByRef mat As bf2mat)
 Dim i As Long
     With mat
         
@@ -210,7 +210,7 @@ End Sub
 
 
 'writes LOD chunk
-Private Sub WriteBF2MeshLod(ByRef ff As Integer, ByRef lod As bf2_lod)
+Private Sub WriteBF2MeshLod(ByRef ff As Integer, ByRef lod As bf2lod)
 Dim i As Long
     With lod
         

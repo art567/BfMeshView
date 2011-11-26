@@ -147,56 +147,6 @@ End Sub
 
 '------------------------------------------------------------------------------------------------------------
 
-'sets the vertex flags of the currently selected geom+lod
-Public Sub SetVertFlags2(ByRef geomid As Long, ByRef lodid As Long)
-    On Error GoTo errhandler
-    
-    Dim i As Long
-    With vmesh
-        If Not .loadok Then Exit Sub
-        If geomid < 0 Then Exit Sub
-        If lodid < 0 Then Exit Sub
-        
-        'clear vert flags
-        For i = 0 To .vertnum - 1
-            .vertflag(i) = 0
-        Next i
-        
-        '...
-        Dim stride As Long
-        stride = .vertstride / 4
-        With .geom(geomid).lod(lodid)
-            Dim m As Long
-            For m = 0 To .matnum - 1
-                With .mat(m)
-                    Dim facenum As Long
-                    facenum = .inum / 3
-                    
-                    For i = 0 To facenum - 1
-                        
-                        Dim v1 As Long
-                        Dim v2 As Long
-                        Dim v3 As Long
-                        v1 = .vstart + vmesh.Index(.istart + (i * 3) + 0)
-                        v2 = .vstart + vmesh.Index(.istart + (i * 3) + 1)
-                        v3 = .vstart + vmesh.Index(.istart + (i * 3) + 2)
-                        
-                        vmesh.vertflag(v1) = 1
-                        vmesh.vertflag(v2) = 1
-                        vmesh.vertflag(v3) = 1
-                    Next i
-                End With
-            Next m
-        End With
-        
-    End With
-    
-    Exit Sub
-errhandler:
-    MsgBox "SetVertFlags2" & vbLf & err.description, vbCritical
-    On Error GoTo 0
-End Sub
-
 
 'sets vertex flags
 Private Sub UpdateSelection()

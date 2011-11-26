@@ -264,7 +264,7 @@ Begin VB.Form frmOptions
       Width           =   1095
    End
    Begin VB.Frame Frame1 
-      Caption         =   "Texture Paths"
+      Caption         =   "Mod/Texture Paths"
       Height          =   2715
       Left            =   90
       TabIndex        =   0

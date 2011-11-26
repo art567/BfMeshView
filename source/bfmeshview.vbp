@@ -59,6 +59,7 @@ Module=BF2_Bake; BF2Bake.bas
 Module=a_Image; a_Image.bas
 Module=a_PixelBuffer; modPixelBuffer.bas
 Form=frmBake.frm
+Module=a_Selection; a_Selection.bas
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""

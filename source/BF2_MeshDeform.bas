@@ -1,14 +1,6 @@
 Attribute VB_Name = "BF2_MeshDeform"
 Option Explicit
 
-Private Type bf2skinweight
-    w As Single
-    b1 As Byte
-    b2 As Byte
-    b3 As Byte
-    b4 As Byte
-End Type
-
 
 'deforms skinnedmesh by skeleton
 Public Sub BF2MeshDeform()
@@ -72,13 +64,13 @@ Public Sub BF2MeshDeform()
                     If .rig(m).bonenum > 0 Then
                         
                         'get vertex position
-                        v.x = vmesh.vert(i * stride + 0)
-                        v.y = vmesh.vert(i * stride + 1)
+                        v.X = vmesh.vert(i * stride + 0)
+                        v.Y = vmesh.vert(i * stride + 1)
                         v.z = vmesh.vert(i * stride + 2)
                         
                         'get normal
-                        n.x = vmesh.vert(i * stride + 3 + 0)
-                        n.y = vmesh.vert(i * stride + 3 + 1)
+                        n.X = vmesh.vert(i * stride + 3 + 0)
+                        n.Y = vmesh.vert(i * stride + 3 + 1)
                         n.z = vmesh.vert(i * stride + 3 + 2)
                         
                         'get vertex weight
@@ -96,23 +88,23 @@ Public Sub BF2MeshDeform()
                         'bone 1
                         tv = mat4transvec(.rig(m).bone(vw.b1).skinmat, v)
                         tn = mat4rotvec(.rig(m).bone(vw.b1).skinmat, n)
-                        dv.x = dv.x + tv.x * vw.w
-                        dv.y = dv.y + tv.y * vw.w
+                        dv.X = dv.X + tv.X * vw.w
+                        dv.Y = dv.Y + tv.Y * vw.w
                         dv.z = dv.z + tv.z * vw.w
                         
-                        dn.x = dn.x + tn.x * vw.w
-                        dn.y = dn.y + tn.y * vw.w
+                        dn.X = dn.X + tn.X * vw.w
+                        dn.Y = dn.Y + tn.Y * vw.w
                         dn.z = dn.z + tn.z * vw.w
                         
                         'bone 2
                         tv = mat4transvec(.rig(m).bone(vw.b2).skinmat, v)
                         tn = mat4rotvec(.rig(m).bone(vw.b2).skinmat, n)
-                        dv.x = dv.x + tv.x * (1 - vw.w)
-                        dv.y = dv.y + tv.y * (1 - vw.w)
+                        dv.X = dv.X + tv.X * (1 - vw.w)
+                        dv.Y = dv.Y + tv.Y * (1 - vw.w)
                         dv.z = dv.z + tv.z * (1 - vw.w)
                         
-                        dn.x = dn.x + tn.x * (1 - vw.w)
-                        dn.y = dn.y + tn.y * (1 - vw.w)
+                        dn.X = dn.X + tn.X * (1 - vw.w)
+                        dn.Y = dn.Y + tn.Y * (1 - vw.w)
                         dn.z = dn.z + tn.z * (1 - vw.w)
                         
                         'store deformed attributes
@@ -120,12 +112,12 @@ Public Sub BF2MeshDeform()
                         vmesh.skinnorm(i) = dn
                         
                     Else
-                        vmesh.skinvert(i).x = vmesh.vert(i * stride + 0)
-                        vmesh.skinvert(i).y = vmesh.vert(i * stride + 1)
+                        vmesh.skinvert(i).X = vmesh.vert(i * stride + 0)
+                        vmesh.skinvert(i).Y = vmesh.vert(i * stride + 1)
                         vmesh.skinvert(i).z = vmesh.vert(i * stride + 2)
                         
-                        vmesh.skinnorm(i).x = vmesh.vert(i * stride + 3 + 0)
-                        vmesh.skinnorm(i).y = vmesh.vert(i * stride + 3 + 1)
+                        vmesh.skinnorm(i).X = vmesh.vert(i * stride + 3 + 0)
+                        vmesh.skinnorm(i).Y = vmesh.vert(i * stride + 3 + 1)
                         vmesh.skinnorm(i).z = vmesh.vert(i * stride + 3 + 2)
                     End If
                 Next i
@@ -201,13 +193,13 @@ Public Sub BF2MeshDeform3(ByRef geom As Long, ByRef lod As Long)
                 For i = .mat(m).vstart To .mat(m).vstart + .mat(m).vnum - 1
                     
                     'get vertex position
-                    v.x = vmesh.vert(i * stride + 0)
-                    v.y = vmesh.vert(i * stride + 1)
+                    v.X = vmesh.vert(i * stride + 0)
+                    v.Y = vmesh.vert(i * stride + 1)
                     v.z = vmesh.vert(i * stride + 2)
                     
                     'get normal
-                    n.x = vmesh.vert(i * stride + 3 + 0)
-                    n.y = vmesh.vert(i * stride + 3 + 1)
+                    n.X = vmesh.vert(i * stride + 3 + 0)
+                    n.Y = vmesh.vert(i * stride + 3 + 1)
                     n.z = vmesh.vert(i * stride + 3 + 2)
                     
                     'get vertex weight

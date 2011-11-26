@@ -19,7 +19,7 @@ End Type
 '---------------------------------
 
 'bf2 mesh file header
-Public Type bf_head '20 bytes
+Public Type bf2head '20 bytes
     u1 As Long          '0
     version As Long     '10 for most bundledmesh, 6 for some bundledmesh, 11 for staticmesh
     u3 As Long          '0
@@ -29,7 +29,7 @@ End Type
 
 
 'vertex attribute table entry
-Public Type bf2_vertattrib '8 bytes
+Public Type bf2vertattrib '8 bytes
     flag As Integer         'some sort of boolean flag (if true the below field are to be ignored?)
     offset As Integer       'offset from vertex data start
     vartype As Integer      'attribute type (vec2, vec3 etc)
@@ -42,7 +42,7 @@ End Type
 
 
 'bone structure
-Private Type bf_bone  '68 bytes
+Public Type bf2bone  '68 bytes
     id As Long        'bone ID (4 bytes)
     matrix As matrix4 'inverse bone matrix (64 bytes)
     
@@ -51,14 +51,14 @@ Private Type bf_bone  '68 bytes
 End Type
 
 'rig structure
-Private Type bf_rig
+Public Type bf2rig
     bonenum As Long
-    bone() As bf_bone
+    bone() As bf2bone
 End Type
 
 
 'lod drawcall
-Public Type bf2_mat
+Public Type bf2mat
     alphamode As Long     '0=opaque, 1=blend, 2=alphatest
     fxfile As String      'shader filename string
     technique As String   'technique name
@@ -89,8 +89,8 @@ Public Type bf2_mat
 End Type
 
 
-'geom lod
-Public Type bf2_lod
+'bf2 lod
+Public Type bf2lod
     
     'bounds
     min As float3
@@ -99,7 +99,7 @@ Public Type bf2_lod
     
     'skinning matrices (skinnedmesh only)
     rignum As Long  'this corresponds to matnum
-    rig() As bf_rig
+    rig() As bf2rig
     
     'nodes (staticmesh and bundledmesh only)
     nodenum As Long
@@ -107,21 +107,21 @@ Public Type bf2_lod
     
     'material groups
     matnum As Long
-    mat() As bf2_mat
+    mat() As bf2mat
     
     ''''internal
     polycount As Long
 End Type
 
 
-'group chunk
-Public Type bf2_geom
+'bf2 geom
+Public Type bf2geom
     lodnum As Long
-    lod() As bf2_lod
+    lod() As bf2lod
 End Type
 
 
-'bf2 vertex weight (helper structure, memcopy float to this)
+'bf2 BundledMesh vertex weight (helper structure, memcopy float to this)
 Public Type bf2vw
     b1 As Byte 'bone 1 index
     b2 As Byte 'bone 2 index
@@ -129,23 +129,40 @@ Public Type bf2vw
     w2 As Byte 'weight for bone 2
 End Type
 
+'bf2 SkinnedMesh vertex weight (helper structure, memcopy float to this)
+Public Type bf2skinweight
+    w As Single
+    b1 As Byte
+    b2 As Byte
+    b3 As Byte
+    b4 As Byte
+End Type
+
+'bf2 vertex info (helper structure generated after load time
+Public Type bf2vertinfo
+    geom As Byte
+    lod As Byte
+    mat As Byte
+    sel As Byte 'unused
+End Type
+
 
 'file structure
 Public Type bf2mesh
     
     'header
-    head As bf_head
+    head As bf2head
     
     'unknown
     u1 As Byte 'always 0?
     
     'geoms
     geomnum As Long
-    geom() As bf2_geom
+    geom() As bf2geom
     
     'vertex attribute table
     vertattribnum As Long
-    vertattrib() As bf2_vertattrib
+    vertattrib() As bf2vertattrib
     
     'vertices
     vertformat As Long 'always 4?  (e.g. GL_FLOAT)
@@ -155,7 +172,7 @@ Public Type bf2mesh
     
     'indices
     indexnum As Long
-    index() As Integer
+    Index() As Integer
     
     'unknown
     u2 As Long 'always 8?
@@ -168,9 +185,12 @@ Public Type bf2mesh
     isBFP4F As Boolean       'true if file is inside BFP4F directory
     loadok As Boolean        'mesh loaded properly
     drawok As Boolean        'mesh rendered properly
+    xstride As Long          'vertstride / 4
+    uvnum As Long            'number of detected uv channels
+    
+    vertinfo() As bf2vertinfo
     vertsel() As Byte        'vertex selection flags
     vertflag() As Byte       'per vertex flag for various things
-    uvnum As Long            'number of detected uv channels
     
     hasSkinVerts As Boolean  'deformed vertices flag
     skinvert() As float3     'deformed vertices

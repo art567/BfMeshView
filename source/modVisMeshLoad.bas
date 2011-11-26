@@ -111,14 +111,6 @@ Dim j As Long
         Echo "vertex block end at " & loc(ff)
         Echo ""
         
-        'internal stuff
-        ReDim .vertsel(0 To .vertnum - 1)
-        ReDim .vertflag(0 To .vertnum - 1)
-        For i = 0 To .vertnum - 1
-            .vertsel(i) = 0
-            .vertflag(i) = 0
-        Next i
-        
         '--- indices ------------------------------------------------------------------------------
         
         Echo "index block start at " & loc(ff)
@@ -182,6 +174,9 @@ Dim j As Long
     'close file
     Close #ff
     
+    'generate some useful stuff
+    GenVertInfo
+    
     'auto-load con
     If opt_loadcon Then
         With vmesh
@@ -231,7 +226,7 @@ End Function
 
 
 'reads lod node table
-Private Sub ReadLodNodeTable(ByRef ff As Integer, ByRef lod As bf2_lod)
+Private Sub ReadLodNodeTable(ByRef ff As Integer, ByRef lod As bf2lod)
 Dim i As Long
 Dim j As Long
     With lod
@@ -334,7 +329,7 @@ End Sub
 
 
 'reads lod material chunk
-Private Sub ReadLodMat(ByRef ff As Integer, ByRef mat As bf2_mat)
+Private Sub ReadLodMat(ByRef ff As Integer, ByRef mat As bf2mat)
 Dim i As Long
     With mat
         
@@ -401,7 +396,7 @@ End Sub
 
 
 'reads geom lod chunk
-Private Sub ReadGeomLod(ByRef ff As Integer, ByRef mesh As bf2_lod)
+Private Sub ReadGeomLod(ByRef ff As Integer, ByRef mesh As bf2lod)
 Dim i As Long
     With mesh
         
@@ -455,11 +450,13 @@ Public Sub UnloadBF2Mesh()
         Erase .geom()
         
         'internal
+        Erase .vertinfo()
         Erase .vertsel()
+        Erase .vertflag()
         
-        vmesh.hasSkinVerts = False
-        Erase vmesh.skinvert()
-        Erase vmesh.skinnorm()
+        .hasSkinVerts = False
+        Erase .skinvert()
+        Erase .skinnorm()
     End With
 End Sub
 
@@ -467,6 +464,51 @@ End Sub
 Public Function MakeKey(ByVal geo As Long, ByVal lod As Long, ByVal mat As Long, ByVal tex As Long) As String
     MakeKey = "@|" & geo & "|" & lod & "|" & mat & "|" & tex
 End Function
+
+
+'generates vertex info
+Public Sub GenVertInfo()
+    With vmesh
+        
+        'internal stuff
+        .xstride = .vertstride / 4
+        ReDim .vertinfo(0 To .vertnum - 1)
+        ReDim .vertsel(0 To .vertnum - 1)
+        ReDim .vertflag(0 To .vertnum - 1)
+        
+        'generate info
+        Dim g As Long
+        For g = 0 To .geomnum - 1
+            With .geom(g)
+                Dim L As Long
+                For L = 0 To .lodnum - 1
+                    With .lod(L)
+                        Dim m As Long
+                        For m = 0 To .matnum - 1
+                            With .mat(m)
+                                Dim v As Long
+                                For v = .vstart To .vstart + .vnum - 1
+                                    vmesh.vertinfo(v).geom = g
+                                    vmesh.vertinfo(v).lod = L
+                                    vmesh.vertinfo(v).mat = m
+                                    vmesh.vertinfo(v).sel = 0
+                                Next v
+                            End With
+                        Next m
+                    End With
+                Next L
+            End With
+        Next g
+        
+        'clear selection/flags
+        Dim i As Long
+        For i = 0 To .vertnum - 1
+            .vertsel(i) = 0
+            .vertflag(i) = 0
+        Next i
+        
+    End With
+End Sub
 
 
 'fills treeview hierarchy

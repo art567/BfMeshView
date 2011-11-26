@@ -65,6 +65,8 @@ Public Sub DrawScene()
     glRotatef camroty, 0, 1, 0
     glTranslatef camcentx, camcenty, camcentz
     
+    GetProjectionInfo
+    
     'reset some things
     glEnable GL_DEPTH_TEST
     glEnable GL_CULL_FACE
@@ -178,8 +180,8 @@ Public Sub ZoomExtends()
             
             'compute center
             Dim c As float3
-            c.x = (.min.x + .max.x) * 0.5
-            c.y = (.min.y + .max.y) * 0.5
+            c.X = (.min.X + .max.X) * 0.5
+            c.Y = (.min.Y + .max.Y) * 0.5
             c.z = (.min.z + .max.z) * 0.5
             
             'compute radius
@@ -202,8 +204,8 @@ Public Sub ZoomExtends()
             'campanx = p.x
             'campany = p.y
             
-            camcentx = c.x
-            camcenty = -c.y
+            camcentx = c.X
+            camcenty = -c.Y
             camcentz = -c.z
             camzoom = s
             
@@ -251,31 +253,31 @@ Public Sub DrawBox(ByRef min As float3, ByRef max As float3)
     
     'bottom square
     glBegin GL_LINE_LOOP
-        glVertex3f min.x, min.y, min.z
-        glVertex3f min.x, min.y, max.z
-        glVertex3f max.x, min.y, max.z
-        glVertex3f max.x, min.y, min.z
+        glVertex3f min.X, min.Y, min.z
+        glVertex3f min.X, min.Y, max.z
+        glVertex3f max.X, min.Y, max.z
+        glVertex3f max.X, min.Y, min.z
     glEnd
     
     'top square
     glBegin GL_LINE_LOOP
-        glVertex3f min.x, max.y, min.z
-        glVertex3f min.x, max.y, max.z
-        glVertex3f max.x, max.y, max.z
-        glVertex3f max.x, max.y, min.z
+        glVertex3f min.X, max.Y, min.z
+        glVertex3f min.X, max.Y, max.z
+        glVertex3f max.X, max.Y, max.z
+        glVertex3f max.X, max.Y, min.z
     glEnd
     
     'vertical lines
     glBegin GL_LINES
-        glVertex3f min.x, min.y, min.z
-        glVertex3f min.x, max.y, min.z
-        glVertex3f min.x, min.y, max.z
-        glVertex3f min.x, max.y, max.z
+        glVertex3f min.X, min.Y, min.z
+        glVertex3f min.X, max.Y, min.z
+        glVertex3f min.X, min.Y, max.z
+        glVertex3f min.X, max.Y, max.z
         
-        glVertex3f max.x, min.y, min.z
-        glVertex3f max.x, max.y, min.z
-        glVertex3f max.x, min.y, max.z
-        glVertex3f max.x, max.y, max.z
+        glVertex3f max.X, min.Y, min.z
+        glVertex3f max.X, max.Y, min.z
+        glVertex3f max.X, min.Y, max.z
+        glVertex3f max.X, max.Y, max.z
     glEnd
 End Sub
 

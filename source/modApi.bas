@@ -1,7 +1,9 @@
 Attribute VB_Name = "a_Api"
 Option Explicit
 
-Public Declare Function DrawRect Lib "gdi32" Alias "Rectangle" (ByVal hdc As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
+Public Declare Function TextOut Lib "gdi32" Alias "TextOutA" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As String, ByVal nCount As Long) As Long
+
+Public Declare Function DrawRect Lib "gdi32" Alias "Rectangle" (ByVal hDC As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
 
 Public Declare Function timeGetTime Lib "winmm.dll" () As Long
 
@@ -18,7 +20,7 @@ Public Declare Sub CopyMem Lib "kernel32" Alias "RtlMoveMemory" (ByVal dst As Lo
 Public Declare Function LockWindowUpdate Lib "user32" (ByVal hWnd As Long) As Long
 
 Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, _
-                                                    ByVal X As Long, ByVal Y As Long, _
+                                                    ByVal x As Long, ByVal y As Long, _
                                                     ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
 
 Private Declare Sub DragAcceptFiles Lib "shell32.dll" (ByVal hWnd As Long, ByVal fAccept As Long)
@@ -49,8 +51,8 @@ Private Declare Function SetWindowLong Lib "user32.dll" Alias "SetWindowLongA" (
                                                                                 ByVal dwNewLong As Long) As Long
 
 Private Type POINTAPI
-    X As Long
-    Y As Long
+    x As Long
+    y As Long
 End Type
 
 Private Type MINMAXINFO
@@ -100,16 +102,16 @@ End Sub
 Private Function WndProc(ByVal hWnd As Long, ByVal uMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 Dim MouseKeys As Long
 Dim value As Long
-Dim X As Long
-Dim Y As Long
+Dim x As Long
+Dim y As Long
     
     Select Case uMsg
     Case WM_MOUSEWHEEL:
         MouseKeys = wParam And 65535
         value = (wParam / 65536) / 120
-        X = lParam And 65535
-        Y = lParam / 65536
-        frmMain.MouseWheel MouseKeys, value, X, Y
+        x = lParam And 65535
+        y = lParam / 65536
+        frmMain.MouseWheel MouseKeys, value, x, y
     Case WM_DROPFILES
         Dim str As String * 512
         DragQueryFile wParam, 0, str, 512
@@ -118,8 +120,8 @@ Dim Y As Long
     Case WM_GETMINMAXINFO
         Dim mm As MINMAXINFO
         CopyMem VarPtr(mm), lParam, LenB(mm)
-        mm.ptMinTrackSize.X = 400
-        mm.ptMinTrackSize.Y = 300
+        mm.ptMinTrackSize.x = 400
+        mm.ptMinTrackSize.y = 300
         CopyMem lParam, VarPtr(mm), LenB(mm)
         WndProc = DefWindowProc(hWnd, uMsg, wParam, lParam)
         Exit Function
@@ -215,11 +217,11 @@ End Function
 
 'checks float3 for NaNs
 Public Function IsNaN3f(ByRef v As float3) As Boolean
-    If IsNaN(v.X) Then
+    If IsNaN(v.x) Then
         IsNaN3f = True
         Exit Function
     End If
-    If IsNaN(v.Y) Then
+    If IsNaN(v.y) Then
         IsNaN3f = True
         Exit Function
     End If

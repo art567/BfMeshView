@@ -2,7 +2,7 @@ Attribute VB_Name = "BF2_MeshShader"
 Option Explicit
 
 
-Private Sub SetBase(ByRef mat As bf2_mat, ByVal i As Long)
+Private Sub SetBase(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 0
     mat.layer(i).texmapid = mat.texmapid(0)
     mat.layer(i).depthfunc = GL_LESS
@@ -25,7 +25,7 @@ Private Sub SetBase(ByRef mat As bf2_mat, ByVal i As Long)
     End Select
 End Sub
 
-Private Sub SetAlpha(ByRef mat As bf2_mat, ByVal i As Long)
+Private Sub SetAlpha(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 0
     mat.layer(i).texmapid = mat.texmapid(0)
     mat.layer(i).depthfunc = GL_LESS
@@ -36,7 +36,7 @@ Private Sub SetAlpha(ByRef mat As bf2_mat, ByVal i As Long)
     mat.layer(i).lighting = False
 End Sub
 
-Private Sub SetAlphaTest(ByRef mat As bf2_mat, ByVal i As Long)
+Private Sub SetAlphaTest(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 0
     mat.layer(i).texmapid = mat.texmapid(0)
     mat.layer(i).depthfunc = GL_LESS
@@ -46,7 +46,7 @@ Private Sub SetAlphaTest(ByRef mat As bf2_mat, ByVal i As Long)
     mat.layer(i).lighting = False
 End Sub
 
-Private Sub SetDetail(ByRef mat As bf2_mat, ByVal i As Long)
+Private Sub SetDetail(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 1
     mat.layer(i).texmapid = mat.texmapid(1)
     mat.layer(i).depthfunc = GL_EQUAL
@@ -57,7 +57,7 @@ Private Sub SetDetail(ByRef mat As bf2_mat, ByVal i As Long)
     mat.layer(i).lighting = False
 End Sub
 
-Private Sub SetDirt(ByRef mat As bf2_mat, ByVal i As Long)
+Private Sub SetDirt(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 2
     mat.layer(i).texmapid = mat.texmapid(2)
     mat.layer(i).depthfunc = GL_EQUAL
@@ -68,7 +68,7 @@ Private Sub SetDirt(ByRef mat As bf2_mat, ByVal i As Long)
     mat.layer(i).lighting = False
 End Sub
 
-Private Sub SetCrack(ByRef mat As bf2_mat, ByVal i As Long)
+Private Sub SetCrack(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 3
     mat.layer(i).texmapid = mat.texmapid(3)
     mat.layer(i).depthfunc = GL_EQUAL
@@ -81,7 +81,7 @@ End Sub
 
 
 'swaps base (layer 1) and detail (layer 2) in case of alpha
-Private Sub MakeAlpha(ByRef mat As bf2_mat)
+Private Sub MakeAlpha(ByRef mat As bf2mat)
     With mat
         If .alphamode = 2 Then
             Dim tmp As Long
@@ -114,7 +114,7 @@ End Sub
 
 
 'builds shader
-Public Sub BuildShader(ByRef mat As bf2_mat, ByRef filename As String)
+Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
     With mat
         'reset
         .layernum = 0

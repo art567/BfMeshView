@@ -43,48 +43,6 @@ Public Sub DrawVisMesh()
             DrawVisMeshOverdraw .geom(selgeom).lod(sellod)
         End Select
         
-        
-        If 666 = 777 Then
-            
-            StartAAPoint 4
-            
-            'verts (green)
-            glColor3f 0.5, 1, 0.5
-            glVertexPointer 3, GL_FLOAT, .vertstride, .vert(0)
-            glEnableClientState GL_VERTEX_ARRAY
-            glDrawArrays GL_POINTS, 0, .vertnum
-            glDisableClientState GL_VERTEX_ARRAY
-            
-            'normals (red)
-            glColor3f 1, 0.5, 0.5
-            glVertexPointer 3, GL_FLOAT, .vertstride, .vert(3)
-            glEnableClientState GL_VERTEX_ARRAY
-            glDrawArrays GL_POINTS, 0, .vertnum
-            glDisableClientState GL_VERTEX_ARRAY
-            
-            'texcoordA (blue)
-            glColor3f 0.5, 0.5, 1
-            glVertexPointer 2, GL_FLOAT, .vertstride, .vert(7)
-            glEnableClientState GL_VERTEX_ARRAY
-            glDrawArrays GL_POINTS, 0, .vertnum
-            glDisableClientState GL_VERTEX_ARRAY
-            
-            'texcoordB (yellow)
-            'glColor3f 1, 1, 0.5
-            'glVertexPointer 2, GL_FLOAT, .vertstride, .vert(9).uv2
-            'glEnableClientState GL_VERTEX_ARRAY
-            'glDrawArrays GL_POINTS, 0, .vertnum
-            'glDisableClientState GL_VERTEX_ARRAY
-            
-            'tangent (pink)
-            'glColor3f 1, 0.5, 1
-            'glVertexPointer 3, GL_FLOAT, .vertstride, .vert(10)
-            'glEnableClientState GL_VERTEX_ARRAY
-            'glDrawArrays GL_POINTS, 0, .vertnum
-            'glDisableClientState GL_VERTEX_ARRAY
-            
-            EndAAPoint
-        End If
     End With
     
     'succes
@@ -92,7 +50,7 @@ Public Sub DrawVisMesh()
 errorhandler:
     
     If err.Number = 11 Then
-        'ignore, Intel I5 bug it seems
+        'ignore, Intel I5 FPU bug it seems
         Exit Sub
     End If
     
@@ -102,7 +60,7 @@ End Sub
 
 
 'draws mesh
-Public Sub DrawVisMeshLod(ByRef mesh As bf2_lod)
+Public Sub DrawVisMeshLod(ByRef mesh As bf2lod)
 Dim i As Long
 Dim j As Long
 Dim vptr As Long 'vertex array pointer
@@ -286,34 +244,20 @@ Dim texchans As Long
                     End If
                     
                 End If
-            End With
+            End With 'end material
             
             'draw vertices
             If view_verts Then
-                StartAAPoint 4
-                
-                Const psycho_mode = False
-                If psycho_mode Then
-                    'For j = 0 To vcount - 1
-                    '    Dim vertindex As Long
-                    '    vertindex = vstart * vmesh.vertstride
-                    '
-                    'Next j
+                glColor4f 1, 1, 1, 1
+                If vmesh.hasSkinVerts Then
+                    glVertexPointer 3, GL_FLOAT, 0, ByVal vptroff
                 Else
-                    'draw all lod vertices
-                    glColor4f 1, 1, 1, 1
-                    
-                    If vmesh.hasSkinVerts Then
-                        glVertexPointer 3, GL_FLOAT, 0, ByVal vptroff
-                    Else
-                        glVertexPointer 3, GL_FLOAT, vmesh.vertstride, ByVal vptroff
-                    End If
-                    
-                    glEnableClientState GL_VERTEX_ARRAY
-                    glDrawArrays GL_POINTS, 0, vcount
-                    glDisableClientState GL_VERTEX_ARRAY
+                    glVertexPointer 3, GL_FLOAT, vmesh.vertstride, ByVal vptroff
                 End If
-                
+                StartAAPoint 4
+                glEnableClientState GL_VERTEX_ARRAY
+                glDrawArrays GL_POINTS, 0, vcount
+                glDisableClientState GL_VERTEX_ARRAY
                 EndAAPoint
             End If
             
@@ -328,14 +272,21 @@ Dim texchans As Long
             If frmTransform.Visible Then
                 showvertsel = True
             End If
+            If toolmode = 1 Then
+                showvertsel = True
+            End If
             If showvertsel Then
+                glColor4f 1, 0, 0, 1
                 StartAAPoint 5
                 glBegin GL_POINTS
                     For j = 0 To vmesh.vertnum - 1
                         If vmesh.vertflag(j) Then
                             If vmesh.vertsel(j) Then
-                                glColor4f 1, 0, 0, 1
-                                glVertex3fv vmesh.vert(j * stride)
+                                If vmesh.hasSkinVerts Then
+                                    glVertex3fv vmesh.skinvert(j).X
+                                Else
+                                    glVertex3fv vmesh.vert(j * stride)
+                                End If
                             End If
                         End If
                     Next j
@@ -552,7 +503,7 @@ End Sub
 
 
 'draws triangles with index color
-Private Sub DrawVisMeshIndexColors(ByRef lod As bf2_lod)
+Private Sub DrawVisMeshIndexColors(ByRef lod As bf2lod)
 Dim m As Long
 Dim i As Long
 Dim v1 As Long
@@ -601,7 +552,7 @@ End Sub
 
 
 'draws LOD as overdraw mode
-Private Sub DrawVisMeshOverdraw(ByRef lod As bf2_lod)
+Private Sub DrawVisMeshOverdraw(ByRef lod As bf2lod)
 Dim m As Long
 Dim i As Long
 Dim v1 As Long
@@ -680,7 +631,7 @@ End Sub
 
 
 '...
-Private Sub DrawPassX(ByRef lod As bf2_lod)
+Private Sub DrawPassX(ByRef lod As bf2lod)
 Dim m As Long
 Dim i As Long
 Dim v1 As Long

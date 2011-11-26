@@ -103,6 +103,7 @@ Private Type bf2col
     geom() As bf2colgeom
     
     ''''internal
+    maxid As Long
     loadok As Boolean
     drawok As Boolean
     filename As String
@@ -175,6 +176,28 @@ Dim c As Long
         If loc(ff) <> LOF(ff) Then
             MsgBox "File not loaded properly!", vbExclamation
         End If
+        
+        'determine max material id
+        .maxid = 0
+        For i = 0 To .geomnum - 1
+            With .geom(i)
+                For j = 0 To .subgnum - 1
+                    With .subg(j)
+                        Dim k As Long
+                        For k = 0 To .lodnum - 1
+                            With .lod(k)
+                                Dim f As Long
+                                For f = 0 To .facenum - 1
+                                    If .face(f).m > cmesh.maxid Then
+                                        cmesh.maxid = .face(f).m
+                                    End If
+                                Next f
+                            End With
+                        Next k
+                    End With
+                Next j
+            End With
+        Next i
         
         'internal
         .loadok = True
@@ -604,7 +627,7 @@ Private Sub DrawColLod(ByRef geom As bf2collod)
         If view_verts Then
             StartAAPoint 4
             glColor3f 1, 1, 1
-            glVertexPointer 3, GL_FLOAT, 0, .vert(0).X
+            glVertexPointer 3, GL_FLOAT, 0, .vert(0).x
             glEnableClientState GL_VERTEX_ARRAY
             
             glDrawArrays GL_POINTS, 0, .vertnum
@@ -650,11 +673,11 @@ Dim cc As Long
             cc = Clamp(m, 0, maxcolors)
             glColor4fv colortable(cc).r
             
-            glNormal3fv .norm(i).X
+            glNormal3fv .norm(i).x
             
-            glVertex3fv .vert(v1).X
-            glVertex3fv .vert(v2).X
-            glVertex3fv .vert(v3).X
+            glVertex3fv .vert(v1).x
+            glVertex3fv .vert(v2).x
+            glVertex3fv .vert(v3).x
         Next i
         glEnd
     End With
@@ -712,4 +735,38 @@ Public Sub UnloadBF2Col()
     End With
 End Sub
 
+Private Sub DrawStr(ByVal x As Long, ByVal y As Long, ByRef str As String)
+    TextOut frmMain.picMain.hDC, x, y, str, Len(str)
+End Sub
 
+Public Sub BF2DrawColInfo()
+    With cmesh
+        If Not .loadok Then Exit Sub
+        
+        glFinish
+        
+        Dim x As Long
+        Dim y As Long
+        x = 10
+        y = 10
+        
+        Dim i As Long
+        For i = 0 To .maxid
+            
+            Dim cc As Long
+            cc = Clamp(i, 0, maxcolors)
+            
+            Dim c As Long
+            c = RGB(colortable(cc).r * 255, colortable(cc).g * 255, colortable(cc).b * 255)
+            
+            frmMain.picMain.FillColor = c
+            frmMain.picMain.ForeColor = c
+            
+            DrawRect frmMain.picMain.hDC, x, y, x + 10, y + 10
+            DrawStr x + 15, y - 2, "Mat " & i
+            
+            y = y + 16
+        Next i
+        
+    End With
+End Sub

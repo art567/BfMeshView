@@ -2,6 +2,17 @@ Attribute VB_Name = "BF2_MeshTools"
 Option Explicit
 
 
+'gets vertex weight
+Public Sub GetSkinVertWeight(ByVal i As Long, ByRef vw As bf2skinweight)
+    CopyMem VarPtr(vw), VarPtr(vmesh.vert(i * vmesh.xstride + 6)), 8
+End Sub
+
+'sets vertex weight
+Public Sub SetSkinVertWeight(ByVal i As Long, ByRef vw As bf2skinweight)
+    CopyMem VarPtr(vmesh.vert(i * vmesh.xstride + 6)), VarPtr(vw), 8
+End Sub
+
+
 'orients normal/tangent vectors to worldspace
 Public Sub VisMeshTool_MakeWS()
 Dim i As Long
@@ -97,8 +108,8 @@ Dim n As float3
     With vmesh
         
         'get vertex
-        v.x = .vert(i + 0)
-        v.y = .vert(i + 1)
+        v.X = .vert(i + 0)
+        v.Y = .vert(i + 1)
         v.z = .vert(i + 2)
         
         'compute normal
@@ -106,8 +117,8 @@ Dim n As float3
         n = Normalize(v)
         
         'replace old normal
-        .vert(i + 3 + 0) = n.x
-        .vert(i + 3 + 1) = n.y
+        .vert(i + 3 + 0) = n.X
+        .vert(i + 3 + 1) = n.Y
         .vert(i + 3 + 2) = n.z
         
     End With
@@ -225,7 +236,7 @@ End Sub
 
 
 'counts number of degenerate triangles
-Private Sub BF2VerifyMat(ByRef mat As bf2_mat)
+Private Sub BF2VerifyMat(ByRef mat As bf2mat)
 Dim i As Long
 Dim v1 As float3
 Dim v2 As float3
@@ -319,7 +330,7 @@ Public Sub BF2MeshFixTexPaths()
 End Sub
 
 
-Public Sub PasteMaterial(ByRef dst As bf2_mat, ByRef src As bf2_mat)
+Public Sub PasteMaterial(ByRef dst As bf2mat, ByRef src As bf2mat)
     Dim i As Long
     With dst
         
@@ -340,4 +351,75 @@ Public Sub PasteMaterial(ByRef dst As bf2_mat, ByRef src As bf2_mat)
     End With
 End Sub
 
+
+'deletes material from LOD
+Public Sub BF2DeleteMat(ByRef geom As Long, ByRef lod As Long, ByRef mat As Long)
+    MsgBox "Delete geom " & selgeom & " lod " & sellod & " material " & selmat
+    
+    With vmesh
+        If Not .loadok Then Exit Sub
+        With .geom(geom).lod(lod)
+            
+            'check
+            If .matnum = 1 Then
+                MsgBox "Cannot delete material, geom must have at least one material.", vbExclamation
+                Exit Sub
+            End If
+            
+            'shift up
+            If mat < .matnum - 1 Then
+                Dim i As Long
+                For i = mat To .matnum - 2
+                    .mat(i) = .mat(i + 1)
+                Next i
+            End If
+            
+            'delete
+            .matnum = .matnum - 1
+            ReDim Preserve .mat(0 To .matnum - 1)
+            
+        End With
+    End With
+    
+    'sellod = sellod - 1
+    frmMain.SelectMesh MakeTag(selgeom, sellod - 1, -1)
+    frmMain.FillTreeView
+    frmMain.picMain_Paint
+End Sub
+
+
+'deletes LOD from geom
+Public Sub BF2DeleteLod(ByRef geom As Long, ByRef lod As Long)
+    MsgBox "Delete geom " & selgeom & " lod " & sellod
+    
+    With vmesh
+        If Not .loadok Then Exit Sub
+        With .geom(geom)
+            
+            'check
+            If .lodnum = 1 Then
+                MsgBox "Cannot delete LOD, geom must have at least one LOD.", vbExclamation
+                Exit Sub
+            End If
+            
+            'shift up
+            If lod < .lodnum - 1 Then
+                Dim i As Long
+                For i = lod To .lodnum - 2
+                    .lod(i) = .lod(i + 1)
+                Next i
+            End If
+            
+            'delete
+            .lodnum = .lodnum - 1
+            ReDim Preserve .lod(0 To .lodnum - 1)
+            
+        End With
+    End With
+    
+    'selmat = selmat - 1
+    frmMain.SelectMesh MakeTag(selgeom, sellod, selmat - 1)
+    frmMain.FillTreeView
+    frmMain.picMain_Paint
+End Sub
 

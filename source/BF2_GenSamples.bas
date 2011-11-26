@@ -67,21 +67,21 @@ End Sub
 
 
 'returns array vertex index
-Private Function GetArrayVertIndex(ByRef mat As bf2_mat, ByVal f As Long, ByVal fv As Long) As Long
+Private Function GetArrayVertIndex(ByRef mat As bf2mat, ByVal f As Long, ByVal fv As Long) As Long
     GetArrayVertIndex = (mat.vstart + vmesh.Index(mat.istart + (f * 3) + fv)) * (vmesh.vertstride / 4)
 End Function
 
 
 'replaces normal if a component is fucked
 Private Function FixNormal(ByRef n As float3, ByRef rep As float3) As float3
-    If IsNaN(n.x) Or IsNaN(n.y) Or IsNaN(n.z) Then
+    If IsNaN(n.X) Or IsNaN(n.Y) Or IsNaN(n.z) Then
         n = rep
     End If
 End Function
 
 
 'writes samples file for LOD
-Public Function WriteLodSamples(ByRef lod As bf2_lod, ByVal chan As Long, ByVal filename As String) As Boolean
+Public Function WriteLodSamples(ByRef lod As bf2lod, ByVal chan As Long, ByVal filename As String) As Boolean
     On Error GoTo errorhandler
     
     'MsgBox filename
@@ -138,29 +138,29 @@ Public Function WriteLodSamples(ByRef lod As bf2_lod, ByVal chan As Long, ByVal 
                     f3 = GetArrayVertIndex(lod.mat(m), f, 2)
                     
                     'vertices
-                    face(fi).v1.x = vmesh.vert(f1 + 0)
-                    face(fi).v1.y = vmesh.vert(f1 + 1)
+                    face(fi).v1.X = vmesh.vert(f1 + 0)
+                    face(fi).v1.Y = vmesh.vert(f1 + 1)
                     face(fi).v1.z = vmesh.vert(f1 + 2)
                     
-                    face(fi).v2.x = vmesh.vert(f2 + 0)
-                    face(fi).v2.y = vmesh.vert(f2 + 1)
+                    face(fi).v2.X = vmesh.vert(f2 + 0)
+                    face(fi).v2.Y = vmesh.vert(f2 + 1)
                     face(fi).v2.z = vmesh.vert(f2 + 2)
                     
-                    face(fi).v3.x = vmesh.vert(f3 + 0)
-                    face(fi).v3.y = vmesh.vert(f3 + 1)
+                    face(fi).v3.X = vmesh.vert(f3 + 0)
+                    face(fi).v3.Y = vmesh.vert(f3 + 1)
                     face(fi).v3.z = vmesh.vert(f3 + 2)
                     
                     'normals
-                    face(fi).n1.x = vmesh.vert(f1 + 3 + 0)
-                    face(fi).n1.y = vmesh.vert(f1 + 3 + 1)
+                    face(fi).n1.X = vmesh.vert(f1 + 3 + 0)
+                    face(fi).n1.Y = vmesh.vert(f1 + 3 + 1)
                     face(fi).n1.z = vmesh.vert(f1 + 3 + 2)
                     
-                    face(fi).n2.x = vmesh.vert(f2 + 3 + 0)
-                    face(fi).n2.y = vmesh.vert(f2 + 3 + 1)
+                    face(fi).n2.X = vmesh.vert(f2 + 3 + 0)
+                    face(fi).n2.Y = vmesh.vert(f2 + 3 + 1)
                     face(fi).n2.z = vmesh.vert(f2 + 3 + 2)
                     
-                    face(fi).n3.x = vmesh.vert(f3 + 3 + 0)
-                    face(fi).n3.y = vmesh.vert(f3 + 3 + 1)
+                    face(fi).n3.X = vmesh.vert(f3 + 3 + 0)
+                    face(fi).n3.Y = vmesh.vert(f3 + 3 + 1)
                     face(fi).n3.z = vmesh.vert(f3 + 3 + 2)
                     
                     fi = fi + 1
@@ -223,12 +223,12 @@ Public Function WriteLodSamples(ByRef lod As bf2_lod, ByVal chan As Long, ByVal 
     WriteLodSamples = True
     Exit Function
 errorhandler:
-    MsgBox "WriteLodSamples" & vbLf & err.Description, vbCritical
+    MsgBox "WriteLodSamples" & vbLf & err.description, vbCritical
 End Function
 
 
 'generates sample array
-Private Sub GenBF2Samples(ByRef lod As bf2_lod, _
+Private Sub GenBF2Samples(ByRef lod As bf2lod, _
                           ByRef sample() As smp_sample, ByVal samplenum As Long, ByVal uvchan As Long)
 
     On Error GoTo errhandler
@@ -251,8 +251,8 @@ Dim miny As Long 'triangle bounding rectangle in pixel space
 Dim maxx As Long 'triangle bounding rectangle in pixel space
 Dim maxy As Long 'triangle bounding rectangle in pixel space
 
-Dim x As Long
-Dim y As Long
+Dim X As Long
+Dim Y As Long
 Dim i As Long
 Dim m As Long
 Dim f As Long
@@ -337,14 +337,14 @@ Dim errloc As Long
                ' ASSERT vi3 < vmesh.vertnum, "vertex index out of range"
                 
                 'get UVs
-                t1.x = vmesh.vert(vi1 + texoffset + 0)
-                t1.y = vmesh.vert(vi1 + texoffset + 1)
+                t1.X = vmesh.vert(vi1 + texoffset + 0)
+                t1.Y = vmesh.vert(vi1 + texoffset + 1)
                 
-                t2.x = vmesh.vert(vi2 + texoffset + 0)
-                t2.y = vmesh.vert(vi2 + texoffset + 1)
+                t2.X = vmesh.vert(vi2 + texoffset + 0)
+                t2.Y = vmesh.vert(vi2 + texoffset + 1)
                 
-                t3.x = vmesh.vert(vi3 + texoffset + 0)
-                t3.y = vmesh.vert(vi3 + texoffset + 1)
+                t3.X = vmesh.vert(vi3 + texoffset + 0)
+                t3.Y = vmesh.vert(vi3 + texoffset + 1)
                 
                 errloc = 3
                 
@@ -381,10 +381,10 @@ Dim errloc As Long
                     Dim fminy As Single
                     Dim fmaxx As Single
                     Dim fmaxy As Single
-                    fminx = min(min(t1.x, t2.x), t3.x) * (mapsizex - 1)
-                    fminy = min(min(t1.y, t2.y), t3.y) * (mapsizey - 1)
-                    fmaxx = max(max(t1.x, t2.x), t3.x) * (mapsizex - 1)
-                    fmaxy = max(max(t1.y, t2.y), t3.y) * (mapsizey - 1)
+                    fminx = min(min(t1.X, t2.X), t3.X) * (mapsizex - 1)
+                    fminy = min(min(t1.Y, t2.Y), t3.Y) * (mapsizey - 1)
+                    fmaxx = max(max(t1.X, t2.X), t3.X) * (mapsizex - 1)
+                    fmaxy = max(max(t1.Y, t2.Y), t3.Y) * (mapsizey - 1)
                     
                     errloc = 42
                     
@@ -421,18 +421,18 @@ Dim errloc As Long
                 If Not badface Then
                     
                     'loop through rect pixels
-                    For x = minx To maxx
-                        For y = miny To maxy
+                    For X = minx To maxx
+                        For Y = miny To maxy
                             
                             'compute pixel index
-                            i = CPos(x, y)
+                            i = CPos(X, Y)
                             
                             'only samples that are not rasterized yet or edge margin samples
                             If sampleflag(i) <> 1 Then
                             
                                 'compute UV position (texel center)
-                                p.x = (x * sx) + ox
-                                p.y = (y * sy) + oy
+                                p.X = (X * sx) + ox
+                                p.Y = (Y * sy) + oy
                                 
                                 errloc = 7
                                 
@@ -467,33 +467,33 @@ Dim errloc As Long
                                 If rasterize Then
                                     
                                     'face vertex 1
-                                    v1.x = vmesh.vert(vi1 + 0)
-                                    v1.y = vmesh.vert(vi1 + 1)
+                                    v1.X = vmesh.vert(vi1 + 0)
+                                    v1.Y = vmesh.vert(vi1 + 1)
                                     v1.z = vmesh.vert(vi1 + 2)
                                     
                                     'face vertex 2
-                                    v2.x = vmesh.vert(vi2 + 0)
-                                    v2.y = vmesh.vert(vi2 + 1)
+                                    v2.X = vmesh.vert(vi2 + 0)
+                                    v2.Y = vmesh.vert(vi2 + 1)
                                     v2.z = vmesh.vert(vi2 + 2)
                                     
                                     'face vertex 3
-                                    v3.x = vmesh.vert(vi3 + 0)
-                                    v3.y = vmesh.vert(vi3 + 1)
+                                    v3.X = vmesh.vert(vi3 + 0)
+                                    v3.Y = vmesh.vert(vi3 + 1)
                                     v3.z = vmesh.vert(vi3 + 2)
                                     
                                     'face normal 1
-                                    n1.x = vmesh.vert(vi1 + normoffset + 0)
-                                    n1.y = vmesh.vert(vi1 + normoffset + 1)
+                                    n1.X = vmesh.vert(vi1 + normoffset + 0)
+                                    n1.Y = vmesh.vert(vi1 + normoffset + 1)
                                     n1.z = vmesh.vert(vi1 + normoffset + 2)
                                     
                                     'face normal 2
-                                    n2.x = vmesh.vert(vi2 + normoffset + 0)
-                                    n2.y = vmesh.vert(vi2 + normoffset + 1)
+                                    n2.X = vmesh.vert(vi2 + normoffset + 0)
+                                    n2.Y = vmesh.vert(vi2 + normoffset + 1)
                                     n2.z = vmesh.vert(vi2 + normoffset + 2)
                                     
                                     'face normal 3
-                                    n3.x = vmesh.vert(vi3 + normoffset + 0)
-                                    n3.y = vmesh.vert(vi3 + normoffset + 1)
+                                    n3.X = vmesh.vert(vi3 + normoffset + 0)
+                                    n3.Y = vmesh.vert(vi3 + normoffset + 1)
                                     n3.z = vmesh.vert(vi3 + normoffset + 2)
                                     
                                     errloc = 10
@@ -517,8 +517,8 @@ Dim errloc As Long
                                 
                             End If
                             
-                        Next y
-                    Next x
+                        Next Y
+                    Next X
                 Else
                     badfacecount = badfacecount + 1
                 End If
@@ -547,21 +547,21 @@ Dim errloc As Long
     
     Exit Sub
 errhandler:
-    MsgBox "GenBF2Samples Error Code: " & errloc & vbLf & err.Description, vbCritical
+    MsgBox "GenBF2Samples Error Code: " & errloc & vbLf & err.description, vbCritical
 End Sub
 
 
 'computes pixel index from coordinates
-Private Function CPos(ByVal x As Long, ByVal y As Long) As Long
-    CPos = x + (y * mapsizex)
+Private Function CPos(ByVal X As Long, ByVal Y As Long) As Long
+    CPos = X + (Y * mapsizex)
 End Function
 
 
 'applies padding to samples
 Private Sub GenSamplePadding(ByRef sample() As smp_sample, ByVal samplenum As Long)
 Dim i As Long  'padding iterator
-Dim x As Long  'column iterator
-Dim y As Long  'row iterator
+Dim X As Long  'column iterator
+Dim Y As Long  'row iterator
 Dim j As Long  'found sample index
 Dim s As Long  'temp sample index
 Dim cs As Long 'current sample index
@@ -578,42 +578,42 @@ Dim cs As Long 'current sample index
             tmp(j) = -1
         Next j
         
-        For x = 0 To mapsizex - 1
-            For y = 0 To mapsizey - 1
+        For X = 0 To mapsizex - 1
+            For Y = 0 To mapsizey - 1
                 
-                cs = CPos(x, y)
+                cs = CPos(X, Y)
                 If sample(cs).face = -1 Then
                     
                     j = -1
                     
                     'north
                     If j < 0 Then
-                        If y - 1 > 0 Then
-                            s = CPos(x, y - 1)
+                        If Y - 1 > 0 Then
+                            s = CPos(X, Y - 1)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
                     
                     'south
                     If j < 0 Then
-                        If y + 1 < mapsizey - 1 Then
-                            s = CPos(x, y + 1)
+                        If Y + 1 < mapsizey - 1 Then
+                            s = CPos(X, Y + 1)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
                     
                     'west
                     If j < 0 Then
-                        If x - 1 > 0 Then
-                            s = CPos(x - 1, y)
+                        If X - 1 > 0 Then
+                            s = CPos(X - 1, Y)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
                     
                     'east
                     If j < 0 Then
-                        If x + 1 < mapsizex - 1 Then
-                            s = CPos(x + 1, y)
+                        If X + 1 < mapsizex - 1 Then
+                            s = CPos(X + 1, Y)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
@@ -627,8 +627,8 @@ Dim cs As Long 'current sample index
                     End If
                     
                 End If
-            Next y
-        Next x
+            Next Y
+        Next X
         
         'sync
         For j = 0 To samplenum - 1
@@ -644,5 +644,5 @@ Dim cs As Long 'current sample index
     
     Exit Sub
 errh:
-    MsgBox err.Description
+    MsgBox err.description
 End Sub

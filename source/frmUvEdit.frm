@@ -294,34 +294,34 @@ Private Sub picMain_KeyUp(KeyCode As Integer, Shift As Integer)
     If KeyCode = vbKeyMenu Then keyalt = False
 End Sub
 
-Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
     mousedown = True
-    mousex = X
-    mousey = Y
+    mousex = x
+    mousey = y
     
-    dragx = X
-    dragy = Y
+    dragx = x
+    dragy = y
     
     picMain_Paint
 End Sub
 
-Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
     If mousedown Then
         
         Dim vx As Single
         Dim vy As Single
-        vx = (X - mousex)
-        vy = (Y - mousey)
+        vx = (x - mousex)
+        vy = (y - mousey)
         
         If Button = vbLeftButton Then
             Select Case toolmode
             Case tool_select
                 
                 sel_vis = True
-                sel_minx = (min(dragx, X) - offx) / dsx
-                sel_miny = (min(dragy, Y) - offy) / dsy
-                sel_maxx = (max(dragx, X) - offx) / dsx
-                sel_maxy = (max(dragy, Y) - offy) / dsy
+                sel_minx = (min(dragx, x) - offx) / dsx
+                sel_miny = (min(dragy, y) - offy) / dsy
+                sel_maxx = (max(dragx, x) - offx) / dsx
+                sel_maxy = (max(dragy, y) - offy) / dsy
                 
             Case tool_move
                 MoveVerts vx / dsx, vy / dsy
@@ -361,12 +361,12 @@ Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, X As Single, 
         picMain_Paint
         frmMain.picMain_Paint
     End If
-    mousex = X
-    mousey = Y
+    mousex = x
+    mousey = y
 End Sub
 
 
-Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
     
     'ignore MouseUp after minimizing/maximizing window
     If Not mousedown Then Exit Sub
@@ -378,8 +378,8 @@ Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, X As Single, Y 
             If sel_vis Then
                 SelVerts sel_minx, sel_miny, sel_maxx, sel_maxy
             Else
-                SelVerts ((X - 3) - offx) / dsx, ((Y - 3) - offy) / dsy, _
-                         ((X + 3) - offx) / dsx, ((Y + 3) - offy) / dsy
+                SelVerts ((x - 3) - offx) / dsx, ((y - 3) - offy) / dsy, _
+                         ((x + 3) - offx) / dsx, ((y + 3) - offy) / dsy
             End If
             
         End If
@@ -527,19 +527,19 @@ Dim i As Long
         For i = 0 To .vertnum - 1
             If .vertflag(i) Then
             
-                Dim X As Single
-                Dim Y As Single
-                X = .vert(i * stride + uvoffset + 0)
-                Y = .vert(i * stride + uvoffset + 1)
+                Dim x As Single
+                Dim y As Single
+                x = .vert(i * stride + uvoffset + 0)
+                y = .vert(i * stride + uvoffset + 1)
                 
                 'clear vert selection
                 If Not keyctrl And Not keyalt Then
                     .vertsel(i) = 0
                 End If
-                If X >= minx Then
-                    If X <= maxx Then
-                        If Y > miny Then
-                            If Y < maxy Then
+                If x >= minx Then
+                    If x <= maxx Then
+                        If y >= miny Then
+                            If y <= maxy Then
                                 
                                 If keyalt Then
                                     .vertsel(i) = 0
@@ -577,17 +577,17 @@ Dim i As Long
             If .vertflag(i) Then
             If .vertsel(i) Then
                 
-                Dim X As Single
-                Dim Y As Single
+                Dim x As Single
+                Dim y As Single
                 
-                X = .vert(i * stride + uvoffset + 0)
-                Y = .vert(i * stride + uvoffset + 1)
+                x = .vert(i * stride + uvoffset + 0)
+                y = .vert(i * stride + uvoffset + 1)
                 
-                X = X + vx
-                Y = Y + vy
+                x = x + vx
+                y = y + vy
                 
-                .vert(i * stride + uvoffset + 0) = X
-                .vert(i * stride + uvoffset + 1) = Y
+                .vert(i * stride + uvoffset + 0) = x
+                .vert(i * stride + uvoffset + 1) = y
                 
             End If
             End If
@@ -645,14 +645,14 @@ Dim i As Long
             If .vertflag(i) Then
             If .vertsel(i) Then
                 
-                Dim X As Single
-                Dim Y As Single
+                Dim x As Single
+                Dim y As Single
                 
-                X = .vert(i * stride + uvoffset + 0)
-                Y = .vert(i * stride + uvoffset + 1)
+                x = .vert(i * stride + uvoffset + 0)
+                y = .vert(i * stride + uvoffset + 1)
                 
-                .vert(i * stride + uvoffset + 0) = Y
-                .vert(i * stride + uvoffset + 1) = X
+                .vert(i * stride + uvoffset + 0) = y
+                .vert(i * stride + uvoffset + 1) = x
                 
             End If
             End If
@@ -731,16 +731,16 @@ Dim i As Long
         For i = 0 To .vertnum - 1
             If .vertsel(i) Then
                 
-                Dim X As Single
-                Dim Y As Single
+                Dim x As Single
+                Dim y As Single
                 
-                X = .vert(i * stride + uvoffset + 0)
-                Y = .vert(i * stride + uvoffset + 1)
+                x = .vert(i * stride + uvoffset + 0)
+                y = .vert(i * stride + uvoffset + 1)
                 
-                minx = min(minx, X)
-                miny = min(miny, Y)
-                maxx = max(maxx, X)
-                maxy = max(maxy, Y)
+                minx = min(minx, x)
+                miny = min(miny, y)
+                maxx = max(maxx, x)
+                maxy = max(maxy, y)
             End If
         Next i
         
@@ -770,7 +770,7 @@ End Sub
 
 
 'clears vertex selection
-Private Sub ClearVertSelection()
+Public Sub ClearVertSelection()
     With vmesh
         If Not .loadok Then Exit Sub
         Dim i As Long
@@ -1055,20 +1055,20 @@ Private Sub DrawGL()
 End Sub
 
 
-Private Function TFX(ByVal X As Single) As Single
-    TFX = (X * zoom) + offx
+Private Function TFX(ByVal x As Single) As Single
+    TFX = (x * zoom) + offx
 End Function
 
-Private Function TFY(ByVal Y As Single) As Single
-    TFY = (Y * zoom) + offy
+Private Function TFY(ByVal y As Single) As Single
+    TFY = (y * zoom) + offy
 End Function
 
-Private Function TFXi(ByVal X As Single) As Single
-    TFXi = (X - offx) / zoom
+Private Function TFXi(ByVal x As Single) As Single
+    TFXi = (x - offx) / zoom
 End Function
 
-Private Function TFYi(ByVal Y As Single) As Single
-    TFYi = (Y - offy) / zoom
+Private Function TFYi(ByVal y As Single) As Single
+    TFYi = (y - offy) / zoom
 End Function
 
 Private Sub tlbTools_ButtonClick(ByVal Button As MSComctlLib.Button)
