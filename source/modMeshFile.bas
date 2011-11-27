@@ -85,8 +85,8 @@ End Function
 'saves mesh file
 Public Function SaveMeshFile(ByRef filename As String) As Boolean
     
-Dim backup As Boolean
-Dim backupname As String
+    Dim backup As Boolean
+    Dim backupname As String
     
     SetStatus "info", "Making backup of " & filename & "..."
     

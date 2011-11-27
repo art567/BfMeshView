@@ -19,6 +19,7 @@ Public view_lighting As Boolean
 Public view_textures As Boolean
 Public view_axis As Boolean
 Public view_grids As Boolean
+Public view_camanim As Boolean
 Private Const axis_size = 1
 Private Const grid_step = 50
 Private Const grid_size = 1
@@ -49,6 +50,18 @@ Public Sub DrawScene()
     End If
     drawlock = True
     
+    '1p camera
+    Dim cam1p As Boolean
+    cam1p = view_camanim And bf2ske.loaded And (bf2ske.cambone > -1)
+    
+    'field of view
+    Dim fov As Single
+    If cam1p Then
+        fov = 60
+    Else
+        fov = 45
+    End If
+    
     'clear buffers
     glClearColor bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a
     glClear GL_COLOR_BUFFER_BIT Or GL_DEPTH_BUFFER_BIT
@@ -56,14 +69,23 @@ Public Sub DrawScene()
     'setup camera
     glMatrixMode GL_PROJECTION
     glLoadIdentity
-    gluPerspective 45, camasp, camnear, camfar
+    gluPerspective fov, camasp, camnear, camfar
     
     glMatrixMode GL_MODELVIEW
     glLoadIdentity
-    glTranslatef campanx, campany, -camzoom
-    glRotatef camrotx, 1, 0, 0
-    glRotatef camroty, 0, 1, 0
-    glTranslatef camcentx, camcenty, camcentz
+    If cam1p Then
+        Dim m As matrix4
+        m = bf2ske.node(bf2ske.cambone).worldmat
+        
+        gluLookAt -m.m(12), m.m(13), m.m(14), _
+                  -m.m(12) + -m.m(8), m.m(13) + m.m(9), m.m(14) + m.m(10), _
+                  -m.m(4), m.m(5), m.m(6)
+    Else
+        glTranslatef campanx, campany, -camzoom
+        glRotatef camrotx, 1, 0, 0
+        glRotatef camroty, 0, 1, 0
+        glTranslatef camcentx, camcenty, camcentz
+    End If
     
     GetProjectionInfo
     

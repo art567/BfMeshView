@@ -259,9 +259,9 @@ Dim i As Long
     colortable(6).g = b + 144 / 255
     colortable(6).b = b + 225 / 255
     
-    colortable(2).r = b + 199 / 255
-    colortable(2).g = b + 88 / 255
-    colortable(2).b = b + 225 / 255
+    colortable(2).r = b + 167 / 255
+    colortable(2).g = b + 113 / 255
+    colortable(2).b = b + 250 / 255
     
     colortable(1).r = b + 225 / 255
     colortable(1).g = b + 88 / 255

@@ -22,6 +22,7 @@ Public Type bf2ske_file
     node() As skenode
     
     'internal
+    cambone As Long
     filename As String
     loaded As Boolean
 End Type
@@ -66,6 +67,7 @@ Public Function LoadBF2Skeleton(ByVal filename As String) As Boolean
     With bf2ske
         .loaded = False
         .filename = filename
+        .cambone = -1
         
         'read version (4 bytes)
         Get #ff, , .version
@@ -146,6 +148,11 @@ Public Function LoadBF2Skeleton(ByVal filename As String) As Boolean
             'reset default animation transform and make world space backup
             .node(i).localmatanim = .node(i).localmat
             .node(i).worldmatbackup = .node(i).worldmat
+            
+            'detect camera bone
+            If .node(i).name = "Camerabone" Then
+                .cambone = i
+            End If
         Next i
         
         .loaded = True

@@ -627,7 +627,7 @@ Private Sub DrawColLod(ByRef geom As bf2collod)
         If view_verts Then
             StartAAPoint 4
             glColor3f 1, 1, 1
-            glVertexPointer 3, GL_FLOAT, 0, .vert(0).x
+            glVertexPointer 3, GL_FLOAT, 0, .vert(0).X
             glEnableClientState GL_VERTEX_ARRAY
             
             glDrawArrays GL_POINTS, 0, .vertnum
@@ -673,11 +673,11 @@ Dim cc As Long
             cc = Clamp(m, 0, maxcolors)
             glColor4fv colortable(cc).r
             
-            glNormal3fv .norm(i).x
+            glNormal3fv .norm(i).X
             
-            glVertex3fv .vert(v1).x
-            glVertex3fv .vert(v2).x
-            glVertex3fv .vert(v3).x
+            glVertex3fv .vert(v1).X
+            glVertex3fv .vert(v2).X
+            glVertex3fv .vert(v3).X
         Next i
         glEnd
     End With
@@ -735,8 +735,8 @@ Public Sub UnloadBF2Col()
     End With
 End Sub
 
-Private Sub DrawStr(ByVal x As Long, ByVal y As Long, ByRef str As String)
-    TextOut frmMain.picMain.hDC, x, y, str, Len(str)
+Private Sub DrawStr(ByVal X As Long, ByVal Y As Long, ByRef str As String)
+    TextOut frmMain.picMain.hDC, X, Y, str, Len(str)
 End Sub
 
 Public Sub BF2DrawColInfo()
@@ -745,10 +745,13 @@ Public Sub BF2DrawColInfo()
         
         glFinish
         
-        Dim x As Long
-        Dim y As Long
-        x = 10
-        y = 10
+        Dim X As Long
+        Dim Y As Long
+        X = 10
+        Y = 10
+        
+        Dim bg As Long
+        bg = RGB(bgcolor.r * 255, bgcolor.g * 255, bgcolor.b * 255)
         
         Dim i As Long
         For i = 0 To .maxid
@@ -759,13 +762,23 @@ Public Sub BF2DrawColInfo()
             Dim c As Long
             c = RGB(colortable(cc).r * 255, colortable(cc).g * 255, colortable(cc).b * 255)
             
+            Dim s As String
+            s = "Mat " & i
+            
+            frmMain.picMain.FillColor = bg
+            frmMain.picMain.ForeColor = bg
+            DrawStr X + 15 + 1, Y - 2 + 1, s
+            DrawStr X + 15 + 0, Y - 2 + 1, s
+            DrawStr X + 15 + 1, Y - 2 + 0, s
+            DrawRect frmMain.picMain.hDC, X, Y, X + 11, Y + 11
+            
             frmMain.picMain.FillColor = c
             frmMain.picMain.ForeColor = c
             
-            DrawRect frmMain.picMain.hDC, x, y, x + 10, y + 10
-            DrawStr x + 15, y - 2, "Mat " & i
+            DrawRect frmMain.picMain.hDC, X, Y, X + 10, Y + 10
+            DrawStr X + 15, Y - 2, s
             
-            y = y + 16
+            Y = Y + 16
         Next i
         
     End With
