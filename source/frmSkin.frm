@@ -32,54 +32,61 @@ Begin VB.Form frmSkin
    End
    Begin VB.CommandButton cmdAuto 
       Caption         =   "Auto-Assign"
+      Enabled         =   0   'False
       Height          =   375
       Left            =   1920
       TabIndex        =   14
       Top             =   5280
       Width           =   1695
    End
-   Begin VB.CommandButton Command6 
+   Begin VB.CommandButton cmdWeightQuick 
       Caption         =   "0.75"
       Height          =   375
-      Left            =   840
+      Index           =   1
+      Left            =   2280
       TabIndex        =   13
       Top             =   4200
       Width           =   615
    End
-   Begin VB.CommandButton Command5 
+   Begin VB.CommandButton cmdWeightQuick 
       Caption         =   "0.25"
       Height          =   375
-      Left            =   2280
+      Index           =   3
+      Left            =   840
       TabIndex        =   12
       Top             =   4200
       Width           =   615
    End
-   Begin VB.CommandButton Command4 
+   Begin VB.CommandButton cmdWeightQuick 
       Caption         =   "0.0"
       Height          =   375
-      Left            =   3000
+      Index           =   4
+      Left            =   120
       TabIndex        =   11
       Top             =   4200
       Width           =   615
    End
-   Begin VB.CommandButton Command3 
+   Begin VB.CommandButton cmdWeightQuick 
       Caption         =   "0.5"
       Height          =   375
+      Index           =   2
       Left            =   1560
       TabIndex        =   10
       Top             =   4200
       Width           =   615
    End
-   Begin VB.CommandButton Command2 
+   Begin VB.CommandButton cmdWeightQuick 
       Caption         =   "1.0"
       Height          =   375
-      Left            =   120
+      Index           =   0
+      Left            =   3000
       TabIndex        =   9
       Top             =   4200
       Width           =   615
    End
    Begin VB.CommandButton cmdMirrorBlend 
       Caption         =   "Mirror Blend"
+      Enabled         =   0   'False
       Height          =   375
       Left            =   120
       TabIndex        =   8
@@ -88,6 +95,7 @@ Begin VB.Form frmSkin
    End
    Begin VB.CommandButton cmdMirrorToRight 
       Caption         =   "Mirror To Right"
+      Enabled         =   0   'False
       Height          =   375
       Left            =   1920
       TabIndex        =   7
@@ -96,6 +104,7 @@ Begin VB.Form frmSkin
    End
    Begin VB.CommandButton cmdMirrorToLeft 
       Caption         =   "Mirror To Left"
+      Enabled         =   0   'False
       Height          =   375
       Left            =   120
       TabIndex        =   6
@@ -104,6 +113,7 @@ Begin VB.Form frmSkin
    End
    Begin VB.CommandButton Command1 
       Caption         =   "Load..."
+      Enabled         =   0   'False
       Height          =   375
       Left            =   120
       TabIndex        =   5
@@ -112,6 +122,7 @@ Begin VB.Form frmSkin
    End
    Begin VB.CommandButton cmdSave 
       Caption         =   "Save..."
+      Enabled         =   0   'False
       Height          =   375
       Left            =   1920
       TabIndex        =   4
@@ -133,7 +144,7 @@ Begin VB.Form frmSkin
    End
    Begin VB.ComboBox cbbBone2 
       Height          =   315
-      Left            =   1920
+      Left            =   120
       Style           =   2  'Dropdown List
       TabIndex        =   2
       Top             =   3360
@@ -141,7 +152,7 @@ Begin VB.Form frmSkin
    End
    Begin VB.ComboBox cbbBone1 
       Height          =   315
-      Left            =   120
+      Left            =   1920
       Style           =   2  'Dropdown List
       TabIndex        =   1
       Top             =   3360
@@ -196,6 +207,7 @@ Option Explicit
 
 Private skin_vert As Long
 Private skin_weight As Single
+Private lockchange As Boolean
 
 Private Sub Form_Load()
     Me.Move 10 * 30, 50 * 30
@@ -223,10 +235,26 @@ Private Sub picWeight_MouseMove(Button As Integer, Shift As Integer, X As Single
         If skin_weight > 1 Then skin_weight = 1
         
         ChangeWeight
-        
-        picWeight_Paint
-        frmMain.picMain_Paint
     End If
+End Sub
+
+Private Sub cmdWeightQuick_Click(Index As Integer)
+    Select Case Index
+    Case 0: skin_weight = 1
+    Case 1: skin_weight = 0.75
+    Case 2: skin_weight = 0.5
+    Case 3: skin_weight = 0.25
+    Case 4: skin_weight = 0
+    End Select
+    ChangeWeight
+End Sub
+
+Private Sub cbbBone1_Click()
+    ChangeWeight
+End Sub
+
+Private Sub cbbBone2_Click()
+    ChangeWeight
 End Sub
 
 Private Sub picWeight_Paint()
@@ -256,11 +284,9 @@ Private Sub picWeight_Paint()
 End Sub
 
 Private Sub FillBoneList()
+    lockchange = True
+    
     Me.lstBones.Clear
-    Me.cbbBone1.Clear
-    Me.cbbBone2.Clear
-    'Me.cbbBone1.AddItem "NONE"
-    'Me.cbbBone2.AddItem "NONE"
     With bf2ske
         If Not .loaded Then Exit Sub
         
@@ -278,15 +304,15 @@ Private Sub FillBoneList()
             Wend
             
             Me.lstBones.AddItem (String(ident, " ") & .node(i).name)
-            
-            'Me.cbbBone1.AddItem .node(i).name
-            'Me.cbbBone2.AddItem .node(i).name
         Next i
     End With
+    
+    lockchange = False
 End Sub
 
 
 Private Sub SelectSkinVert(ByRef v As Long)
+    lockchange = True
     
     'fill bone lists
     Me.cbbBone1.Clear
@@ -302,17 +328,11 @@ Private Sub SelectSkinVert(ByRef v As Long)
     Dim vw As bf2skinweight
     GetSkinVertWeight v, vw
     
-    Dim sb1 As Long
-    Dim sb2 As Long
-    'sb1 = .geom(vmesh.vertinfo(i).geom).lod(vmesh.vertinfo(i).lod).rig(vmesh.vertinfo(i).mat).bone(vw.b1).id
-    'sb2 = .geom(vmesh.vertinfo(i).geom).lod(vmesh.vertinfo(i).lod).rig(vmesh.vertinfo(i).mat).bone(vw.b2).id
-    
     Me.cbbBone1.ListIndex = vw.b1
     Me.cbbBone2.ListIndex = vw.b2
-    
     skin_weight = vw.w
     
-    'Me.Caption = "b1:" & vw.b1 & "|b2:" & vw.b2 & "|w" & vw.w
+    lockchange = False
 End Sub
 
 Private Sub chkEditMode_Click()
@@ -361,6 +381,8 @@ End Sub
 
 
 Private Sub ChangeWeight()
+    If lockchange Then Exit Sub
+    
     With vmesh
         If Not .loadok Then Exit Sub
         
@@ -382,6 +404,10 @@ Private Sub ChangeWeight()
                 End If
             End If
         Next i
+        
+        'redraw
+        picWeight_Paint
+        frmMain.picMain_Paint
         
     End With
 End Sub
