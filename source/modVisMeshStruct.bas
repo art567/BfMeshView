@@ -86,6 +86,9 @@ Public Type bf2mat
     mapuvid() As Long       'UV index for each map
     layernum As Long
     layer(1 To 4) As mat_layer
+    glslprog As Long
+    hasBump As Boolean
+    hasWreck As Boolean
 End Type
 
 

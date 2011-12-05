@@ -12,7 +12,7 @@ End Type
 
 'ystruct (16 bytes)
 Private Type ystruct
-    u1 As Single
+    u1 As Single 'typically, matches a vertex X, Y, or Z coordinate
     u2 As Integer
     u3 As Integer
     u4 As Long
@@ -62,22 +62,6 @@ Private Type bf2collod
     norm() As float3
     badtri As Long
 End Type
-
-''collisionmesh geom (temp!!)
-'Private Type bf2colgeom
-'    type As Long         '0=parachute, 1=staticmesh, 2=most bundledmesh, 3=vehicle / NO! its number of groups!!
-'
-'    qlodnum As Long
-'    qlod() As bf2colgeomlod
-'
-'    'LODs
-'    lodnum As Long
-'    lod() As bf2colgeomlod
-'
-'    'wreck LODs
-'    xlodnum As Long
-'    xlod() As bf2colgeomlod
-'End Type
 
 'sub
 Private Type bf2colsub
@@ -335,20 +319,22 @@ Private Sub BF2ReadColLod(ByRef ff As Integer, ByRef lod As bf2collod)
         Get #ff, , .bmin
         Get #ff, , .bmax
         
+        Echo "  unknown stuff start at " & loc(ff)
+        
         '--- y block ---
         
         'ynum (4 bytes)
         Get #ff, , .ynum
-        Echo "  ynum: " & .ynum
+        Echo "   ynum: " & .ynum
         
         'ydata (16 bytes * ynum)
         If .ynum > 0 Then
-            Echo "  ydata start at " & loc(ff)
+            Echo "   ydata start at " & loc(ff)
             
             ReDim .ydata(0 To .ynum - 1)
             Get #ff, , .ydata()
             
-            Echo "  ydata end at " & loc(ff)
+            Echo "   ydata end at " & loc(ff)
         End If
         
         '--- z block ---
@@ -358,35 +344,41 @@ Private Sub BF2ReadColLod(ByRef ff As Integer, ByRef lod As bf2collod)
         
         'znum (4 bytes)
         Get #ff, , .znum
-        Echo "  znum: " & .znum
+        Echo "   znum: " & .znum
         
         'zdata (2 bytes * znum)
         If .znum > 0 Then
-            Echo "  zdata start at " & loc(ff)
+            Echo "   zdata start at " & loc(ff)
             
             ReDim .zdata(0 To .znum - 1)
             Get #ff, , .zdata()
             
-            Echo "  zdata start at " & loc(ff)
+            Echo "   zdata end at " & loc(ff)
         End If
         
         '--- a block ---
         
         If cmesh.ver >= 10 Then
+            
+            'related to vertices?
+            'for single triangle, anum == 3
+            
             'anum (4 bytes)
             Get #ff, , .anum
-            Echo "  anum: " & .anum
+            Echo "   anum: " & .anum
             
             'adata (4 bytes * anum)
             If .anum > 0 Then
-                Echo "  adata start at " & loc(ff)
+                Echo "   adata start at " & loc(ff)
                 
                 ReDim .adata(0 To .anum - 1)
                 Get #ff, , .adata()
                 
-                Echo "  adata start at " & loc(ff)
+                Echo "   adata end at " & loc(ff)
             End If
         End If
+        
+        Echo "  unknown stuff end at " & loc(ff)
         
     End With
 End Sub
@@ -627,7 +619,7 @@ Private Sub DrawColLod(ByRef geom As bf2collod)
         If view_verts Then
             StartAAPoint 4
             glColor3f 1, 1, 1
-            glVertexPointer 3, GL_FLOAT, 0, .vert(0).X
+            glVertexPointer 3, GL_FLOAT, 0, .vert(0).x
             glEnableClientState GL_VERTEX_ARRAY
             
             glDrawArrays GL_POINTS, 0, .vertnum
@@ -673,11 +665,11 @@ Dim cc As Long
             cc = Clamp(m, 0, maxcolors)
             glColor4fv colortable(cc).r
             
-            glNormal3fv .norm(i).X
+            glNormal3fv .norm(i).x
             
-            glVertex3fv .vert(v1).X
-            glVertex3fv .vert(v2).X
-            glVertex3fv .vert(v3).X
+            glVertex3fv .vert(v1).x
+            glVertex3fv .vert(v2).x
+            glVertex3fv .vert(v3).x
         Next i
         glEnd
     End With
@@ -735,8 +727,8 @@ Public Sub UnloadBF2Col()
     End With
 End Sub
 
-Private Sub DrawStr(ByVal X As Long, ByVal Y As Long, ByRef str As String)
-    TextOut frmMain.picMain.hDC, X, Y, str, Len(str)
+Private Sub DrawStr(ByVal x As Long, ByVal y As Long, ByRef str As String)
+    TextOut frmMain.picMain.hDC, x, y, str, Len(str)
 End Sub
 
 Public Sub BF2DrawColInfo()
@@ -745,10 +737,10 @@ Public Sub BF2DrawColInfo()
         
         glFinish
         
-        Dim X As Long
-        Dim Y As Long
-        X = 10
-        Y = 10
+        Dim x As Long
+        Dim y As Long
+        x = 10
+        y = 10
         
         Dim bg As Long
         bg = RGB(bgcolor.r * 255, bgcolor.g * 255, bgcolor.b * 255)
@@ -767,19 +759,183 @@ Public Sub BF2DrawColInfo()
             
             frmMain.picMain.FillColor = bg
             frmMain.picMain.ForeColor = bg
-            DrawStr X + 15 + 1, Y - 2 + 1, s
-            DrawStr X + 15 + 0, Y - 2 + 1, s
-            DrawStr X + 15 + 1, Y - 2 + 0, s
-            DrawRect frmMain.picMain.hDC, X, Y, X + 11, Y + 11
+            DrawStr x + 15 + 1, y - 2 + 1, s
+            DrawStr x + 15 + 0, y - 2 + 1, s
+            DrawStr x + 15 + 1, y - 2 + 0, s
+            DrawRect frmMain.picMain.hDC, x, y, x + 11, y + 11
             
             frmMain.picMain.FillColor = c
             frmMain.picMain.ForeColor = c
             
-            DrawRect frmMain.picMain.hDC, X, Y, X + 10, Y + 10
-            DrawStr X + 15, Y - 2, s
+            DrawRect frmMain.picMain.hDC, x, y, x + 10, y + 10
+            DrawStr x + 15, y - 2, s
             
-            Y = Y + 16
+            y = y + 16
         Next i
         
     End With
 End Sub
+
+'------------------ WRITING -------------------------------------------------------------
+
+'writes lod
+Private Sub BF2WriteColLod(ByRef ff As Integer, ByRef lod As bf2collod)
+    With lod
+        
+        'coltype (4 bytes)
+        If cmesh.ver >= 9 Then
+            Put #ff, , .coltype
+        End If
+        
+        '--- faces ---
+        
+        'facenum (4 bytes)
+        Put #ff, , .facenum
+        
+        'faces (8 bytes * facenum)
+        If .facenum > 0 Then
+            Put #ff, , .face()
+        End If
+        
+        '--- vertices ---
+        
+        'vertnum (4 bytes)
+        Put #ff, , .vertnum
+        
+        'vertices (12 bytes * vertnum)
+        If .vertnum > 0 Then
+            Put #ff, , .vert()
+        End If
+        
+        'vertid (2 bytes * vertnum)
+        If .vertnum > 0 Then
+            Put #ff, , .vertid()
+        End If
+        
+        '--- bounds ---
+        
+        'bounds (24 bytes)
+        Put #ff, , .min
+        Put #ff, , .max
+        
+        '--- misc ---
+        
+        'unknown (1 byte)
+        Put #ff, , .u7
+        
+        '--- misc ---
+        
+        'bounds (24 bytes)
+        Put #ff, , .bmin
+        Put #ff, , .bmax
+        
+        '--- y block ---
+        
+        'ynum (4 bytes)
+        Put #ff, , .ynum
+        
+        'ydata (16 bytes * ynum)
+        If .ynum > 0 Then
+            Put #ff, , .ydata()
+        End If
+        
+        '--- z block ---
+        
+        'znum (4 bytes)
+        Put #ff, , .znum
+        
+        'zdata (2 bytes * znum)
+        If .znum > 0 Then
+            Put #ff, , .zdata()
+        End If
+        
+        '--- a block ---
+        
+        If cmesh.ver >= 10 Then
+            
+            'anum (4 bytes)
+            Put #ff, , .anum
+            
+            'adata (4 bytes * anum)
+            If .anum > 0 Then
+                Put #ff, , .adata()
+            End If
+            
+        End If
+        
+    End With
+End Sub
+
+'writes sub
+Private Sub BF2WriteColSub(ByRef ff As Integer, ByRef subg As bf2colsub)
+    Dim i As Long
+    With subg
+        Put #ff, , .lodnum
+        If .lodnum > 0 Then
+            For i = 0 To .lodnum - 1
+                BF2WriteColLod ff, .lod(i)
+            Next i
+        End If
+    End With
+End Sub
+
+
+'writes geom
+Private Sub BF2WriteColGeom(ByRef ff As Integer, ByRef geom As bf2colgeom)
+    Dim i As Long
+    With geom
+        Put #ff, , .subgnum
+        If .subgnum > 0 Then
+            For i = 0 To .subgnum - 1
+                BF2WriteColSub ff, .subg(i)
+            Next i
+        End If
+    End With
+End Sub
+
+
+'writes collisionmesh to file
+Public Function BF2WriteColMesh(ByRef filename As String) As Boolean
+    On Error GoTo errorhandler
+    
+    If Not cmesh.loadok Then
+        MsgBox "Could not save CollisionMesh, file failed to load without error.", vbExclamation
+        Exit Function
+    End If
+    
+    'open file
+    Dim ff As Integer
+    ff = FreeFile
+    Open filename For Binary As #ff
+    
+    With cmesh
+        
+        'unknown (4 bytes)
+        Put #ff, , .u1
+        
+        'version (4 bytes)
+        Put #ff, , .ver
+        
+        'geomnum (4 bytes)
+        Put #ff, , .geomnum
+        
+        'write geoms
+        If .geomnum > 0 Then
+            Dim i As Long
+            For i = 0 To .geomnum - 1
+                BF2WriteColGeom ff, .geom(i)
+            Next i
+        End If
+        
+    End With
+    
+    'close file
+    Close #ff
+    
+    'success
+    BF2WriteColMesh = True
+    Exit Function
+errorhandler:
+    MsgBox "BF2WriteColMesh" & vbLf & err.description, vbCritical
+End Function
+

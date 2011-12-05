@@ -1,7 +1,6 @@
 Attribute VB_Name = "BF2_MeshShader"
 Option Explicit
 
-
 Private Sub SetBase(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texcoff = 0
     mat.layer(i).texmapid = mat.texmapid(0)
@@ -123,6 +122,7 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
         
         'SKINNEDMESH
         Case "skinnedmesh.fx"
+            mat.glslprog = 0
             
             Select Case LCase(.technique)
             Case "alpha_test"
@@ -135,6 +135,21 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             
         'BUNDLEDMESH
         Case "bundledmesh.fx"
+            mat.glslprog = bundledmesh.prog
+            mat.hasBump = False
+            mat.hasWreck = False
+            
+            If .mapnum = 3 Then
+                If InString(.map(1), "SpecularLUT") Then
+                    mat.hasBump = False
+                Else
+                    mat.hasBump = True
+                End If
+            End If
+            If .mapnum = 4 Then
+                mat.hasBump = True
+                mat.hasWreck = True
+            End If
             
             'opaque
             .layernum = 1
@@ -181,6 +196,7 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             
         'STATICMESH
         Case "staticmesh.fx"
+            mat.glslprog = 0
             
             'check if file is in vegetation directory
             Dim veggie As Boolean

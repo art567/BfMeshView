@@ -3,7 +3,7 @@ Option Explicit
 
 
 'writes mesh to file
-Public Function WriteVisMesh(ByRef filename As String) As Boolean
+Public Function BF2WriteVisMesh(ByRef filename As String) As Boolean
     On Error GoTo errorhandler
     
 Dim i As Long
@@ -86,10 +86,10 @@ Dim j As Long
     'close file
     Close #ff
     
-    WriteVisMesh = True
+    BF2WriteVisMesh = True
     Exit Function
 errorhandler:
-    MsgBox "WriteVisMesh" & vbLf & err.description, vbCritical
+    MsgBox "BF2WriteVisMesh" & vbLf & err.description, vbCritical
 End Function
 
 

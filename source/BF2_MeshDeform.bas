@@ -3,7 +3,7 @@ Option Explicit
 
 
 'deforms skinnedmesh by skeleton
-Public Sub BF2MeshDeform()
+Public Sub BF2MeshDeformSM()
     With vmesh
         On Error GoTo errhandler
         
@@ -65,12 +65,12 @@ Public Sub BF2MeshDeform()
                         
                         'get vertex position
                         v.X = vmesh.vert(i * stride + 0)
-                        v.Y = vmesh.vert(i * stride + 1)
+                        v.y = vmesh.vert(i * stride + 1)
                         v.z = vmesh.vert(i * stride + 2)
                         
                         'get normal
                         n.X = vmesh.vert(i * stride + 3 + 0)
-                        n.Y = vmesh.vert(i * stride + 3 + 1)
+                        n.y = vmesh.vert(i * stride + 3 + 1)
                         n.z = vmesh.vert(i * stride + 3 + 2)
                         
                         'get vertex weight
@@ -89,22 +89,22 @@ Public Sub BF2MeshDeform()
                         tv = mat4transvec(.rig(m).bone(vw.b1).skinmat, v)
                         tn = mat4rotvec(.rig(m).bone(vw.b1).skinmat, n)
                         dv.X = dv.X + tv.X * vw.w
-                        dv.Y = dv.Y + tv.Y * vw.w
+                        dv.y = dv.y + tv.y * vw.w
                         dv.z = dv.z + tv.z * vw.w
                         
                         dn.X = dn.X + tn.X * vw.w
-                        dn.Y = dn.Y + tn.Y * vw.w
+                        dn.y = dn.y + tn.y * vw.w
                         dn.z = dn.z + tn.z * vw.w
                         
                         'bone 2
                         tv = mat4transvec(.rig(m).bone(vw.b2).skinmat, v)
                         tn = mat4rotvec(.rig(m).bone(vw.b2).skinmat, n)
                         dv.X = dv.X + tv.X * (1 - vw.w)
-                        dv.Y = dv.Y + tv.Y * (1 - vw.w)
+                        dv.y = dv.y + tv.y * (1 - vw.w)
                         dv.z = dv.z + tv.z * (1 - vw.w)
                         
                         dn.X = dn.X + tn.X * (1 - vw.w)
-                        dn.Y = dn.Y + tn.Y * (1 - vw.w)
+                        dn.y = dn.y + tn.y * (1 - vw.w)
                         dn.z = dn.z + tn.z * (1 - vw.w)
                         
                         'store deformed attributes
@@ -113,11 +113,11 @@ Public Sub BF2MeshDeform()
                         
                     Else
                         vmesh.skinvert(i).X = vmesh.vert(i * stride + 0)
-                        vmesh.skinvert(i).Y = vmesh.vert(i * stride + 1)
+                        vmesh.skinvert(i).y = vmesh.vert(i * stride + 1)
                         vmesh.skinvert(i).z = vmesh.vert(i * stride + 2)
                         
                         vmesh.skinnorm(i).X = vmesh.vert(i * stride + 3 + 0)
-                        vmesh.skinnorm(i).Y = vmesh.vert(i * stride + 3 + 1)
+                        vmesh.skinnorm(i).y = vmesh.vert(i * stride + 3 + 1)
                         vmesh.skinnorm(i).z = vmesh.vert(i * stride + 3 + 2)
                     End If
                 Next i
@@ -132,8 +132,16 @@ errhandler:
 End Sub
 
 
-'deforms mesh with CON nodes
-Public Sub BF2MeshDeform2()
+'deforms bundledmesh with CON nodes
+Public Sub BF2MeshDeformBM()
+    Dim i As Long
+
+    'reset
+    nodetransformnum = 40
+    For i = 0 To 40 - 1
+        mat4identity nodetransform(i)
+    Next i
+    
     With bf2con
         If Not .loaded Then Exit Sub
         If .nodenum <= 1 Then Exit Sub
@@ -149,19 +157,29 @@ Public Sub BF2MeshDeform2()
             ReDim .skinnorm(0 To .vertnum - 1)
         End If
         
-        Dim i As Long
         For i = 0 To .geomnum - 1
             With .geom(i)
                 Dim j As Long
                 For j = 0 To .lodnum - 1
-                    BF2MeshDeform3 i, j
+                    BF2MeshDeformGeomLod i, j
                 Next j
             End With
         Next i
     End With
+    
+    'fill nodetransform table
+    With bf2con
+        If .partnum > 0 Then
+            nodetransformnum = .partnum
+            For i = 0 To .partnum - 1
+                nodetransform(i) = .node(.part(i)).wtrans
+            Next i
+        End If
+    End With
+    
 End Sub
 
-Public Sub BF2MeshDeform3(ByRef geom As Long, ByRef lod As Long)
+Public Sub BF2MeshDeformGeomLod(ByRef geom As Long, ByRef lod As Long)
     With vmesh
         On Error GoTo errhandler
         
@@ -194,12 +212,12 @@ Public Sub BF2MeshDeform3(ByRef geom As Long, ByRef lod As Long)
                     
                     'get vertex position
                     v.X = vmesh.vert(i * stride + 0)
-                    v.Y = vmesh.vert(i * stride + 1)
+                    v.y = vmesh.vert(i * stride + 1)
                     v.z = vmesh.vert(i * stride + 2)
                     
                     'get normal
                     n.X = vmesh.vert(i * stride + 3 + 0)
-                    n.Y = vmesh.vert(i * stride + 3 + 1)
+                    n.y = vmesh.vert(i * stride + 3 + 1)
                     n.z = vmesh.vert(i * stride + 3 + 2)
                     
                     'get vertex weight

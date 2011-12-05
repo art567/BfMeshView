@@ -75,6 +75,12 @@ Public Function YesNo(ByVal v As Boolean) As String
 End Function
 
 
+'returns true if keyword string found in subject string
+Public Function InString(ByRef subj As String, ByRef keyw As String) As Boolean
+    InString = InStr(1, subj, keyw, vbTextCompare) > 0
+End Function
+
+
 'returns directory string from file path string
 Public Function GetFilePath(ByVal str As String) As String
 Dim pos As Long
@@ -338,3 +344,5 @@ Public Function color4f(ByVal r As Single, ByVal g As Single, ByVal b As Single,
     color4f.b = b
     color4f.a = a
 End Function
+
+

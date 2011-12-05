@@ -177,6 +177,12 @@ Dim j As Long
     'generate some useful stuff
     GenVertInfo
     
+    'reset node transforms
+    nodetransformnum = 40
+    For i = 0 To 40 - 1
+        mat4identity nodetransform(i)
+    Next i
+    
     'auto-load con
     If opt_loadcon Then
         With vmesh

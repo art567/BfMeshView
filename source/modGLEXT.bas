@@ -30,9 +30,9 @@ Public Const GL_TEXTURE8 = 33992
 Public Const GL_ACTIVE_TEXTURE = 34016
 Public Const GL_CLIENT_ACTIVE_TEXTURE = 34017
 Public Const GL_MAX_TEXTURE_UNITS = 34018
-Public Declare Sub glActiveTexture Lib "glext32.dll" (ByVal texture As GLenum)
-Public Declare Sub glClientActiveTexture Lib "glext32.dll" (ByVal texture As GLenum)
-Public Declare Sub glMultiTexCoord2f Lib "glext32.dll" (ByVal target As GLenum, ByVal s As GLfloat, ByVal t As GLfloat)
+Public Declare Sub glActiveTexture Lib "glext.dll" (ByVal texture As GLenum)
+Public Declare Sub glClientActiveTexture Lib "glext.dll" (ByVal texture As GLenum)
+Public Declare Sub glMultiTexCoord2f Lib "glext.dll" (ByVal target As GLenum, ByVal s As GLfloat, ByVal t As GLfloat)
 
 'GL_ARB_shader_objects
 Public Const GL_PROGRAM_OBJECT = 35648

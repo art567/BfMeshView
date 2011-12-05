@@ -30,7 +30,7 @@ Public Sub DrawVisMesh()
             
         'deform mesh
         If bf2baf.loaded Then
-            BF2MeshDeform
+            BF2MeshDeformSM
         End If
         
         'draw mesh
@@ -136,101 +136,150 @@ Dim texchans As Long
                 
                 'draw polygons
                 If view_poly Then
-                    
-                    'prepare stuff
-                    If view_lighting Then
-                        glEnable GL_LIGHTING
-                    End If
-                    If view_edges Or view_verts Then
-                        glPolygonOffset 1, 1
-                        glEnable GL_POLYGON_OFFSET_FILL
-                    End If
-                    
-                    'draw geometry
-                    Dim texcoff As Long
-                    If view_textures And .layernum > 0 Then
-                        If seltex > -1 And selmat = i Then
-                            
-                            'render single unlit pass with texture
-                            
-                            If view_lighting Then glDisable GL_LIGHTING
-                            glBindTexture GL_TEXTURE_2D, texmap(.texmapid(seltex)).tex
-                            glEnable GL_TEXTURE_2D
-                            glColor3f 1, 1, 1
-                            
-                            'determine the UV channel index for this texture map
-                            texcoff = .mapuvid(seltex)
-                            
-                            'draw geometry
-                            drawfaces vptroff, nptroff, tptroff + (8 * texcoff), iptroff, icount
-                            
-                            'reset stuff
-                            glDisable GL_TEXTURE_2D
-                            If view_lighting Then glEnable GL_LIGHTING
-                            
-                        Else
-                            
-                            'render each texture layer as seperate pass
-                            For j = 1 To .layernum
-                                
-                                'get texture for this layer
-                                Dim texmapid As Long
-                                texmapid = .layer(j).texmapid
-                                
-                                If texmapid > 0 Then
-                                    
-                                    texcoff = .layer(j).texcoff
-                                    
-                                    If .layer(j).blend Then
-                                        glBlendFunc .layer(j).blendsrc, .layer(j).blenddst
-                                        glEnable GL_BLEND
-                                    End If
-                                    If .layer(j).alphatest Then
-                                        glEnable GL_ALPHA_TEST
-                                        glAlphaFunc GL_GREATER, .layer(j).alpharef
-                                    End If
-                                    If .layer(j).twosided Then
-                                        glDisable GL_CULL_FACE
-                                    End If
-                                    If .layer(j).lighting And view_lighting Then
-                                        glEnable GL_LIGHTING
-                                    End If
-                                    glDepthMask .layer(j).depthWrite
-                                    glDepthFunc .layer(j).depthfunc
-                                    
-                                    glBindTexture GL_TEXTURE_2D, texmap(texmapid).tex
-                                    glEnable GL_TEXTURE_2D
-                                    glColor4f 1, 1, 1, 1
-                                    
-                                    drawfaces vptroff, nptroff, tptroff + (8 * texcoff), iptroff, icount
-                                    
-                                    glDepthMask True
-                                    glDisable GL_BLEND
-                                    glDisable GL_TEXTURE_2D
-                                    glDisable GL_ALPHA_TEST
-                                    glEnable GL_CULL_FACE
-                                    glDepthFunc GL_LESS
-                                    glDisable GL_LIGHTING
-                                Else
-                                    glColor3f 0.75, 0.75, 0.75
-                                    drawfaces vptroff, nptroff, 0, iptroff, icount
-                                End If
-                            Next j
+                    If .glslprog > 0 Then
+                        'GLSL shader pipeline
+                        
+                        'prepare
+                        glUseProgram .glslprog
+                        
+                        'uniforms
+                        If bundledmesh.prog Then
+                            Dim epw As float3
+                            epw.x = -eyeposworld.x 'DICE crap is flipped
+                            epw.y = eyeposworld.y
+                            epw.z = eyeposworld.z
+                            SetUniform3f bundledmesh, "eyeposworld", epw
+                            SetUniform1f bundledmesh, "hasBump", Bool2Float(.hasBump)
+                            SetUniform1f bundledmesh, "hasWreck", Bool2Float(.hasWreck)
+                            SetUniform1f bundledmesh, "showDiffuse", Bool2Float(view_textures)
+                            SetNodeTransforms bundledmesh, "nodetransform"
                         End If
+                        
+                        'alpha mode
+                        Select Case .alphamode
+                        Case 1:
+                            glBlendFunc GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+                            glDepthMask GL_FALSE
+                            glEnable GL_BLEND
+                        Case 2:
+                            glAlphaFunc GL_GREATER, 0.5
+                            glEnable GL_ALPHA_TEST
+                        End Select
+                        
+                        'bind texture
+                        For j = 0 To .mapnum - 1
+                            glActiveTexture GL_TEXTURE0 + j
+                            glBindTexture GL_TEXTURE_2D, texmap(.texmapid(j)).tex
+                        Next j
+                        
+                        'draw
+                        'drawfaces vptroff, nptroff, tptroff, iptroff, icount
+                        drawfacesX .vstart, .vnum, .istart, .inum
+                        
+                        'reset
+                        glUseProgram 0
+                        glActiveTexture GL_TEXTURE0
+                        glDisable GL_ALPHA_TEST
+                        glDisable GL_BLEND
+                        glDepthMask GL_TRUE
                     Else
-                        glColor3f 0.75, 0.75, 0.75
-                        drawfaces vptroff, nptroff, 0, iptroff, icount
-                    End If
-                    
-                    'reset stuff
-                    If view_edges Or view_verts Then
-                        glDisable GL_POLYGON_OFFSET_FILL
-                    End If
-                    If view_lighting Then
-                        glDisable GL_LIGHTING
-                    End If
-                    If view_textures Then
-                        glDisable GL_TEXTURE_2D
+                        'fixed function pipeline
+                        
+                        'prepare stuff
+                        If view_lighting Then
+                            glEnable GL_LIGHTING
+                        End If
+                        If view_edges Or view_verts Then
+                            glPolygonOffset 1, 1
+                            glEnable GL_POLYGON_OFFSET_FILL
+                        End If
+                        
+                        'draw geometry
+                        Dim texcoff As Long
+                        If view_textures And .layernum > 0 Then
+                            If seltex > -1 And selmat = i Then
+                                
+                                'render single unlit pass with texture
+                                
+                                If view_lighting Then glDisable GL_LIGHTING
+                                glBindTexture GL_TEXTURE_2D, texmap(.texmapid(seltex)).tex
+                                glEnable GL_TEXTURE_2D
+                                glColor3f 1, 1, 1
+                                
+                                'determine the UV channel index for this texture map
+                                texcoff = .mapuvid(seltex)
+                                
+                                'draw geometry
+                                drawfaces vptroff, nptroff, tptroff + (8 * texcoff), iptroff, icount
+                                
+                                'reset stuff
+                                glDisable GL_TEXTURE_2D
+                                If view_lighting Then glEnable GL_LIGHTING
+                                
+                            Else
+                                
+                                'render each texture layer as seperate pass
+                                For j = 1 To .layernum
+                                    
+                                    'get texture for this layer
+                                    Dim texmapid As Long
+                                    texmapid = .layer(j).texmapid
+                                    
+                                    If texmapid > 0 Then
+                                        
+                                        texcoff = .layer(j).texcoff
+                                        
+                                        If .layer(j).blend Then
+                                            glBlendFunc .layer(j).blendsrc, .layer(j).blenddst
+                                            glEnable GL_BLEND
+                                        End If
+                                        If .layer(j).alphatest Then
+                                            glEnable GL_ALPHA_TEST
+                                            glAlphaFunc GL_GREATER, .layer(j).alpharef
+                                        End If
+                                        If .layer(j).twosided Then
+                                            glDisable GL_CULL_FACE
+                                        End If
+                                        If .layer(j).lighting And view_lighting Then
+                                            glEnable GL_LIGHTING
+                                        End If
+                                        glDepthMask .layer(j).depthWrite
+                                        glDepthFunc .layer(j).depthfunc
+                                        
+                                        glBindTexture GL_TEXTURE_2D, texmap(texmapid).tex
+                                        glEnable GL_TEXTURE_2D
+                                        glColor4f 1, 1, 1, 1
+                                        
+                                        drawfaces vptroff, nptroff, tptroff + (8 * texcoff), iptroff, icount
+                                        
+                                        glDepthMask True
+                                        glDisable GL_BLEND
+                                        glDisable GL_TEXTURE_2D
+                                        glDisable GL_ALPHA_TEST
+                                        glEnable GL_CULL_FACE
+                                        glDepthFunc GL_LESS
+                                        glDisable GL_LIGHTING
+                                    Else
+                                        glColor3f 0.75, 0.75, 0.75
+                                        drawfaces vptroff, nptroff, 0, iptroff, icount
+                                    End If
+                                Next j
+                            End If
+                        Else
+                            glColor3f 0.75, 0.75, 0.75
+                            drawfaces vptroff, nptroff, 0, iptroff, icount
+                        End If
+                        
+                        'reset stuff
+                        If view_edges Or view_verts Then
+                            glDisable GL_POLYGON_OFFSET_FILL
+                        End If
+                        If view_lighting Then
+                            glDisable GL_LIGHTING
+                        End If
+                        If view_textures Then
+                            glDisable GL_TEXTURE_2D
+                        End If
                     End If
                     
                     'draw edges
@@ -283,7 +332,7 @@ Dim texchans As Long
                         If vmesh.vertflag(j) Then
                             If vmesh.vertsel(j) Then
                                 If vmesh.hasSkinVerts Then
-                                    glVertex3fv vmesh.skinvert(j).X
+                                    glVertex3fv vmesh.skinvert(j).x
                                 Else
                                     glVertex3fv vmesh.vert(j * stride)
                                 End If
@@ -321,18 +370,18 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride)
                             
                             'get vertex
-                            v.X = vmesh.vert(vi + 0)
-                            v.Y = vmesh.vert(vi + 1)
+                            v.x = vmesh.vert(vi + 0)
+                            v.y = vmesh.vert(vi + 1)
                             v.z = vmesh.vert(vi + 2)
                             
                             'get normal
-                            n.X = vmesh.vert(vi + normoff + 0)
-                            n.Y = vmesh.vert(vi + normoff + 1)
+                            n.x = vmesh.vert(vi + normoff + 0)
+                            n.y = vmesh.vert(vi + normoff + 1)
                             n.z = vmesh.vert(vi + normoff + 2)
                             
                             'get tangent
-                            t.X = vmesh.vert(vi + tangoff + 0)
-                            t.Y = vmesh.vert(vi + tangoff + 1)
+                            t.x = vmesh.vert(vi + tangoff + 0)
+                            t.y = vmesh.vert(vi + tangoff + 1)
                             t.z = vmesh.vert(vi + tangoff + 2)
                             
                             'get binormal
@@ -340,22 +389,22 @@ Dim texchans As Long
                             ti = ((.mat(j).vstart + k) * stride) + 20
                             
                             'rescale
-                            t.X = v.X + t.X * s
-                            t.Y = v.Y + t.Y * s
+                            t.x = v.x + t.x * s
+                            t.y = v.y + t.y * s
                             t.z = v.z + t.z * s
-                            b.X = v.X + b.X * s
-                            b.Y = v.Y + b.Y * s
+                            b.x = v.x + b.x * s
+                            b.y = v.y + b.y * s
                             b.z = v.z + b.z * s
                             
                             'draw tangent
                             glColor4f 1, 0.5, 0.5, 0.5
-                            glVertex3fv v.X
-                            glVertex3fv t.X
+                            glVertex3fv v.x
+                            glVertex3fv t.x
                             
                             'draw bitangent
                             glColor4f 0.5, 1, 0.5, 0.5
-                            glVertex3fv v.X
-                            glVertex3fv b.X
+                            glVertex3fv v.x
+                            glVertex3fv b.x
                             
                         Next k
                     Next j
@@ -375,12 +424,12 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride) + 0
                             ni = ((.mat(j).vstart + k) * stride) + 3
                             
-                            n.X = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
-                            n.Y = vmesh.vert(vi + 1) + vmesh.vert(ni + 1) * s
+                            n.x = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
+                            n.y = vmesh.vert(vi + 1) + vmesh.vert(ni + 1) * s
                             n.z = vmesh.vert(vi + 2) + vmesh.vert(ni + 2) * s
                             
                             glVertex3fv vmesh.vert(vi)
-                            glVertex3fv n.X
+                            glVertex3fv n.x
                             
                         Next k
                     Next j
@@ -497,6 +546,100 @@ Private Sub drawfaces(ByVal vptr As Long, ByVal nptr As Long, ByVal tptr As Long
         If bakemode Then
             glEnable GL_DEPTH_TEST
         End If
+        
+    End With
+End Sub
+
+'draws material faces
+Private Sub drawfacesX(ByVal voff As Long, vnum As Long, ByVal ioff As Long, ByVal inum As Long)
+    With vmesh
+        
+        Dim vptr As Long
+        vptr = VarPtr(.vert(0)) + voff * .vertstride
+        
+        Dim iptr As Long
+        iptr = VarPtr(.Index(0)) + ioff * 2
+        
+        'enable vertex attributes
+        Dim i As Long
+        For i = 0 To .vertattribnum - 1
+            Dim off As Long
+            off = vptr + .vertattrib(i).offset
+            
+            Select Case .vertattrib(i).usage
+            Case 0: 'position
+                glEnableClientState GL_VERTEX_ARRAY
+                glVertexPointer 3, GL_FLOAT, .vertstride, ByVal off
+            Case 1: 'blend weight
+                'todo
+            Case 2: 'blend indices
+                glEnableClientState GL_COLOR_ARRAY
+                glColorPointer 4, GL_UNSIGNED_BYTE, .vertstride, ByVal off
+            Case 3: 'normal
+                glEnableClientState GL_NORMAL_ARRAY
+                glNormalPointer GL_FLOAT, .vertstride, ByVal off
+            Case 5: 'uv1
+                glClientActiveTexture GL_TEXTURE0
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 2, GL_FLOAT, .vertstride, ByVal off
+            Case 6: 'tangent
+                glClientActiveTexture GL_TEXTURE5
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 3, GL_FLOAT, .vertstride, ByVal off
+            Case 261: 'uv2
+                glClientActiveTexture GL_TEXTURE1
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 2, GL_FLOAT, .vertstride, ByVal off
+            Case 517: 'uv3
+                glClientActiveTexture GL_TEXTURE2
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 2, GL_FLOAT, .vertstride, ByVal off
+            Case 773: 'uv4
+                glClientActiveTexture GL_TEXTURE3
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 2, GL_FLOAT, .vertstride, ByVal off
+            Case 1029: 'uv5
+                glClientActiveTexture GL_TEXTURE4
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 2, GL_FLOAT, .vertstride, ByVal off
+            End Select
+        Next i
+        
+        'draw triangles
+        glDrawElements GL_TRIANGLES, inum, GL_UNSIGNED_SHORT, ByVal iptr
+        
+        'disable vertex attributes
+        For i = 0 To .vertattribnum - 1
+            
+            Select Case .vertattrib(i).usage
+            Case 0: 'position
+                glDisableClientState GL_VERTEX_ARRAY
+            Case 1: 'blend weight
+                'todo
+            Case 2: 'blend indices
+                glDisableClientState GL_COLOR_ARRAY
+            Case 3: 'normal
+                glDisableClientState GL_NORMAL_ARRAY
+            Case 5: 'uv1
+                glClientActiveTexture GL_TEXTURE0
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
+            Case 6: 'tangent
+                glClientActiveTexture GL_TEXTURE5
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
+            Case 261: 'uv2
+                glClientActiveTexture GL_TEXTURE1
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
+            Case 517: 'uv3
+                glClientActiveTexture GL_TEXTURE2
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
+            Case 773: 'uv4
+                glClientActiveTexture GL_TEXTURE3
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
+            Case 1029: 'uv5
+                glClientActiveTexture GL_TEXTURE4
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
+            End Select
+        Next i
         
     End With
 End Sub

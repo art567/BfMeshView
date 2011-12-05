@@ -106,7 +106,9 @@ Public Function SaveMeshFile(ByRef filename As String) As Boolean
     ext = LCase(GetFileExt(filename))
     Select Case ext
     Case "bundledmesh", "staticmesh", "skinnedmesh"
-        r = WriteVisMesh(filename)
+        r = BF2WriteVisMesh(filename)
+    Case "collisionmesh"
+        r = BF2WriteColMesh(filename)
     Case "sm"
         r = WriteStdMesh(filename)
     Case "samples", "samp_01", "samp_02", "samp_03"

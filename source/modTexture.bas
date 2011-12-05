@@ -212,7 +212,7 @@ Dim filename As String
     
     Exit Sub
 errorhandler:
-    MsgBox "LoadMeshTextures" & vbLf & err.Description, vbCritical
+    MsgBox "LoadMeshTextures" & vbLf & err.description, vbCritical
 End Sub
 
 
@@ -279,5 +279,24 @@ Public Function BF2GetTextureFilename(ByVal geo As Long, ByVal lod As Long, ByVa
     
     Exit Function
 errhandler:
-    MsgBox "BF2GetTextureFilename" & vbLf & err.Description, vbCritical
+    MsgBox "BF2GetTextureFilename" & vbLf & err.description, vbCritical
+End Function
+
+
+Public Function GenTexture(ByVal r As Byte, ByVal g As Byte, ByVal b As Byte, ByVal a As Byte) As GLuint
+    Dim tex As GLuint
+    Dim pix(3) As Byte
+    pix(0) = r
+    pix(1) = g
+    pix(2) = b
+    pix(3) = a
+    glGenTextures 1, tex
+    glBindTexture GL_TEXTURE_2D, tex
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    glTexImage2D GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, ByVal VarPtr(pix(0))
+    glBindTexture GL_TEXTURE_2D, 0
+    GenTexture = tex
 End Function

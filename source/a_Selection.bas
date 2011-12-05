@@ -3,29 +3,58 @@ Option Explicit
 
 Public toolmode As Long '0=view, 1=select
 Private modelmatrix(15) As GLdouble
-Private projectionmatrix(15) As GLdouble
+Private projmatrix(15) As GLdouble
 Private viewport(3) As GLint
 
 
 'updates matrices
 Public Sub GetProjectionInfo()
     glGetDoublev GL_MODELVIEW_MATRIX, modelmatrix(0)
-    glGetDoublev GL_PROJECTION_MATRIX, projectionmatrix(0)
+    glGetDoublev GL_PROJECTION_MATRIX, projmatrix(0)
     glGetIntegerv GL_VIEWPORT, viewport(0)
 End Sub
 
 
 'projects world space position to screen coordinate
-Private Function Project(ByRef pos As float3) As float3
+Public Function Project(ByRef pos As float3) As float3
 Dim winx As GLdouble
 Dim winy As GLdouble
 Dim winz As GLdouble
-    gluProject pos.X, pos.Y, pos.z, _
-               modelmatrix(0), projectionmatrix(0), viewport(0), _
+    gluProject pos.x, pos.y, pos.z, _
+               modelmatrix(0), projmatrix(0), viewport(0), _
                winx, winy, winz
-    Project.X = winx
-    Project.Y = viewport(3) - winy
+    Project.x = winx
+    Project.y = viewport(3) - winy
     Project.z = winz
+End Function
+
+
+'unprojects screen space (pixels) position to world space
+Public Function Unproject(ByRef pos As float3) As float3
+Dim objx As GLdouble
+Dim objy As GLdouble
+Dim objz As GLdouble
+    gluUnProject pos.x, viewport(3) - pos.y, pos.z, modelmatrix(0), projmatrix(0), viewport(0), objx, objy, objz
+    Unproject.x = objx
+    Unproject.y = objy
+    Unproject.z = objz
+End Function
+
+
+'unprojects screen space (float) position to world space
+Public Function Unproject2(ByRef pos As float3) As float3
+Dim objx As GLdouble
+Dim objy As GLdouble
+Dim objz As GLdouble
+Dim vp(3) As GLint
+    vp(0) = 0
+    vp(1) = 0
+    vp(2) = 1
+    vp(3) = 1
+    gluUnProject pos.x, vp(3) - pos.y, pos.z, modelmatrix(0), projmatrix(0), vp(0), objx, objy, objz
+    Unproject2.x = objx
+    Unproject2.y = objy
+    Unproject2.z = objz
 End Function
 
 
@@ -46,12 +75,12 @@ Public Sub BF2SelectVert(ByVal minx As Single, ByVal miny As Single, ByVal maxx 
                 'get vertex position
                 Dim v As float3 'note: all DICE stuff is mirrored on X axis
                 If vmesh.hasSkinVerts Then
-                    v.X = -.skinvert(i).X
-                    v.Y = .skinvert(i).Y
+                    v.x = -.skinvert(i).x
+                    v.y = .skinvert(i).y
                     v.z = .skinvert(i).z
                 Else
-                    v.X = -.vert(i * stride + 0)
-                    v.Y = .vert(i * stride + 1)
+                    v.x = -.vert(i * stride + 0)
+                    v.y = .vert(i * stride + 1)
                     v.z = .vert(i * stride + 2)
                 End If
                 
@@ -64,10 +93,10 @@ Public Sub BF2SelectVert(ByVal minx As Single, ByVal miny As Single, ByVal maxx 
                     .vertsel(i) = 0
                 End If
                 If sv.z > 0 Then
-                    If sv.X >= minx Then
-                        If sv.X <= maxx Then
-                            If sv.Y >= miny Then
-                                If sv.Y <= maxy Then
+                    If sv.x >= minx Then
+                        If sv.x <= maxx Then
+                            If sv.y >= miny Then
+                                If sv.y <= maxy Then
                                     If frmMain.keyalt Then
                                         .vertsel(i) = 0
                                     Else
