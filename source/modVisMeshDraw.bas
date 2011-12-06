@@ -127,6 +127,14 @@ Dim texchans As Long
                 If vmesh.hasSkinVerts Then
                     vptroff = VarPtr(vmesh.skinvert(0)) + (.vstart * 12)
                     nptroff = VarPtr(vmesh.skinnorm(0)) + (.vstart * 12)
+                    
+                    'fill nodetransforms
+                    If vmesh.isSkinnedMesh And .glslprog > 0 Then
+                        nodetransformnum = mesh.rig(i).bonenum
+                        For j = 0 To mesh.rig(i).bonenum - 1
+                            nodetransform(j) = mesh.rig(i).bone(j).skinmat
+                        Next j
+                    End If
                 End If
                 
                 Dim vcount As Long
@@ -143,17 +151,8 @@ Dim texchans As Long
                         glUseProgram .glslprog
                         
                         'uniforms
-                        If bundledmesh.prog Then
-                            Dim epw As float3
-                            epw.x = -eyeposworld.x 'DICE crap is flipped
-                            epw.y = eyeposworld.y
-                            epw.z = eyeposworld.z
-                            SetUniform3f bundledmesh, "eyeposworld", epw
-                            SetUniform1f bundledmesh, "hasBump", Bool2Float(.hasBump)
-                            SetUniform1f bundledmesh, "hasWreck", Bool2Float(.hasWreck)
-                            SetUniform1f bundledmesh, "showDiffuse", Bool2Float(view_textures)
-                            SetNodeTransforms bundledmesh, "nodetransform"
-                        End If
+                        If bundledmesh.prog Then SetUniforms bundledmesh, mesh.mat(i)
+                        If skinnedmesh.prog Then SetUniforms skinnedmesh, mesh.mat(i)
                         
                         'alpha mode
                         Select Case .alphamode
@@ -173,7 +172,6 @@ Dim texchans As Long
                         Next j
                         
                         'draw
-                        'drawfaces vptroff, nptroff, tptroff, iptroff, icount
                         drawfacesX .vstart, .vnum, .istart, .inum
                         
                         'reset
@@ -332,7 +330,7 @@ Dim texchans As Long
                         If vmesh.vertflag(j) Then
                             If vmesh.vertsel(j) Then
                                 If vmesh.hasSkinVerts Then
-                                    glVertex3fv vmesh.skinvert(j).x
+                                    glVertex3fv vmesh.skinvert(j).X
                                 Else
                                     glVertex3fv vmesh.vert(j * stride)
                                 End If
@@ -370,17 +368,17 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride)
                             
                             'get vertex
-                            v.x = vmesh.vert(vi + 0)
+                            v.X = vmesh.vert(vi + 0)
                             v.y = vmesh.vert(vi + 1)
                             v.z = vmesh.vert(vi + 2)
                             
                             'get normal
-                            n.x = vmesh.vert(vi + normoff + 0)
+                            n.X = vmesh.vert(vi + normoff + 0)
                             n.y = vmesh.vert(vi + normoff + 1)
                             n.z = vmesh.vert(vi + normoff + 2)
                             
                             'get tangent
-                            t.x = vmesh.vert(vi + tangoff + 0)
+                            t.X = vmesh.vert(vi + tangoff + 0)
                             t.y = vmesh.vert(vi + tangoff + 1)
                             t.z = vmesh.vert(vi + tangoff + 2)
                             
@@ -389,22 +387,22 @@ Dim texchans As Long
                             ti = ((.mat(j).vstart + k) * stride) + 20
                             
                             'rescale
-                            t.x = v.x + t.x * s
+                            t.X = v.X + t.X * s
                             t.y = v.y + t.y * s
                             t.z = v.z + t.z * s
-                            b.x = v.x + b.x * s
+                            b.X = v.X + b.X * s
                             b.y = v.y + b.y * s
                             b.z = v.z + b.z * s
                             
                             'draw tangent
                             glColor4f 1, 0.5, 0.5, 0.5
-                            glVertex3fv v.x
-                            glVertex3fv t.x
+                            glVertex3fv v.X
+                            glVertex3fv t.X
                             
                             'draw bitangent
                             glColor4f 0.5, 1, 0.5, 0.5
-                            glVertex3fv v.x
-                            glVertex3fv b.x
+                            glVertex3fv v.X
+                            glVertex3fv b.X
                             
                         Next k
                     Next j
@@ -424,12 +422,12 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride) + 0
                             ni = ((.mat(j).vstart + k) * stride) + 3
                             
-                            n.x = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
+                            n.X = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
                             n.y = vmesh.vert(vi + 1) + vmesh.vert(ni + 1) * s
                             n.z = vmesh.vert(vi + 2) + vmesh.vert(ni + 2) * s
                             
                             glVertex3fv vmesh.vert(vi)
-                            glVertex3fv n.x
+                            glVertex3fv n.X
                             
                         Next k
                     Next j
@@ -571,7 +569,9 @@ Private Sub drawfacesX(ByVal voff As Long, vnum As Long, ByVal ioff As Long, ByV
                 glEnableClientState GL_VERTEX_ARRAY
                 glVertexPointer 3, GL_FLOAT, .vertstride, ByVal off
             Case 1: 'blend weight
-                'todo
+                glClientActiveTexture GL_TEXTURE1
+                glEnableClientState GL_TEXTURE_COORD_ARRAY
+                glTexCoordPointer 1, GL_FLOAT, .vertstride, ByVal off
             Case 2: 'blend indices
                 glEnableClientState GL_COLOR_ARRAY
                 glColorPointer 4, GL_UNSIGNED_BYTE, .vertstride, ByVal off
@@ -615,7 +615,8 @@ Private Sub drawfacesX(ByVal voff As Long, vnum As Long, ByVal ioff As Long, ByV
             Case 0: 'position
                 glDisableClientState GL_VERTEX_ARRAY
             Case 1: 'blend weight
-                'todo
+                glClientActiveTexture GL_TEXTURE1
+                glDisableClientState GL_TEXTURE_COORD_ARRAY
             Case 2: 'blend indices
                 glDisableClientState GL_COLOR_ARRAY
             Case 3: 'normal

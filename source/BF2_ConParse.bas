@@ -36,6 +36,7 @@ Private Function bf2conCreateNode(ByRef t As String, ByRef name As String) As Lo
         Dim i As Long
         For i = 0 To .nodenum - 1
             If .node(i).name = name Then
+                .node(i).type = t
                 bf2conCreateNode = i
                 Exit Function
             End If
@@ -114,7 +115,7 @@ Public Sub LoadCon(ByRef filename As String)
                 Case "ObjectTemplate.setPosition"
                     str = Split(str(1), "/")
                     Dim pos As float3
-                    pos.x = val(str(0))
+                    pos.X = val(str(0))
                     pos.y = val(str(1))
                     pos.z = val(str(2))
                     mat4setpos .node(tnode).transform, pos
@@ -122,7 +123,7 @@ Public Sub LoadCon(ByRef filename As String)
                 Case "ObjectTemplate.setRotation"
                     str = Split(str(1), "/")
                     Dim rot As float3
-                    rot.x = val(str(1))
+                    rot.X = val(str(1))
                     rot.y = val(str(0))
                     rot.z = val(str(2))
                     mat4setrotYXZ .node(tnode).transform, rot
@@ -177,12 +178,7 @@ Public Sub LoadCon(ByRef filename As String)
         mat4identity .node(0).transform
         For i = 0 To .nodenum - 1
             If .node(i).parent > -1 Then
-            
-                'If .node(i).type = "Spring" Then
-                '    .node(i).wtrans = .node(.node(i).parent).transform
-                'Else
-                    .node(i).wtrans = mat4mult(.node(i).transform, .node(.node(i).parent).transform)
-                'End If
+                .node(i).wtrans = mat4mult(.node(i).transform, .node(.node(i).parent).wtrans)
             Else
                 .node(i).wtrans = .node(i).transform
             End If
@@ -227,10 +223,10 @@ Public Sub DrawConNodes()
             Const s = 0.01
             Dim min As float3
             Dim max As float3
-            min.x = -s
+            min.X = -s
             min.y = -s
             min.z = -s
-            max.x = s
+            max.X = s
             max.y = s
             max.z = s
             
@@ -293,7 +289,7 @@ Public Sub FillTreeBF2Con(ByRef tree As MSComctlLib.TreeView)
                 
                 Dim name As String
                 'name = "Node " & i & " (" & .name & ")" & .geometryPart
-                name = .name & " (" & .geometryPart & ")"
+                name = .name & " (" & .geometryPart & ") " & .type
                 
                 If .parent = -1 Then
                     'root

@@ -122,7 +122,9 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
         
         'SKINNEDMESH
         Case "skinnedmesh.fx"
-            mat.glslprog = 0
+            mat.glslprog = skinnedmesh.prog
+            mat.hasBump = True
+            mat.hasWreck = False
             
             Select Case LCase(.technique)
             Case "alpha_test"

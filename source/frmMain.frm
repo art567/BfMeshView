@@ -432,7 +432,7 @@ Begin VB.Form frmMain
          Caption         =   "-"
       End
       Begin VB.Menu mnuViewCamAnim 
-         Caption         =   "Camera Animation"
+         Caption         =   "Animate Camera"
       End
       Begin VB.Menu mnuViewLine88 
          Caption         =   "-"
@@ -520,7 +520,7 @@ Begin VB.Form frmMain
          Caption         =   "UV Editor..."
       End
       Begin VB.Menu mnuToolsSkin 
-         Caption         =   "Skin..."
+         Caption         =   "Skin Editor..."
       End
    End
    Begin VB.Menu mnuOptions 
@@ -936,39 +936,39 @@ errorhandler:
     'nothing
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
     If Button = 1 Then
-        If SplitHover(x, y) Then
+        If SplitHover(X, y) Then
             splitdrag = True
         End If
     End If
-    mousex = x
+    mousex = X
     mousey = y
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, y As Single)
     If splitdrag Then
-        treeview_width = treeview_width + (x - mousex)
+        treeview_width = treeview_width + (X - mousex)
         treeview_width = Clamp(treeview_width, 20, 3 * (Me.ScaleWidth / 4))
         Form_Resize
     End If
     
     'hover
-    If SplitHover(x, y) Then
+    If SplitHover(X, y) Then
         Me.MousePointer = vbSizeWE
     Else
         Me.MousePointer = vbDefault
     End If
     
-    mousex = x
+    mousex = X
     mousey = y
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, Shift As Integer, X As Single, y As Single)
     splitdrag = False
 End Sub
 
-Private Function SplitHover(ByVal x As Single, ByVal y As Single) As Boolean
+Private Function SplitHover(ByVal X As Single, ByVal y As Single) As Boolean
 Dim minx As Single
 Dim maxx As Single
     minx = Me.trvMain.Left + Me.trvMain.width
@@ -979,7 +979,7 @@ Dim maxy As Single
     miny = 0
     maxy = Me.ScaleHeight - Me.stsMain.height
     
-    If x > minx And x < maxx Then
+    If X > minx And X < maxx Then
         If y > 0 And y < maxy Then
             SplitHover = True
         End If
@@ -1088,8 +1088,8 @@ Private Sub picMain_KeyUp(KeyCode As Integer, Shift As Integer)
     Form_KeyUp KeyCode, Shift
 End Sub
 
-Private Sub Pan(ByVal x As Single, ByVal y As Single)
-    campanx = campanx + ((x * 0.1) * camzoom)
+Private Sub Pan(ByVal X As Single, ByVal y As Single)
+    campanx = campanx + ((X * 0.1) * camzoom)
     campany = campany - ((y * 0.1) * camzoom)
 End Sub
 
@@ -1098,44 +1098,44 @@ Private Sub zoom(ByVal v As Single)
     If camzoom < 0.001 Then camzoom = 0.001
 End Sub
 
-Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
     mouse_down = True
-    mouse_px = x
+    mouse_px = X
     mouse_py = y
     
-    dragx = x
+    dragx = X
     dragy = y
 End Sub
 
-Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseMove(Button As Integer, Shift As Integer, X As Single, y As Single)
     If mouse_down Then
         If Button = vbLeftButton Then
             If toolmode = 1 And Not keyshift Then
                 sel_vis = True
-                sel_minx = min(dragx, x)
+                sel_minx = min(dragx, X)
                 sel_miny = min(dragy, y)
-                sel_maxx = max(dragx, x)
+                sel_maxx = max(dragx, X)
                 sel_maxy = max(dragy, y)
             Else
                 camrotx = camrotx + ((y - mouse_py) * 0.5)
-                camroty = camroty + ((x - mouse_px) * 0.5)
+                camroty = camroty + ((X - mouse_px) * 0.5)
             End If
         End If
         If Button = vbRightButton Then
             zoom ((mouse_py - y) * 0.1)
         End If
         If Button = vbMiddleButton Then
-            Pan ((x - mouse_px) * 0.01), ((y - mouse_py) * 0.01)
+            Pan ((X - mouse_px) * 0.01), ((y - mouse_py) * 0.01)
         End If
         picMain_Paint
     End If
     
     Me.MousePointer = vbDefault
-    mouse_px = x
+    mouse_px = X
     mouse_py = y
 End Sub
 
-Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, X As Single, y As Single)
     
     'ignore MouseUp after minimizing/maximizing window
     If Not mouse_down Then Exit Sub
@@ -1145,7 +1145,7 @@ Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y 
             If sel_vis Then
                 BF2SelectVert sel_minx, sel_miny, sel_maxx, sel_maxy
             Else
-                BF2SelectVert (x - 3), (y - 3), (x + 3), (y + 3)
+                BF2SelectVert (X - 3), (y - 3), (X + 3), (y + 3)
             End If
             frmSkin.SelectionChanged
             sel_vis = False
@@ -1158,7 +1158,7 @@ Private Sub picMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y 
     'picMain_Paint
 End Sub
 
-Public Sub MouseWheel(ByVal MouseKeys As Long, ByVal value As Long, ByVal x As Long, ByVal y As Long)
+Public Sub MouseWheel(ByVal MouseKeys As Long, ByVal value As Long, ByVal X As Long, ByVal y As Long)
     zoom value
     picMain_Paint
 End Sub
@@ -1194,15 +1194,17 @@ Private Sub picTime_Paint()
     
     'time
     If wt > 0 Then
-        'picTime.FillColor = RGB(200, 200, 200)
-        'picTime.ForeColor = RGB(200, 200, 200)
-        picTime.FillColor = RGB(140, 214, 213)
-        picTime.ForeColor = RGB(140, 214, 213)
-        DrawRect picTime.hDC, 1, 1, wt + 1, (h / 2)
+        picTime.FillColor = RGB(200, 200, 200)
+        picTime.ForeColor = RGB(200, 200, 200)
+        DrawRect picTime.hDC, 1, 1, wt + 1, h - 1
         
-        picTime.FillColor = RGB(41, 165, 173)
-        picTime.ForeColor = RGB(41, 165, 173)
-        DrawRect picTime.hDC, 1, (h / 2), wt + 1, h - 1
+        ''picTime.FillColor = RGB(140, 214, 213)
+        ''picTime.ForeColor = RGB(140, 214, 213)
+        'DrawRect picTime.hDC, 1, 1, wt + 1, (h / 2)
+        
+        'picTime.FillColor = RGB(41, 165, 173)
+        'picTime.ForeColor = RGB(41, 165, 173)
+        'DrawRect picTime.hDC, 1, (h / 2), wt + 1, h - 1
     End If
     
     'draw slider
@@ -1232,17 +1234,17 @@ Public Sub SetTime(ByVal t As Single, Optional redraw As Boolean = True)
     End If
 End Sub
 
-Private Sub picTime_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
-    picTime_MouseMove Button, Shift, x, y
+Private Sub picTime_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
+    picTime_MouseMove Button, Shift, X, y
 End Sub
 
-Private Sub picTime_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picTime_MouseMove(Button As Integer, Shift As Integer, X As Single, y As Single)
     If Button Then
         Dim w  As Single
         w = (picTime.width - 2)
         If w = 0 Then Exit Sub
         Dim val As Single
-        val = (x - 1) / w
+        val = (X - 1) / w
         If val < 0 Then val = 0
         If val > 1 Then val = 1
         SetTime val
@@ -1832,12 +1834,12 @@ Private Sub trvMain_KeyUp(KeyCode As Integer, Shift As Integer)
     picMain_Paint
 End Sub
 
-Private Sub trvMain_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub trvMain_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
     On Error GoTo hell
     
     'select node under cursor
     Dim n As MSComctlLib.node
-    Set n = Me.trvMain.HitTest(x, y)
+    Set n = Me.trvMain.HitTest(X, y)
     If Not n Is Nothing Then
         SelectMesh n.tag, n.key
         picMain_Paint
@@ -1849,7 +1851,7 @@ hell:
     picMain_Paint
 End Sub
 
-Private Sub trvMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub trvMain_MouseUp(Button As Integer, Shift As Integer, X As Single, y As Single)
     On Error GoTo errhandler
     
     'note: we show the context menu on MouseDown because NodeClick steals the MouseUp event
@@ -1880,7 +1882,7 @@ Private Sub trvMain_MouseUp(Button As Integer, Shift As Integer, x As Single, y 
         
         'show context menu
         PopupMenu Me.mnuTreeContext, vbPopupMenuRightButton, _
-                  trvMain.Left + (x / 15) + 2, _
+                  trvMain.Left + (X / 15) + 2, _
                   trvMain.top + (y / 15) + 2, mnuTreeContextViewTex
         
     End If
@@ -2125,14 +2127,14 @@ Private Sub UpdateCaption()
 End Sub
 
 'reset mousepointer
-Private Sub stsMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub stsMain_MouseMove(Button As Integer, Shift As Integer, X As Single, y As Single)
     Me.MousePointer = vbDefault
 End Sub
-Private Sub trvMain_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub trvMain_MouseMove(Button As Integer, Shift As Integer, X As Single, y As Single)
     Me.MousePointer = vbDefault
 End Sub
 
-Private Sub txtLog_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub txtLog_MouseMove(Button As Integer, Shift As Integer, X As Single, y As Single)
     Me.MousePointer = vbDefault
 End Sub
 

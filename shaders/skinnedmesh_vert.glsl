@@ -1,7 +1,6 @@
 #version 120
 
 uniform float hasBump;
-uniform float hasWreck;
 
 uniform mat4 nodetransform[40];
 uniform vec3 eyeposworld;
@@ -16,15 +15,26 @@ varying vec4 boneinfo;
 void main()
 {
  //// temp: pass as uniform!
- //vec3 sunvecworld = normalize(vec3(0.5, -0.5, 0.5));
+ //vec3 sunvecworld = normalize(vec3(0.5, -0.5, -0.5));
  vec3 sunvecworld = -eyeposworld ;
  //// temp
  
  // bone id
- int nodeid = int(gl_Color.r*255.0);
+ int bone1 = int(gl_Color.r*255.0);
+ int bone2 = int(gl_Color.g*255.0);
+ 
+ // blend weight
+ float blend = gl_MultiTexCoord1.s;
+ 
+ // build bone matrix
+ mat4 bonemat = mat4(0.0);
+ bonemat += nodetransform[ bone1 ] * blend;
+ bonemat += nodetransform[ bone2 ] * (1.0 - blend);
+ //bonemat = normalize(bonemat);
  
  // transform vertex
- vec4 vert = nodetransform[ nodeid ] * gl_Vertex;
+ vec4 vert = bonemat * gl_Vertex;
+ //vert = gl_Vertex; //// temp!!!
  
  // UV0
  uv = gl_MultiTexCoord0.st;
@@ -36,8 +46,10 @@ void main()
  eyesurfvec = eyeposworld - vert.xyz;
  
  // transform sunvec
- sunvec = (vec4(sunvecworld,0.0) * nodetransform[ nodeid ]).xyz;
+ sunvec = (vec4(sunvecworld,0.0) * bonemat).xyz;
+ //sunvec = sunvecworld; //// temp!!!
  
+ /*
  // tangent
  if (hasBump > 0.5) {
   
@@ -54,6 +66,7 @@ void main()
   // rotate local eye-to-surface to tangent space
   eyesurfvec = eyesurfvec * rotmat;
  }
+ */
  
  boneinfo = gl_Color;
  

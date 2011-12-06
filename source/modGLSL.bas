@@ -35,18 +35,6 @@ End Type
 Public Sub SetNodeTransforms(ByRef sh As shader, ByRef name As String)
     Dim loc As GLuint
     loc = glGetUniformLocation(sh.prog, name)
-    
-    'Dim m(2) As matrix4
-    'mat4identity m(0)
-    'mat4identity m(1)
-    'mat4setpos m(0), float3(0, -2, 0)
-    'mat4setpos m(1), float3(0, 2, 0)
-    'Dim i As Long
-    'For i = 0 To 40 - 1
-    '    mat4identity nodetransform(i)
-    '    mat4setpos nodetransform(i), float3(0, i, 0)
-    'Next i
-    
     If loc <> -1 Then
         glUniformMatrix4fv loc, nodetransformnum, GL_FALSE, nodetransform(0).m(0)
     End If
@@ -151,18 +139,15 @@ End Function
 Public Sub SetUniform3f(ByRef sh As shader, ByRef name As String, ByRef val As float3)
     Dim loc As GLuint
     loc = glGetUniformLocation(sh.prog, name)
-    If loc <> -1 Then glUniform3f loc, val.x, val.y, val.z
+    If loc <> -1 Then glUniform3f loc, val.X, val.y, val.z
 End Sub
 
 'set uniform
-Public Sub SetUniform1f(ByRef sh As shader, ByRef name As String, ByRef val As Single)
+Public Sub SetUniform1f(ByRef sh As shader, ByRef name As String, ByVal val As Single)
     Dim loc As GLuint
     loc = glGetUniformLocation(sh.prog, name)
     If loc <> -1 Then glUniform1f loc, val
 End Sub
-
-
-
 
 
 'deletes program
@@ -170,6 +155,9 @@ Public Function DeleteProgram(ByRef sh As shader)
     glDeleteProgram sh.prog
     glDeleteShader sh.vert
     glDeleteShader sh.frag
+    sh.prog = 0
+    sh.vert = 0
+    sh.frag = 0
 End Function
 
 

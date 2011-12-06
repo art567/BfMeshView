@@ -8,13 +8,19 @@ Public nodetransformnum As Long
 
 'shaders
 Public bundledmesh As shader
+Public skinnedmesh As shader
 
 
 'loads all shaders
 Public Sub LoadShaders()
-    
     CreateProgram bundledmesh, xs("bundledmesh_vert.glsl"), xs("bundledmesh_frag.glsl")
-    
+    CreateProgram skinnedmesh, xs("skinnedmesh_vert.glsl"), xs("skinnedmesh_frag.glsl")
+End Sub
+
+'unloads all shaders
+Public Sub UnloadShaders()
+    DeleteProgram bundledmesh
+    DeleteProgram skinnedmesh
 End Sub
 
 
@@ -26,16 +32,25 @@ Public Sub ReloadShaders()
 End Sub
 
 
-'unloads all shaders
-Public Sub UnloadShaders()
-    DeleteProgram bundledmesh
-End Sub
-
-
 'tiny helper
 Private Function xs(ByRef fname As String) As String
     xs = LoadTextFile_NoError(App.path & "\shaders\" & fname)
 End Function
+
+'...
+Public Sub SetUniforms(ByRef sh As shader, ByRef mat As bf2mat)
+Dim epw As float3
+    epw.X = -eyeposworld.X 'DICE crap is flipped
+    epw.y = eyeposworld.y
+    epw.z = eyeposworld.z
+    SetUniform3f sh, "eyeposworld", epw
+    SetUniform1f sh, "hasBump", Bool2Float(mat.hasBump)
+    SetUniform1f sh, "hasWreck", Bool2Float(mat.hasWreck)
+    SetUniform1f sh, "hasXlpha", Bool2Float(mat.alphamode > 0)
+    SetUniform1f sh, "showLighting", Bool2Float(view_lighting)
+    SetUniform1f sh, "showDiffuse", Bool2Float(view_textures)
+    SetNodeTransforms sh, "nodetransform"
+End Sub
 
 
 'loads entire file as text
@@ -54,7 +69,7 @@ End Function
 
 
 'converts boolean to float
-Public Function Bool2Float(ByRef v As Boolean) As Single
+Public Function Bool2Float(ByVal v As Boolean) As Single
     If v Then Bool2Float = 1
 End Function
 

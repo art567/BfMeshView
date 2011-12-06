@@ -2,11 +2,8 @@
 
 uniform sampler2D texture0; // diffuse
 uniform sampler2D texture1; // normal
-uniform sampler2D texture3; // wreck
 
 uniform float hasBump;
-uniform float hasWreck;
-uniform float hasXlpha;
 uniform float showDiffuse;
 uniform float showLighting;
 
@@ -31,12 +28,8 @@ void main()
  vec4 frag = vec4(1.0, 1.0, 1.0, 1.0);
  vec3 spec = vec3(1.0, 1.0, 1.0);
  
- // textures
+ // diffuse map
  vec4 colormap = texture2D(texture0, uv);
- vec4 normalmap = texture2D(texture1, uv);
- vec4 wreckmap = texture2D(texture3, uv);
- 
- // diffuse
  if (showDiffuse > 0.5) {
   frag *= colormap;
  } else {
@@ -44,31 +37,16 @@ void main()
   frag.a = colormap.a;
  }
  
- // wreck map
- if (hasWreck > 0.5) {
-  if (showDiffuse > 0.5) {
-   frag.rgb *= wreckmap.rgb;
-  }
-  spec *= wreckmap.rgb;
- }
- 
  // normal
  vec3 n;
  if (hasBump > 0.5) {
   // normal map
+  vec4 normalmap = texture2D(texture1, uv);
   n = normalize(normalmap.rgb * 2.0 - 1.0);
+  spec *= normalmap.a;
  } else {
   // vertex normal
   n = normalize(norm);
- }
- 
- // specular
- if (hasXlpha > 0.5) {
-  if (hasBump > 0.5) {
-   spec *= normalmap.a;
-  }
- } else {
-  spec *= colormap.a;
  }
  
  // lighting
@@ -80,7 +58,7 @@ void main()
   vec3 eyevec = normalize(eyesurfvec);
   
   // specular
-  if (NdotL > 0.0) { // todo: skip if shade==0
+  if (NdotL > 0.0) {
    
    // get half vector
    vec3 hv = normalize( -sunvec + eyevec );
@@ -96,11 +74,6 @@ void main()
  
  // output
  gl_FragColor = frag;
- //gl_FragColor = vec4(1.0, 0.1, 0.1, 1.0);
- //gl_FragColor = vec4(n,1.0);
- //gl_FragColor = wreckmap;
- //gl_FragColor = vec4(sunvec,1.0);
- //gl_FragColor = vec4(boneid*10.0);
- //gl_FragColor = boneinfo * 10.0;
- //gl_FragColor.rgb = vec3(hasXlpha);
+ 
+ //gl_FragColor = boneinfo*10.0;
 }
