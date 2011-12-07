@@ -122,9 +122,9 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
         
         'SKINNEDMESH
         Case "skinnedmesh.fx"
-            mat.glslprog = skinnedmesh.prog
-            mat.hasBump = True
-            mat.hasWreck = False
+            .glslprog = skinnedmesh.prog
+            .hasBump = True
+            .hasWreck = False
             
             Select Case LCase(.technique)
             Case "alpha_test"
@@ -137,30 +137,29 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             
         'BUNDLEDMESH
         Case "bundledmesh.fx"
-            mat.glslprog = bundledmesh.prog
-            mat.hasBump = False
-            mat.hasWreck = False
+            .glslprog = bundledmesh.prog
+            .hasBump = False
+            .hasWreck = False
+            .hasAnimatedUV = False
             
             If .mapnum = 3 Then
                 If InString(.map(1), "SpecularLUT") Then
-                    mat.hasBump = False
+                    .hasBump = False
                 Else
-                    mat.hasBump = True
+                    .hasBump = True
                 End If
             End If
             If .mapnum = 4 Then
-                mat.hasBump = True
-                mat.hasWreck = True
+                .hasBump = True
+                .hasWreck = True
+            End If
+            If InStr(1, .technique, "AnimatedUV", vbTextCompare) > 0 Then
+                .hasAnimatedUV = True
             End If
             
             'opaque
             .layernum = 1
             SetBase mat, 1
-            
-            'uvmap
-            'If InStr(1, .technique, "AnimatedUV", vbTextCompare) > 0 Then
-            '    .layer(1).texcoff = 1
-            'End If
             
             'wreck (no bump)
             If .mapnum = 3 Then

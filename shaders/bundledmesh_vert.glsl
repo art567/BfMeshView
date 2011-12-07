@@ -2,6 +2,7 @@
 
 uniform float hasBump;
 uniform float hasWreck;
+uniform float hasXnimatedUV;
 
 uniform mat4 nodetransform[40];
 uniform vec3 eyeposworld;
@@ -28,6 +29,10 @@ void main()
  
  // UV0
  uv = gl_MultiTexCoord0.st;
+ 
+ if (hasXnimatedUV > 0.5) {
+  uv += gl_MultiTexCoord1.st * vec2(0.5,1.0);
+ }
  
  // normal
  norm = gl_Normal;

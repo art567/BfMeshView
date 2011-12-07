@@ -46,6 +46,7 @@ Dim epw As float3
     SetUniform3f sh, "eyeposworld", epw
     SetUniform1f sh, "hasBump", Bool2Float(mat.hasBump)
     SetUniform1f sh, "hasWreck", Bool2Float(mat.hasWreck)
+    SetUniform1f sh, "hasXnimatedUV", Bool2Float(mat.hasAnimatedUV)
     SetUniform1f sh, "hasXlpha", Bool2Float(mat.alphamode > 0)
     SetUniform1f sh, "showLighting", Bool2Float(view_lighting)
     SetUniform1f sh, "showDiffuse", Bool2Float(view_textures)

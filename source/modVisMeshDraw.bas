@@ -144,7 +144,11 @@ Dim texchans As Long
                 
                 'draw polygons
                 If view_poly Then
-                    If .glslprog > 0 Then
+                    
+                    Dim showOnlyTexture As Boolean
+                    showOnlyTexture = (seltex > -1 And selmat = i)
+                    
+                    If .glslprog > 0 And Not showOnlyTexture Then
                         'GLSL shader pipeline
                         
                         'prepare
@@ -183,6 +187,9 @@ Dim texchans As Long
                     Else
                         'fixed function pipeline
                         
+                        glActiveTexture GL_TEXTURE0
+                        glClientActiveTexture GL_TEXTURE0
+                        
                         'prepare stuff
                         If view_lighting Then
                             glEnable GL_LIGHTING
@@ -194,27 +201,26 @@ Dim texchans As Long
                         
                         'draw geometry
                         Dim texcoff As Long
-                        If view_textures And .layernum > 0 Then
-                            If seltex > -1 And selmat = i Then
+                        If showOnlyTexture Then
                                 
-                                'render single unlit pass with texture
-                                
-                                If view_lighting Then glDisable GL_LIGHTING
-                                glBindTexture GL_TEXTURE_2D, texmap(.texmapid(seltex)).tex
-                                glEnable GL_TEXTURE_2D
-                                glColor3f 1, 1, 1
-                                
-                                'determine the UV channel index for this texture map
-                                texcoff = .mapuvid(seltex)
-                                
-                                'draw geometry
-                                drawfaces vptroff, nptroff, tptroff + (8 * texcoff), iptroff, icount
-                                
-                                'reset stuff
-                                glDisable GL_TEXTURE_2D
-                                If view_lighting Then glEnable GL_LIGHTING
-                                
-                            Else
+                            'render single unlit pass with texture
+                            
+                            If view_lighting Then glDisable GL_LIGHTING
+                            glBindTexture GL_TEXTURE_2D, texmap(.texmapid(seltex)).tex
+                            glEnable GL_TEXTURE_2D
+                            glColor3f 1, 1, 1
+                            
+                            'determine the UV channel index for this texture map
+                            texcoff = .mapuvid(seltex)
+                            
+                            'draw geometry
+                            drawfaces vptroff, nptroff, tptroff + (8 * texcoff), iptroff, icount
+                            
+                            'reset stuff
+                            glDisable GL_TEXTURE_2D
+                            If view_lighting Then glEnable GL_LIGHTING
+                        Else
+                            If view_textures And .layernum > 0 Then
                                 
                                 'render each texture layer as seperate pass
                                 For j = 1 To .layernum
@@ -262,10 +268,10 @@ Dim texchans As Long
                                         drawfaces vptroff, nptroff, 0, iptroff, icount
                                     End If
                                 Next j
+                            Else
+                                glColor3f 0.75, 0.75, 0.75
+                                drawfaces vptroff, nptroff, 0, iptroff, icount
                             End If
-                        Else
-                            glColor3f 0.75, 0.75, 0.75
-                            drawfaces vptroff, nptroff, 0, iptroff, icount
                         End If
                         
                         'reset stuff

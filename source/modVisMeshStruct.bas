@@ -89,6 +89,7 @@ Public Type bf2mat
     glslprog As Long
     hasBump As Boolean
     hasWreck As Boolean
+    hasAnimatedUV As Boolean
 End Type
 
 
