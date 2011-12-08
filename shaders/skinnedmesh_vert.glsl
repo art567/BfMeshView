@@ -1,9 +1,10 @@
 #version 120
 
-uniform float hasBump;
+uniform int hasBump;
 
 uniform mat4 nodetransform[40];
 uniform vec3 eyeposworld;
+uniform vec3 eyevecworld;
 //uniform vec3 sunvecworld;
 
 varying vec2 uv;
@@ -15,8 +16,8 @@ varying vec4 boneinfo;
 void main()
 {
  //// temp: pass as uniform!
- //vec3 sunvecworld = normalize(vec3(0.5, -0.5, -0.5));
- vec3 sunvecworld = -eyeposworld ;
+ //vec3 sunvecworld = normalize(vec3(0.5, -0.5, 0.5));
+ vec3 sunvecworld = eyevecworld;
  //// temp
  
  // bone id
@@ -51,7 +52,7 @@ void main()
  
  /*
  // tangent
- if (hasBump > 0.5) {
+ if (hasBump > 0) {
   
   // compute tangents
   vec3 tan1 = gl_MultiTexCoord5.xyz;

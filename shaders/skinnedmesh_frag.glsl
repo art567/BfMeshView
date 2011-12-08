@@ -3,9 +3,9 @@
 uniform sampler2D texture0; // diffuse
 uniform sampler2D texture1; // normal
 
-uniform float hasBump;
-uniform float showDiffuse;
-uniform float showLighting;
+uniform int hasBump;
+uniform int showDiffuse;
+uniform int showLighting;
 
 //uniform vec3 sunambient;
 //uniform vec3 sundiffuse;
@@ -28,9 +28,12 @@ void main()
  vec4 frag = vec4(1.0, 1.0, 1.0, 1.0);
  vec3 spec = vec3(1.0, 1.0, 1.0);
  
- // diffuse map
+ // textures
  vec4 colormap = texture2D(texture0, uv);
- if (showDiffuse > 0.5) {
+ vec4 normalmap = texture2D(texture1, uv);
+ 
+ // diffuse map
+ if (showDiffuse > 0) {
   frag *= colormap;
  } else {
   frag.rgb *= 0.75;
@@ -39,9 +42,8 @@ void main()
  
  // normal
  vec3 n;
- if (hasBump > 0.5) {
+ if (hasBump > 0) {
   // normal map
-  vec4 normalmap = texture2D(texture1, uv);
   n = normalize(normalmap.rgb * 2.0 - 1.0);
   spec *= normalmap.a;
  } else {
@@ -50,7 +52,7 @@ void main()
  }
  
  // lighting
- if (showLighting > 0.5) {
+ if (showLighting > 0) {
   float NdotL = dot(n,normalize(-sunvec));
   frag.rgb *= sunambient.rgb + sundiffuse.rgb * max(NdotL,0.0);
   

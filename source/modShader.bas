@@ -39,19 +39,72 @@ End Function
 
 '...
 Public Sub SetUniforms(ByRef sh As shader, ByRef mat As bf2mat)
-Dim epw As float3
-    epw.X = -eyeposworld.X 'DICE crap is flipped
-    epw.y = eyeposworld.y
-    epw.z = eyeposworld.z
-    SetUniform3f sh, "eyeposworld", epw
-    SetUniform1f sh, "hasBump", Bool2Float(mat.hasBump)
-    SetUniform1f sh, "hasWreck", Bool2Float(mat.hasWreck)
-    SetUniform1f sh, "hasXnimatedUV", Bool2Float(mat.hasAnimatedUV)
-    SetUniform1f sh, "hasXlpha", Bool2Float(mat.alphamode > 0)
-    SetUniform1f sh, "showLighting", Bool2Float(view_lighting)
-    SetUniform1f sh, "showDiffuse", Bool2Float(view_textures)
+
+    'texture handles
+    Dim i As Long
+    For i = 0 To 7
+        SetUniform1i sh, "texture" & i, i
+    Next i
+    
+    'uniforms
+    SetUniform3f sh, "eyeposworld", FlipX(eyeposworld)
+    SetUniform3f sh, "eyevecworld", FlipX(eyevecworld)
+    SetUniform1i sh, "hasBump", Bool2Int(mat.hasBump)
+    SetUniform1i sh, "hasWreck", Bool2Int(mat.hasWreck)
+    SetUniform1i sh, "hasAnimatedUV", Bool2Int(mat.hasAnimatedUV)
+    SetUniform1i sh, "hasAlpha", Bool2Int(mat.alphamode > 0)
+    SetUniform1i sh, "hasBumpAlpha", Bool2Int(mat.hasBumpAlpha)
+    SetUniform1i sh, "showLighting", Bool2Int(view_lighting)
+    SetUniform1i sh, "showDiffuse", Bool2Int(view_textures)
     SetNodeTransforms sh, "nodetransform"
 End Sub
+
+Private Sub AddReportVar(ByRef str As String, ByRef name As String)
+    Dim v As Long
+    v = 666
+    Dim loc As Long
+    loc = glGetUniformLocation(bundledmesh.prog, name)
+    glGetUniformiv bundledmesh.prog, loc, v
+    str = str & name & " @ " & loc & ": " & v & vbLf
+End Sub
+
+Public Sub GetReport()
+    Dim str As String
+    AddReportVar str, "texture0"
+    AddReportVar str, "texture1"
+    AddReportVar str, "texture2"
+    AddReportVar str, "texture3"
+    AddReportVar str, "texture4"
+    AddReportVar str, "texture5"
+    AddReportVar str, "texture6"
+    AddReportVar str, "texture7"
+    AddReportVar str, "hasBump"
+    AddReportVar str, "hasWreck"
+    AddReportVar str, "hasAnimatedUV"
+    AddReportVar str, "hasAlpha"
+    AddReportVar str, "showLighting"
+    AddReportVar str, "showDiffuse"
+    MsgBox str
+End Sub
+
+'DICE crap is flipped on X axis
+Public Function FlipX(ByRef v As float3) As float3
+    FlipX = float3(-v.X, v.y, v.z)
+End Function
+
+'converts boolean to float
+Public Function Bool2Float(ByVal v As Boolean) As Single
+    If v Then Bool2Float = 1
+End Function
+
+'converts boolean to int
+Public Function Bool2Int(ByVal v As Boolean) As Long
+    If v = True Then
+        Bool2Int = 1
+    Else
+        Bool2Int = 0
+    End If
+End Function
 
 
 'loads entire file as text
@@ -66,12 +119,6 @@ On Error GoTo errhandler
     Exit Function
 errhandler:
     'MsgBox "LoadTextFile_NoError" & vbLf & err.description, vbCritical
-End Function
-
-
-'converts boolean to float
-Public Function Bool2Float(ByVal v As Boolean) As Single
-    If v Then Bool2Float = 1
 End Function
 
 

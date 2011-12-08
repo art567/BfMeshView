@@ -1,11 +1,12 @@
 #version 120
 
-uniform float hasBump;
-uniform float hasWreck;
-uniform float hasXnimatedUV;
+uniform int hasBump;
+uniform int hasWreck;
+uniform int hasAnimatedUV;
 
 uniform mat4 nodetransform[40];
 uniform vec3 eyeposworld;
+uniform vec3 eyevecworld;
 //uniform vec3 sunvecworld;
 
 varying vec2 uv;
@@ -13,12 +14,14 @@ varying vec3 norm;
 varying vec3 eyesurfvec;         // eye to surface vector
 varying vec3 sunvec;
 varying vec4 boneinfo;
+varying vec3 eyepos;
+varying vec3 fragpos;
 
 void main()
 {
  //// temp: pass as uniform!
  //vec3 sunvecworld = normalize(vec3(0.5, -0.5, 0.5));
- vec3 sunvecworld = -eyeposworld ;
+ vec3 sunvecworld = eyevecworld;
  //// temp
  
  // bone id
@@ -30,21 +33,24 @@ void main()
  // UV0
  uv = gl_MultiTexCoord0.st;
  
- if (hasXnimatedUV > 0.5) {
+ if (hasAnimatedUV > 0) {
   uv += gl_MultiTexCoord1.st * vec2(0.5,1.0);
  }
  
  // normal
  norm = gl_Normal;
  
- // eye to surface vector in world space
- eyesurfvec = eyeposworld - vert.xyz;
+ // transform eye position to node space
+ vec3 eyeposlocal = (vec4(eyeposworld,0.0) * nodetransform[ nodeid ]).xyz;
  
  // transform sunvec
  sunvec = (vec4(sunvecworld,0.0) * nodetransform[ nodeid ]).xyz;
  
+ // eye to surface vector in world space
+ eyesurfvec = eyeposlocal - vert.xyz;
+ 
  // tangent
- if (hasBump > 0.5) {
+ if (hasBump > 0) {
   
   // compute tangents
   vec3 tan1 = gl_MultiTexCoord5.xyz;
@@ -61,6 +67,9 @@ void main()
  }
  
  boneinfo = gl_Color;
+ 
+ eyepos = eyeposworld;
+ fragpos = vert.xyz;
  
  // vertex position
  //gl_Position = gl_ModelViewProjectionMatrix * vert;

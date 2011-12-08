@@ -155,8 +155,8 @@ Dim texchans As Long
                         glUseProgram .glslprog
                         
                         'uniforms
-                        If bundledmesh.prog Then SetUniforms bundledmesh, mesh.mat(i)
-                        If skinnedmesh.prog Then SetUniforms skinnedmesh, mesh.mat(i)
+                        If .glslprog = bundledmesh.prog Then SetUniforms bundledmesh, mesh.mat(i)
+                        If .glslprog = skinnedmesh.prog Then SetUniforms skinnedmesh, mesh.mat(i)
                         
                         'alpha mode
                         Select Case .alphamode

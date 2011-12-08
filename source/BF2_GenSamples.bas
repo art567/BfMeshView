@@ -74,7 +74,7 @@ End Function
 
 'replaces normal if a component is fucked
 Private Function FixNormal(ByRef n As float3, ByRef rep As float3) As float3
-    If IsNaN(n.X) Or IsNaN(n.Y) Or IsNaN(n.z) Then
+    If IsNaN(n.X) Or IsNaN(n.y) Or IsNaN(n.z) Then
         n = rep
     End If
 End Function
@@ -139,28 +139,28 @@ Public Function WriteLodSamples(ByRef lod As bf2lod, ByVal chan As Long, ByVal f
                     
                     'vertices
                     face(fi).v1.X = vmesh.vert(f1 + 0)
-                    face(fi).v1.Y = vmesh.vert(f1 + 1)
+                    face(fi).v1.y = vmesh.vert(f1 + 1)
                     face(fi).v1.z = vmesh.vert(f1 + 2)
                     
                     face(fi).v2.X = vmesh.vert(f2 + 0)
-                    face(fi).v2.Y = vmesh.vert(f2 + 1)
+                    face(fi).v2.y = vmesh.vert(f2 + 1)
                     face(fi).v2.z = vmesh.vert(f2 + 2)
                     
                     face(fi).v3.X = vmesh.vert(f3 + 0)
-                    face(fi).v3.Y = vmesh.vert(f3 + 1)
+                    face(fi).v3.y = vmesh.vert(f3 + 1)
                     face(fi).v3.z = vmesh.vert(f3 + 2)
                     
                     'normals
                     face(fi).n1.X = vmesh.vert(f1 + 3 + 0)
-                    face(fi).n1.Y = vmesh.vert(f1 + 3 + 1)
+                    face(fi).n1.y = vmesh.vert(f1 + 3 + 1)
                     face(fi).n1.z = vmesh.vert(f1 + 3 + 2)
                     
                     face(fi).n2.X = vmesh.vert(f2 + 3 + 0)
-                    face(fi).n2.Y = vmesh.vert(f2 + 3 + 1)
+                    face(fi).n2.y = vmesh.vert(f2 + 3 + 1)
                     face(fi).n2.z = vmesh.vert(f2 + 3 + 2)
                     
                     face(fi).n3.X = vmesh.vert(f3 + 3 + 0)
-                    face(fi).n3.Y = vmesh.vert(f3 + 3 + 1)
+                    face(fi).n3.y = vmesh.vert(f3 + 3 + 1)
                     face(fi).n3.z = vmesh.vert(f3 + 3 + 2)
                     
                     fi = fi + 1
@@ -252,7 +252,7 @@ Dim maxx As Long 'triangle bounding rectangle in pixel space
 Dim maxy As Long 'triangle bounding rectangle in pixel space
 
 Dim X As Long
-Dim Y As Long
+Dim y As Long
 Dim i As Long
 Dim m As Long
 Dim f As Long
@@ -338,13 +338,13 @@ Dim errloc As Long
                 
                 'get UVs
                 t1.X = vmesh.vert(vi1 + texoffset + 0)
-                t1.Y = vmesh.vert(vi1 + texoffset + 1)
+                t1.y = vmesh.vert(vi1 + texoffset + 1)
                 
                 t2.X = vmesh.vert(vi2 + texoffset + 0)
-                t2.Y = vmesh.vert(vi2 + texoffset + 1)
+                t2.y = vmesh.vert(vi2 + texoffset + 1)
                 
                 t3.X = vmesh.vert(vi3 + texoffset + 0)
-                t3.Y = vmesh.vert(vi3 + texoffset + 1)
+                t3.y = vmesh.vert(vi3 + texoffset + 1)
                 
                 errloc = 3
                 
@@ -382,9 +382,9 @@ Dim errloc As Long
                     Dim fmaxx As Single
                     Dim fmaxy As Single
                     fminx = min(min(t1.X, t2.X), t3.X) * (mapsizex - 1)
-                    fminy = min(min(t1.Y, t2.Y), t3.Y) * (mapsizey - 1)
+                    fminy = min(min(t1.y, t2.y), t3.y) * (mapsizey - 1)
                     fmaxx = max(max(t1.X, t2.X), t3.X) * (mapsizex - 1)
-                    fmaxy = max(max(t1.Y, t2.Y), t3.Y) * (mapsizey - 1)
+                    fmaxy = max(max(t1.y, t2.y), t3.y) * (mapsizey - 1)
                     
                     errloc = 42
                     
@@ -422,17 +422,17 @@ Dim errloc As Long
                     
                     'loop through rect pixels
                     For X = minx To maxx
-                        For Y = miny To maxy
+                        For y = miny To maxy
                             
                             'compute pixel index
-                            i = CPos(X, Y)
+                            i = CPos(X, y)
                             
                             'only samples that are not rasterized yet or edge margin samples
                             If sampleflag(i) <> 1 Then
                             
                                 'compute UV position (texel center)
                                 p.X = (X * sx) + ox
-                                p.Y = (Y * sy) + oy
+                                p.y = (y * sy) + oy
                                 
                                 errloc = 7
                                 
@@ -468,32 +468,32 @@ Dim errloc As Long
                                     
                                     'face vertex 1
                                     v1.X = vmesh.vert(vi1 + 0)
-                                    v1.Y = vmesh.vert(vi1 + 1)
+                                    v1.y = vmesh.vert(vi1 + 1)
                                     v1.z = vmesh.vert(vi1 + 2)
                                     
                                     'face vertex 2
                                     v2.X = vmesh.vert(vi2 + 0)
-                                    v2.Y = vmesh.vert(vi2 + 1)
+                                    v2.y = vmesh.vert(vi2 + 1)
                                     v2.z = vmesh.vert(vi2 + 2)
                                     
                                     'face vertex 3
                                     v3.X = vmesh.vert(vi3 + 0)
-                                    v3.Y = vmesh.vert(vi3 + 1)
+                                    v3.y = vmesh.vert(vi3 + 1)
                                     v3.z = vmesh.vert(vi3 + 2)
                                     
                                     'face normal 1
                                     n1.X = vmesh.vert(vi1 + normoffset + 0)
-                                    n1.Y = vmesh.vert(vi1 + normoffset + 1)
+                                    n1.y = vmesh.vert(vi1 + normoffset + 1)
                                     n1.z = vmesh.vert(vi1 + normoffset + 2)
                                     
                                     'face normal 2
                                     n2.X = vmesh.vert(vi2 + normoffset + 0)
-                                    n2.Y = vmesh.vert(vi2 + normoffset + 1)
+                                    n2.y = vmesh.vert(vi2 + normoffset + 1)
                                     n2.z = vmesh.vert(vi2 + normoffset + 2)
                                     
                                     'face normal 3
                                     n3.X = vmesh.vert(vi3 + normoffset + 0)
-                                    n3.Y = vmesh.vert(vi3 + normoffset + 1)
+                                    n3.y = vmesh.vert(vi3 + normoffset + 1)
                                     n3.z = vmesh.vert(vi3 + normoffset + 2)
                                     
                                     errloc = 10
@@ -517,7 +517,7 @@ Dim errloc As Long
                                 
                             End If
                             
-                        Next Y
+                        Next y
                     Next X
                 Else
                     badfacecount = badfacecount + 1
@@ -552,8 +552,8 @@ End Sub
 
 
 'computes pixel index from coordinates
-Private Function CPos(ByVal X As Long, ByVal Y As Long) As Long
-    CPos = X + (Y * mapsizex)
+Private Function CPos(ByVal X As Long, ByVal y As Long) As Long
+    CPos = X + (y * mapsizex)
 End Function
 
 
@@ -561,7 +561,7 @@ End Function
 Private Sub GenSamplePadding(ByRef sample() As smp_sample, ByVal samplenum As Long)
 Dim i As Long  'padding iterator
 Dim X As Long  'column iterator
-Dim Y As Long  'row iterator
+Dim y As Long  'row iterator
 Dim j As Long  'found sample index
 Dim s As Long  'temp sample index
 Dim cs As Long 'current sample index
@@ -579,25 +579,25 @@ Dim cs As Long 'current sample index
         Next j
         
         For X = 0 To mapsizex - 1
-            For Y = 0 To mapsizey - 1
+            For y = 0 To mapsizey - 1
                 
-                cs = CPos(X, Y)
+                cs = CPos(X, y)
                 If sample(cs).face = -1 Then
                     
                     j = -1
                     
                     'north
                     If j < 0 Then
-                        If Y - 1 > 0 Then
-                            s = CPos(X, Y - 1)
+                        If y - 1 > 0 Then
+                            s = CPos(X, y - 1)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
                     
                     'south
                     If j < 0 Then
-                        If Y + 1 < mapsizey - 1 Then
-                            s = CPos(X, Y + 1)
+                        If y + 1 < mapsizey - 1 Then
+                            s = CPos(X, y + 1)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
@@ -605,7 +605,7 @@ Dim cs As Long 'current sample index
                     'west
                     If j < 0 Then
                         If X - 1 > 0 Then
-                            s = CPos(X - 1, Y)
+                            s = CPos(X - 1, y)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
@@ -613,7 +613,7 @@ Dim cs As Long 'current sample index
                     'east
                     If j < 0 Then
                         If X + 1 < mapsizex - 1 Then
-                            s = CPos(X + 1, Y)
+                            s = CPos(X + 1, y)
                             If sample(s).face > -1 Then j = s
                         End If
                     End If
@@ -627,7 +627,7 @@ Dim cs As Long 'current sample index
                     End If
                     
                 End If
-            Next Y
+            Next y
         Next X
         
         'sync

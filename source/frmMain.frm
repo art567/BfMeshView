@@ -1068,6 +1068,7 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
     Case vbKeyControl: keyctrl = True
     Case vbKeyMenu:    keyalt = True
     Case vbKeyShift:   keyshift = True
+    Case vbKeyF12: GetReport
     End Select
 End Sub
 

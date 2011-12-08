@@ -22,6 +22,8 @@ Public Declare Sub glUniform1f Lib "glext.dll" (ByVal location As GLint, ByVal v
 Public Declare Sub glUniform3f Lib "glext.dll" (ByVal location As GLint, _
                                                 ByVal v0 As GLfloat, ByVal v1 As GLfloat, ByVal v2 As GLfloat)
 
+Public Declare Sub glGetUniformiv Lib "glext.dll" (ByVal prog As GLuint, ByVal loc As GLint, ByRef i As GLint)
+
 Public Declare Sub glUniformMatrix4fv Lib "glext.dll" (ByVal location As GLint, ByVal count As GLsizei, _
                                                        ByVal transpose As GLboolean, value As GLfloat)
 
@@ -114,15 +116,7 @@ Public Function CreateProgram(ByRef sh As shader, ByRef vert As String, ByRef fr
     End If
     
     'bind program
-    glUseProgram program
-    
-    'texture handles
-    Dim i As Long
-    For i = 0 To 7
-        Dim loc As GLuint
-        loc = glGetUniformLocation(program, "texture" & i)
-        If loc <> -1 Then glUniform1i loc, i
-    Next i
+    'glUseProgram program
     
     'clean up
     glUseProgram 0
@@ -147,6 +141,13 @@ Public Sub SetUniform1f(ByRef sh As shader, ByRef name As String, ByVal val As S
     Dim loc As GLuint
     loc = glGetUniformLocation(sh.prog, name)
     If loc <> -1 Then glUniform1f loc, val
+End Sub
+
+'set uniform
+Public Sub SetUniform1i(ByRef sh As shader, ByRef name As String, ByVal val As Long)
+    Dim loc As GLuint
+    loc = glGetUniformLocation(sh.prog, name)
+    If loc <> -1 Then glUniform1i loc, val
 End Sub
 
 

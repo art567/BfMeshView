@@ -2,13 +2,15 @@
 
 uniform sampler2D texture0; // diffuse
 uniform sampler2D texture1; // normal
+//uniform sampler2D texture2; // SpecularLUT
 uniform sampler2D texture3; // wreck
 
-uniform float hasBump;
-uniform float hasWreck;
-uniform float hasXlpha;
-uniform float showDiffuse;
-uniform float showLighting;
+uniform int hasBump;
+uniform int hasWreck;
+uniform int hasAlpha;
+uniform int hasBumpAlpha;
+uniform int showDiffuse;
+uniform int showLighting;
 
 //uniform vec3 sunambient;
 //uniform vec3 sundiffuse;
@@ -18,6 +20,9 @@ varying vec3 norm;
 varying vec3 sunvec;
 varying vec3 eyesurfvec;         // eye to surface vector
 varying vec4 boneinfo;
+
+varying vec3 eyepos;
+varying vec3 fragpos;
 
 void main()
 {
@@ -37,24 +42,29 @@ void main()
  vec4 wreckmap = texture2D(texture3, uv);
  
  // diffuse
- if (showDiffuse > 0.5) {
+ if (showDiffuse > 0) {
   frag *= colormap;
  } else {
   frag.rgb *= 0.75;
+ }
+ 
+ // alpha
+ if (hasBumpAlpha > 0) {
+  frag.a = normalmap.a;
+ } else {
   frag.a = colormap.a;
  }
  
  // wreck map
- if (hasWreck > 0.5) {
-  if (showDiffuse > 0.5) {
+ if (hasWreck > 0) {
+  if (showDiffuse > 0) {
    frag.rgb *= wreckmap.rgb;
   }
-  spec *= wreckmap.rgb;
  }
  
  // normal
  vec3 n;
- if (hasBump > 0.5) {
+ if (hasBump > 0) {
   // normal map
   n = normalize(normalmap.rgb * 2.0 - 1.0);
  } else {
@@ -63,21 +73,28 @@ void main()
  }
  
  // specular
- if (hasXlpha > 0.5) {
-  if (hasBump > 0.5) {
-   spec *= normalmap.a;
+ if (hasAlpha > 0) {
+  if (hasBump > 0) {
+   if (hasBumpAlpha > 0) {
+    spec *= colormap.a;
+   } else {
+    spec *= normalmap.a;
+   }
   }
  } else {
   spec *= colormap.a;
  }
+ if (hasWreck > 0) {
+  spec *= wreckmap.rgb;
+ }
  
  // lighting
- if (showLighting > 0.5) {
+ if (showLighting > 0) {
   float NdotL = dot(n,normalize(-sunvec));
   frag.rgb *= sunambient.rgb + sundiffuse.rgb * max(NdotL,0.0);
   
   // normalize eye to surface vector
-  vec3 eyevec = normalize(eyesurfvec);
+  vec3 eyevec = eyesurfvec ;//normalize(eyesurfvec);
   
   // specular
   if (NdotL > 0.0) { // todo: skip if shade==0
@@ -102,5 +119,10 @@ void main()
  //gl_FragColor = vec4(sunvec,1.0);
  //gl_FragColor = vec4(boneid*10.0);
  //gl_FragColor = boneinfo * 10.0;
- //gl_FragColor.rgb = vec3(hasXlpha);
+ //gl_FragColor = vec4(hasAlpha);
+ //gl_FragColor = colormap * normalmap;
+ //gl_FragColor.rgb = normalize(eyesurfvec) * 0.5 + 0.5;
+ //gl_FragColor.rgb = vec3(distance(eyepos,fragpos));
+ 
+ //gl_FragColor = vec4(vec3(hasBumpAlpha),1.0);
 }

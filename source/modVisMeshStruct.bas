@@ -90,6 +90,7 @@ Public Type bf2mat
     hasBump As Boolean
     hasWreck As Boolean
     hasAnimatedUV As Boolean
+    hasBumpAlpha As Boolean
 End Type
 
 

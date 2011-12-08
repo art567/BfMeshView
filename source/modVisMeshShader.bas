@@ -141,6 +141,7 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             .hasBump = False
             .hasWreck = False
             .hasAnimatedUV = False
+            .hasBumpAlpha = False
             
             If .mapnum = 3 Then
                 If InString(.map(1), "SpecularLUT") Then
@@ -155,6 +156,11 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             End If
             If InStr(1, .technique, "AnimatedUV", vbTextCompare) > 0 Then
                 .hasAnimatedUV = True
+            End If
+            
+            'alpha in bumpmap, dunno how BF2 detects this
+            If .alphamode > 0 And LCase(.technique) = "alpha_testcolormapgloss" Then
+                .hasBumpAlpha = True
             End If
             
             'opaque
