@@ -93,14 +93,11 @@ void main()
   float NdotL = dot(n,normalize(-sunvec));
   frag.rgb *= sunambient.rgb + sundiffuse.rgb * max(NdotL,0.0);
   
-  // normalize eye to surface vector
-  vec3 eyevec = eyesurfvec ;//normalize(eyesurfvec);
-  
   // specular
-  if (NdotL > 0.0) { // todo: skip if shade==0
+  if (NdotL > 0.0) {
    
-   // get half vector
-   vec3 hv = normalize( -sunvec + eyevec );
+   // half vector
+   vec3 hv = normalize( -sunvec + eyesurfvec );
    
    // compute specular amount
    float NdotHV = max(dot(n,hv),0.0);

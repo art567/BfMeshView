@@ -8,7 +8,7 @@ Private Sub SetBase(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).depthWrite = GL_TRUE
     mat.layer(i).lighting = False
     mat.layer(i).blend = False
-    mat.layer(i).alphatest = False
+    mat.layer(i).alphaTest = False
     
     Select Case mat.alphamode
     Case 1:
@@ -19,7 +19,7 @@ Private Sub SetBase(ByRef mat As bf2mat, ByVal i As Long)
         'mat.layer(i).alphatest = True
         'mat.layer(i).alpharef = 0.005
     Case 2:
-        mat.layer(i).alphatest = True
+        mat.layer(i).alphaTest = True
         mat.layer(i).alpharef = 0.5
     End Select
 End Sub
@@ -40,7 +40,7 @@ Private Sub SetAlphaTest(ByRef mat As bf2mat, ByVal i As Long)
     mat.layer(i).texmapid = mat.texmapid(0)
     mat.layer(i).depthfunc = GL_LESS
     mat.layer(i).depthWrite = GL_TRUE
-    mat.layer(i).alphatest = True
+    mat.layer(i).alphaTest = True
     mat.layer(i).alpharef = 0.5
     mat.layer(i).lighting = False
 End Sub
@@ -105,7 +105,7 @@ Private Sub MakeAlpha(ByRef mat As bf2mat)
             .layer(2).blendsrc = GL_ZERO
             .layer(2).blenddst = GL_SRC_COLOR
             
-            .layer(1).alphatest = True
+            .layer(1).alphaTest = True
             .layer(1).alpharef = 0.5
         End If
     End With
@@ -203,7 +203,14 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             
         'STATICMESH
         Case "staticmesh.fx"
-            mat.glslprog = 0
+            .glslprog = staticmesh.prog
+            .hasBump = True
+            If InStr(1, .technique, "Dirt", vbTextCompare) Then .hasDirt = True
+            If InStr(1, .technique, "Crack", vbTextCompare) Then .hasCrack = True
+            If InStr(1, .technique, "NCrack", vbTextCompare) Then .hasCrackN = True
+            If InStr(1, .technique, "NDetail", vbTextCompare) Then .hasDetailN = True
+            
+            '--- FFP ------------------------------------------------
             
             'check if file is in vegetation directory
             Dim veggie As Boolean
@@ -231,14 +238,19 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             'statics
             Case "Base"
                 If veggie Then
+                    
+                    .glslprog = leaf.prog
+                    .alphaTest = 0.5
+                    .twoSided = True
+                    
                     .layernum = 1
                     .layer(1).texcoff = 0
                     .layer(1).texmapid = mat.texmapid(0)
                     .layer(1).depthfunc = GL_LESS
                     .layer(1).depthWrite = GL_TRUE
-                    .layer(1).alphatest = True
+                    .layer(1).alphaTest = True
                     .layer(1).alpharef = 0.25
-                    .layer(1).twosided = True
+                    .layer(1).twoSided = True
                 Else
                     .layernum = 1
                     SetBase mat, 1
@@ -249,6 +261,8 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
                  "BaseDetailNDetailenvmap"
                 
                 If veggie Then
+                    
+                    .glslprog = trunk.prog
                     
                     .layernum = 2
                     

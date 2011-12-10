@@ -34,9 +34,9 @@ Public Type shader
 End Type
 
 
-Public Sub SetNodeTransforms(ByRef sh As shader, ByRef name As String)
+Public Sub SetNodeTransforms(ByRef prog As GLuint, ByRef name As String)
     Dim loc As GLuint
-    loc = glGetUniformLocation(sh.prog, name)
+    loc = glGetUniformLocation(prog, name)
     If loc <> -1 Then
         glUniformMatrix4fv loc, nodetransformnum, GL_FALSE, nodetransform(0).m(0)
     End If
@@ -130,23 +130,23 @@ End Function
 
 
 'set uniform
-Public Sub SetUniform3f(ByRef sh As shader, ByRef name As String, ByRef val As float3)
+Public Sub SetUniform3f(ByRef prog As GLuint, ByRef name As String, ByRef val As float3)
     Dim loc As GLuint
-    loc = glGetUniformLocation(sh.prog, name)
+    loc = glGetUniformLocation(prog, name)
     If loc <> -1 Then glUniform3f loc, val.X, val.y, val.z
 End Sub
 
 'set uniform
-Public Sub SetUniform1f(ByRef sh As shader, ByRef name As String, ByVal val As Single)
+Public Sub SetUniform1f(ByRef prog As GLuint, ByRef name As String, ByVal val As Single)
     Dim loc As GLuint
-    loc = glGetUniformLocation(sh.prog, name)
+    loc = glGetUniformLocation(prog, name)
     If loc <> -1 Then glUniform1f loc, val
 End Sub
 
 'set uniform
-Public Sub SetUniform1i(ByRef sh As shader, ByRef name As String, ByVal val As Long)
+Public Sub SetUniform1i(ByRef prog As GLuint, ByRef name As String, ByVal val As Long)
     Dim loc As GLuint
-    loc = glGetUniformLocation(sh.prog, name)
+    loc = glGetUniformLocation(prog, name)
     If loc <> -1 Then glUniform1i loc, val
 End Sub
 

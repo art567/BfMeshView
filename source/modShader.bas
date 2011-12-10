@@ -9,18 +9,27 @@ Public nodetransformnum As Long
 'shaders
 Public bundledmesh As shader
 Public skinnedmesh As shader
+Public staticmesh As shader
+Public trunk As shader
+Public leaf As shader
 
 
 'loads all shaders
 Public Sub LoadShaders()
     CreateProgram bundledmesh, xs("bundledmesh_vert.glsl"), xs("bundledmesh_frag.glsl")
     CreateProgram skinnedmesh, xs("skinnedmesh_vert.glsl"), xs("skinnedmesh_frag.glsl")
+    CreateProgram staticmesh, xs("staticmesh_vert.glsl"), xs("staticmesh_frag.glsl")
+    CreateProgram trunk, xs("trunk_vert.glsl"), xs("trunk_frag.glsl")
+    CreateProgram leaf, xs("leaf_vert.glsl"), xs("leaf_frag.glsl")
 End Sub
 
 'unloads all shaders
 Public Sub UnloadShaders()
     DeleteProgram bundledmesh
     DeleteProgram skinnedmesh
+    DeleteProgram staticmesh
+    DeleteProgram trunk
+    DeleteProgram leaf
 End Sub
 
 
@@ -38,25 +47,29 @@ Private Function xs(ByRef fname As String) As String
 End Function
 
 '...
-Public Sub SetUniforms(ByRef sh As shader, ByRef mat As bf2mat)
+Public Sub SetUniforms(ByRef prog As GLuint, ByRef mat As bf2mat)
 
     'texture handles
     Dim i As Long
     For i = 0 To 7
-        SetUniform1i sh, "texture" & i, i
+        SetUniform1i prog, "texture" & i, i
     Next i
     
     'uniforms
-    SetUniform3f sh, "eyeposworld", FlipX(eyeposworld)
-    SetUniform3f sh, "eyevecworld", FlipX(eyevecworld)
-    SetUniform1i sh, "hasBump", Bool2Int(mat.hasBump)
-    SetUniform1i sh, "hasWreck", Bool2Int(mat.hasWreck)
-    SetUniform1i sh, "hasAnimatedUV", Bool2Int(mat.hasAnimatedUV)
-    SetUniform1i sh, "hasAlpha", Bool2Int(mat.alphamode > 0)
-    SetUniform1i sh, "hasBumpAlpha", Bool2Int(mat.hasBumpAlpha)
-    SetUniform1i sh, "showLighting", Bool2Int(view_lighting)
-    SetUniform1i sh, "showDiffuse", Bool2Int(view_textures)
-    SetNodeTransforms sh, "nodetransform"
+    SetUniform3f prog, "eyeposworld", FlipX(eyeposworld)
+    SetUniform3f prog, "eyevecworld", FlipX(eyevecworld)
+    SetUniform1i prog, "hasBump", Bool2Int(mat.hasBump)
+    SetUniform1i prog, "hasWreck", Bool2Int(mat.hasWreck)
+    SetUniform1i prog, "hasAnimatedUV", Bool2Int(mat.hasAnimatedUV)
+    SetUniform1i prog, "hasAlpha", Bool2Int(mat.alphamode > 0)
+    SetUniform1i prog, "hasBumpAlpha", Bool2Int(mat.hasBumpAlpha)
+    SetUniform1i prog, "hasDirt", Bool2Int(mat.hasDirt)
+    SetUniform1i prog, "hasCrack", Bool2Int(mat.hasCrack)
+    SetUniform1i prog, "hasCrackN", Bool2Int(mat.hasCrackN)
+    SetUniform1i prog, "hasDetailN", Bool2Int(mat.hasDetailN)
+    SetUniform1i prog, "showLighting", Bool2Int(view_lighting)
+    SetUniform1i prog, "showDiffuse", Bool2Int(view_textures)
+    SetNodeTransforms prog, "nodetransform"
 End Sub
 
 Private Sub AddReportVar(ByRef str As String, ByRef name As String)

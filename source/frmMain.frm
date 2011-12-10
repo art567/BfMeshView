@@ -431,6 +431,10 @@ Begin VB.Form frmMain
       Begin VB.Menu mnuLine77 
          Caption         =   "-"
       End
+      Begin VB.Menu mnuViewAnimateMesh 
+         Caption         =   "Animate Mesh"
+         Enabled         =   0   'False
+      End
       Begin VB.Menu mnuViewCamAnim 
          Caption         =   "Animate Camera"
       End
@@ -451,6 +455,12 @@ Begin VB.Form frmMain
          End
       End
       Begin VB.Menu mnuViewLine5 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuViewGLSL 
+         Caption         =   "GLSL Shaders"
+      End
+      Begin VB.Menu mnuLine55 
          Caption         =   "-"
       End
       Begin VB.Menu mnuViewBakePreview 
@@ -749,7 +759,9 @@ Private Sub Form_Load()
     LoadConfig app_configfile
     
     'load shaders
-    LoadShaders
+    If opt_useglsl Then
+        LoadShaders
+    End If
     
     'synchronize menu
     SyncMenu
@@ -813,7 +825,9 @@ Private Sub Form_Unload(Cancel As Integer)
     Unload frmTransform
     Unload frmSkin
     
-    UnloadShaders
+    If opt_useglsl Then
+        UnloadShaders
+    End If
     
     If hglrc Then
         wglMakeCurrent 0, 0
@@ -842,6 +856,7 @@ Public Sub SyncMenu()
     frmMain.mnuViewSamples.Checked = view_samples
     frmMain.mnuViewAxis.Checked = view_axis
     frmMain.mnuViewGrids.Checked = view_grids
+    frmMain.mnuViewGLSL.Checked = opt_useglsl
     
     frmMain.mnuOptionsLoadTextures.Checked = opt_loadtextures
     frmMain.mnuOptionsLoadSamples.Checked = opt_loadsamples
@@ -1521,6 +1536,19 @@ Private Sub mnuViewModeOverdraw_Click()
     Me.mnuViewModeNormal.Checked = False
     Me.mnuViewModeVertexOrder.Checked = False
     Me.mnuViewModeOverdraw.Checked = True
+    picMain_Paint
+End Sub
+
+Private Sub mnuViewGLSL_Click()
+    opt_useglsl = Not opt_useglsl
+    Me.mnuViewGLSL.Checked = opt_useglsl
+    
+    If opt_useglsl Then
+        LoadShaders
+    Else
+        UnloadShaders
+    End If
+    BuildFFPShaders
     picMain_Paint
 End Sub
 

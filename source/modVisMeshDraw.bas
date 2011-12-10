@@ -153,10 +153,7 @@ Dim texchans As Long
                         
                         'prepare
                         glUseProgram .glslprog
-                        
-                        'uniforms
-                        If .glslprog = bundledmesh.prog Then SetUniforms bundledmesh, mesh.mat(i)
-                        If .glslprog = skinnedmesh.prog Then SetUniforms skinnedmesh, mesh.mat(i)
+                        SetUniforms .glslprog, mesh.mat(i)
                         
                         'alpha mode
                         Select Case .alphamode
@@ -168,6 +165,13 @@ Dim texchans As Long
                             glAlphaFunc GL_GREATER, 0.5
                             glEnable GL_ALPHA_TEST
                         End Select
+                        If .alphaTest > 0 Then
+                            glAlphaFunc GL_GREATER, .alphaTest
+                            glEnable GL_ALPHA_TEST
+                        End If
+                        If .twoSided Then
+                            glDisable GL_CULL_FACE
+                        End If
                         
                         'bind texture
                         For j = 0 To .mapnum - 1
@@ -183,6 +187,7 @@ Dim texchans As Long
                         glActiveTexture GL_TEXTURE0
                         glDisable GL_ALPHA_TEST
                         glDisable GL_BLEND
+                        glEnable GL_CULL_FACE
                         glDepthMask GL_TRUE
                     Else
                         'fixed function pipeline
@@ -237,11 +242,11 @@ Dim texchans As Long
                                             glBlendFunc .layer(j).blendsrc, .layer(j).blenddst
                                             glEnable GL_BLEND
                                         End If
-                                        If .layer(j).alphatest Then
+                                        If .layer(j).alphaTest Then
                                             glEnable GL_ALPHA_TEST
                                             glAlphaFunc GL_GREATER, .layer(j).alpharef
                                         End If
-                                        If .layer(j).twosided Then
+                                        If .layer(j).twoSided Then
                                             glDisable GL_CULL_FACE
                                         End If
                                         If .layer(j).lighting And view_lighting Then

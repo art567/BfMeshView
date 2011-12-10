@@ -8,11 +8,11 @@ Public Type mat_layer
     blend As Boolean
     blendsrc As GLuint
     blenddst As GLuint
-    alphatest As Boolean
+    alphaTest As Boolean
     alpharef As Single
     depthfunc As GLenum
     depthWrite As GLboolean
-    twosided As Boolean
+    twoSided As Boolean
     lighting As Boolean
 End Type
 
@@ -91,6 +91,12 @@ Public Type bf2mat
     hasWreck As Boolean
     hasAnimatedUV As Boolean
     hasBumpAlpha As Boolean
+    hasDirt As Boolean
+    hasCrack As Boolean
+    hasCrackN As Boolean
+    hasDetailN As Boolean
+    alphaTest As Single
+    twoSided As Boolean
 End Type
 
 
