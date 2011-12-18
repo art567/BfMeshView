@@ -12,7 +12,7 @@ Public Type mat_layer
     alpharef As Single
     depthfunc As GLenum
     depthWrite As GLboolean
-    twoSided As Boolean
+    twosided As Boolean
     lighting As Boolean
 End Type
 
@@ -95,8 +95,9 @@ Public Type bf2mat
     hasCrack As Boolean
     hasCrackN As Boolean
     hasDetailN As Boolean
+    hasEnvMap As Boolean
     alphaTest As Single
-    twoSided As Boolean
+    twosided As Boolean
 End Type
 
 

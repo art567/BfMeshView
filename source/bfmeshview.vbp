@@ -62,6 +62,7 @@ Form=frmBake.frm
 Module=a_Selection; a_Selection.bas
 Module=a_GLSL; modGLSL.bas
 Module=a_Shader; modShader.bas
+Module=a_EnvMap; a_EnvMap.bas
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""

@@ -700,6 +700,9 @@ Private Sub Form_Load()
     'init extensions
     glextInit
     
+    'get max anisotropy value
+    glGetFloatv GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxaniso
+    
     'default states
     glTexEnvi GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE
     glLightModeli GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE
@@ -1083,7 +1086,10 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
     Case vbKeyControl: keyctrl = True
     Case vbKeyMenu:    keyalt = True
     Case vbKeyShift:   keyshift = True
-    Case vbKeyF12: GetReport
+    Case vbKeyF12:
+        ReloadEnvMap
+        SetStatus "info", "EnvMap reloaded..."
+        picMain_Paint
     End Select
 End Sub
 

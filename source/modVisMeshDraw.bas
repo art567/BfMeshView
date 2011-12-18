@@ -169,15 +169,22 @@ Dim texchans As Long
                             glAlphaFunc GL_GREATER, .alphaTest
                             glEnable GL_ALPHA_TEST
                         End If
-                        If .twoSided Then
+                        If .twosided Then
                             glDisable GL_CULL_FACE
                         End If
                         
-                        'bind texture
+                        'bind textures
                         For j = 0 To .mapnum - 1
                             glActiveTexture GL_TEXTURE0 + j
+                            glClientActiveTexture GL_TEXTURE0 + j
                             glBindTexture GL_TEXTURE_2D, texmap(.texmapid(j)).tex
+                            glBindTexture GL_TEXTURE_CUBE_MAP, 0
                         Next j
+                        If .hasEnvMap Then
+                            glActiveTexture GL_TEXTURE0 + envmapchan
+                            glClientActiveTexture GL_TEXTURE0 + envmapchan
+                            glBindTexture GL_TEXTURE_CUBE_MAP, envmapTex
+                        End If
                         
                         'draw
                         drawfacesX .vstart, .vnum, .istart, .inum
@@ -246,7 +253,7 @@ Dim texchans As Long
                                             glEnable GL_ALPHA_TEST
                                             glAlphaFunc GL_GREATER, .layer(j).alpharef
                                         End If
-                                        If .layer(j).twoSided Then
+                                        If .layer(j).twosided Then
                                             glDisable GL_CULL_FACE
                                         End If
                                         If .layer(j).lighting And view_lighting Then

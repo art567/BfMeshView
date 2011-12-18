@@ -1,6 +1,7 @@
 Attribute VB_Name = "a_Misc"
 Option Explicit
 
+Public maxaniso As Single
 Public uveditor_isloaded As Boolean
 
 Public Type color3f

@@ -48,12 +48,13 @@ End Function
 
 '...
 Public Sub SetUniforms(ByRef prog As GLuint, ByRef mat As bf2mat)
-
+    
     'texture handles
     Dim i As Long
     For i = 0 To 7
         SetUniform1i prog, "texture" & i, i
     Next i
+    SetUniform1i prog, "envmap", envmapChan
     
     'uniforms
     SetUniform3f prog, "eyeposworld", FlipX(eyeposworld)
@@ -67,6 +68,7 @@ Public Sub SetUniforms(ByRef prog As GLuint, ByRef mat As bf2mat)
     SetUniform1i prog, "hasCrack", Bool2Int(mat.hasCrack)
     SetUniform1i prog, "hasCrackN", Bool2Int(mat.hasCrackN)
     SetUniform1i prog, "hasDetailN", Bool2Int(mat.hasDetailN)
+    SetUniform1i prog, "hasEnvMap", Bool2Int(mat.hasEnvMap)
     SetUniform1i prog, "showLighting", Bool2Int(view_lighting)
     SetUniform1i prog, "showDiffuse", Bool2Int(view_textures)
     SetNodeTransforms prog, "nodetransform"

@@ -50,6 +50,10 @@ End Type
 Public Function LoadDDS(ByVal filename As String) As GLuint
     On Error GoTo errorhandler
     
+    'bugfix?
+    glActiveTexture GL_TEXTURE0
+    glClientActiveTexture GL_TEXTURE0
+    
     Echo "DDS: " & Chr(34) & filename & Chr(34)
     
     ''If GLEW_EXT_texture_compression_s3tc Then
@@ -167,9 +171,7 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     End If
     
     'anisotropic filtering
-    Dim maxas As Single
-    glGetFloatv GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxas
-    glTexParameterf GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxas
+    glTexParameterf GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxaniso
     
     'upload mipmaps
     Dim offset As Long
@@ -218,5 +220,5 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     LoadDDS = texname
     Exit Function
 errorhandler:
-    MsgBox "LoadDDS" & vbLf & Err.Description, vbCritical
+    MsgBox "LoadDDS" & vbLf & err.description, vbCritical
 End Function

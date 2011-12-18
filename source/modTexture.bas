@@ -238,10 +238,12 @@ Public Sub BindTexture(ByVal id As Long)
     End If
     glBindTexture GL_TEXTURE_2D, texmap(id).tex
     glEnable GL_TEXTURE_2D
+    glDisable GL_TEXTURE_CUBE_MAP
 End Sub
 Public Sub UnbindTexture()
     glBindTexture GL_TEXTURE_2D, 0
     glDisable GL_TEXTURE_2D
+    glDisable GL_TEXTURE_CUBE_MAP
 End Sub
 
 

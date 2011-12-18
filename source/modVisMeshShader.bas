@@ -158,6 +158,12 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
                 .hasAnimatedUV = True
             End If
             
+            'envmap
+            If InStr(1, LCase(.technique), "envmap", vbTextCompare) > 0 Then
+                .hasenvmap = True
+                LoadEnvMap
+            End If
+            
             'alpha in bumpmap, dunno how BF2 detects this
             If .alphamode > 0 And LCase(.technique) = "alpha_testcolormapgloss" Then
                 .hasBumpAlpha = True
@@ -241,7 +247,7 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
                     
                     .glslprog = leaf.prog
                     .alphaTest = 0.5
-                    .twoSided = True
+                    .twosided = True
                     
                     .layernum = 1
                     .layer(1).texcoff = 0
@@ -250,7 +256,7 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
                     .layer(1).depthWrite = GL_TRUE
                     .layer(1).alphaTest = True
                     .layer(1).alpharef = 0.25
-                    .layer(1).twoSided = True
+                    .layer(1).twosided = True
                 Else
                     .layernum = 1
                     SetBase mat, 1

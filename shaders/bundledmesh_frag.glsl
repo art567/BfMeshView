@@ -4,10 +4,12 @@ uniform sampler2D texture0; // diffuse
 uniform sampler2D texture1; // normal
 //uniform sampler2D texture2; // SpecularLUT
 uniform sampler2D texture3; // wreck
+uniform samplerCube envmap; // envmap
 
 uniform int hasBump;
 uniform int hasWreck;
 uniform int hasAlpha;
+uniform int hasEnvMap;
 uniform int hasBumpAlpha;
 uniform int showDiffuse;
 uniform int showLighting;
@@ -89,11 +91,22 @@ void main()
  }
  
  // lighting
+ float NdotL = dot(n,normalize(-sunvec));
  if (showLighting > 0) {
-  float NdotL = dot(n,normalize(-sunvec));
   frag.rgb *= sunambient.rgb + sundiffuse.rgb * max(NdotL,0.0);
-  
-  // specular
+ }
+ 
+ // envmap
+ if (hasEnvMap > 0) {
+  vec3 v = normalize( eyepos - fragpos );
+  vec3 ref = reflect(v, normalize(norm) );
+  vec4 env = textureCube(envmap, ref);
+  frag.rgb = mix(frag.rgb, env.rgb, colormap.a);
+  //frag.rgb = env.rgb;
+ }
+ 
+ // specular
+ if (showLighting > 0) {
   if (NdotL > 0.0) {
    
    // half vector
@@ -107,6 +120,8 @@ void main()
    frag.rgb += sunspecular * spec;
   }
  }
+ 
+ //frag.rgb = vec3(colormap.a);
  
  // output
  gl_FragColor = frag;

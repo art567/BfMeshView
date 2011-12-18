@@ -29,6 +29,10 @@ Dim intformat As GLint
 Dim errstr As String
     On Error GoTo errorhandler
     
+    'bugfix?
+    glActiveTexture GL_TEXTURE0
+    glClientActiveTexture GL_TEXTURE0
+    
     'check if file exists
     If Not FileExist(filename) Then
         MsgBox "File " & Chr(34) & filename & Chr(34) & " not found.", vbExclamation
@@ -141,6 +145,7 @@ Dim errstr As String
     glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
     glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
     glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    glTexParameterf GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxaniso
     'glTexParameteri GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE
     gluBuild2DMipmaps GL_TEXTURE_2D, intformat, header.width, header.height, format, GL_UNSIGNED_BYTE, ByVal VarPtr(fdata(0))
     
