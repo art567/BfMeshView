@@ -25,6 +25,7 @@ varying vec4 boneinfo;
 
 varying vec3 eyepos;
 varying vec3 fragpos;
+varying float debug;
 
 void main()
 {
@@ -42,6 +43,9 @@ void main()
  vec4 colormap = texture2D(texture0, uv);
  vec4 normalmap = texture2D(texture1, uv);
  vec4 wreckmap = texture2D(texture3, uv);
+ 
+ // vertex normal
+ vec3 vertNorm = normalize(norm);
  
  // diffuse
  if (showDiffuse > 0) {
@@ -71,7 +75,7 @@ void main()
   n = normalize(normalmap.rgb * 2.0 - 1.0);
  } else {
   // vertex normal
-  n = normalize(norm);
+  n = vertNorm;
  }
  
  // specular
@@ -90,6 +94,14 @@ void main()
   spec *= wreckmap.rgb;
  }
  
+ // glass
+ if (hasAlpha > 0) {
+  if (hasEnvMap > 0) {
+   vec3 v = normalize( eyepos - fragpos );
+   frag.a += max(0.0, 1.0-dot(vertNorm,v));
+  }
+ }
+ 
  // lighting
  float NdotL = dot(n,normalize(-sunvec));
  if (showLighting > 0) {
@@ -99,42 +111,42 @@ void main()
  // envmap
  if (hasEnvMap > 0) {
   vec3 v = normalize( eyepos - fragpos );
-  vec3 ref = reflect(v, normalize(norm) );
+  vec3 ref = reflect(v, vertNorm);
   vec4 env = textureCube(envmap, ref);
   frag.rgb = mix(frag.rgb, env.rgb, colormap.a);
-  //frag.rgb = env.rgb;
  }
  
  // specular
  if (showLighting > 0) {
   if (NdotL > 0.0) {
    
+   //spec = vec3(1.0, 0.0, 0.0);
+   
    // half vector
    vec3 hv = normalize( -sunvec + eyesurfvec );
    
    // compute specular amount
    float NdotHV = max(dot(n,hv),0.0);
-   spec *= pow(NdotHV,100.0);
+   float specPow = pow(NdotHV,100.0);
+   spec *= specPow;
    
    // apply specular
    frag.rgb += sunspecular * spec;
+   
+   // glass specular
+   if (hasEnvMap > 0) {
+    if (hasAlpha > 0) {
+     frag.a += specPow;
+    }
+   }
+   
   }
  }
  
- //frag.rgb = vec3(colormap.a);
- 
  // output
  gl_FragColor = frag;
- //gl_FragColor = vec4(1.0, 0.1, 0.1, 1.0);
- //gl_FragColor = vec4(n,1.0);
- //gl_FragColor = wreckmap;
- //gl_FragColor = vec4(sunvec,1.0);
- //gl_FragColor = vec4(boneid*10.0);
- //gl_FragColor = boneinfo * 10.0;
- //gl_FragColor = vec4(hasAlpha);
- //gl_FragColor = colormap * normalmap;
- //gl_FragColor.rgb = normalize(eyesurfvec) * 0.5 + 0.5;
- //gl_FragColor.rgb = vec3(distance(eyepos,fragpos));
  
- //gl_FragColor = vec4(vec3(hasBumpAlpha),1.0);
+ //gl_FragColor = vec4(vec3(normalize( eyepos - fragpos )),1.0);
+ //gl_FragColor = vec4(vertNorm*0.5+0.5,1.0);
+ //gl_FragColor.rgb = vec3(debug * 0.5 + 0.5);
 }

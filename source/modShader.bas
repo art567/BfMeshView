@@ -59,16 +59,16 @@ Public Sub SetUniforms(ByRef prog As GLuint, ByRef mat As bf2mat)
     'uniforms
     SetUniform3f prog, "eyeposworld", FlipX(eyeposworld)
     SetUniform3f prog, "eyevecworld", FlipX(eyevecworld)
-    SetUniform1i prog, "hasBump", Bool2Int(mat.hasBump)
+    SetUniform1i prog, "hasBump", Bool2Int(mat.hasBump And view_bumpmap)
     SetUniform1i prog, "hasWreck", Bool2Int(mat.hasWreck)
     SetUniform1i prog, "hasAnimatedUV", Bool2Int(mat.hasAnimatedUV)
     SetUniform1i prog, "hasAlpha", Bool2Int(mat.alphamode > 0)
     SetUniform1i prog, "hasBumpAlpha", Bool2Int(mat.hasBumpAlpha)
     SetUniform1i prog, "hasDirt", Bool2Int(mat.hasDirt)
     SetUniform1i prog, "hasCrack", Bool2Int(mat.hasCrack)
-    SetUniform1i prog, "hasCrackN", Bool2Int(mat.hasCrackN)
-    SetUniform1i prog, "hasDetailN", Bool2Int(mat.hasDetailN)
-    SetUniform1i prog, "hasEnvMap", Bool2Int(mat.hasEnvMap)
+    SetUniform1i prog, "hasCrackN", Bool2Int(mat.hasCrackN And view_bumpmap)
+    SetUniform1i prog, "hasDetailN", Bool2Int(mat.hasDetailN And view_bumpmap)
+    SetUniform1i prog, "hasEnvMap", Bool2Int(mat.hasEnvMap And view_envmap)
     SetUniform1i prog, "showLighting", Bool2Int(view_lighting)
     SetUniform1i prog, "showDiffuse", Bool2Int(view_textures)
     SetNodeTransforms prog, "nodetransform"
@@ -104,7 +104,7 @@ End Sub
 
 'DICE crap is flipped on X axis
 Public Function FlipX(ByRef v As float3) As float3
-    FlipX = float3(-v.X, v.y, v.z)
+    FlipX = float3(-v.x, v.y, v.z)
 End Function
 
 'converts boolean to float

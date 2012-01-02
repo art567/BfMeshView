@@ -198,6 +198,7 @@ Public Type bf2mesh
     loadok As Boolean        'mesh loaded properly
     drawok As Boolean        'mesh rendered properly
     xstride As Long          'vertstride / 4
+    xtan() As float4         'corrected tangents
     uvnum As Long            'number of detected uv channels
     
     vertinfo() As bf2vertinfo

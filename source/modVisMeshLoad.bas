@@ -13,8 +13,8 @@ Public Function LoadBF2Mesh(ByRef filename As String) As Boolean
         Exit Function
     End If
     
-Dim i As Long
-Dim j As Long
+    Dim i As Long
+    Dim j As Long
     
     'open file
     Dim ff As Integer
@@ -176,6 +176,7 @@ Dim j As Long
     
     'generate some useful stuff
     GenVertInfo
+    BF2ComputeTangents
     
     'reset node transforms
     nodetransformnum = 40

@@ -44,8 +44,10 @@ Public Sub LoadDefaultConfig()
     view_bounds = False
     view_bonesys = False
     view_samples = True
-    view_axis = True
+    view_axis = False
     view_grids = True
+    view_envmap = True
+    view_bumpmap = True
     
     bgcolor.r = 0.25
     bgcolor.g = 0.25
@@ -182,6 +184,9 @@ Dim skip As Boolean
                 Case "view_samples":    view_samples = val(str(1))
                 Case "view_axis":       view_axis = val(str(1))
                 Case "view_grids":      view_grids = val(str(1))
+                Case "view_envmap":     view_envmap = val(str(1))
+                Case "view_bumpmap":    view_bumpmap = val(str(1))
+
                 End Select
             End If
             
@@ -264,6 +269,8 @@ Dim backup As Boolean
     Print #ff, "view_samples=" & Abs(view_samples)
     Print #ff, "view_axis=" & Abs(view_axis)
     Print #ff, "view_grids=" & Abs(view_grids)
+    Print #ff, "view_envmap=" & Abs(view_envmap)
+    Print #ff, "view_bumpmap=" & Abs(view_bumpmap)
     Print #ff, ""
     
     'lighting renderer

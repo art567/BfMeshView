@@ -108,8 +108,8 @@ Dim n As float3
     With vmesh
         
         'get vertex
-        v.X = .vert(i + 0)
-        v.Y = .vert(i + 1)
+        v.x = .vert(i + 0)
+        v.y = .vert(i + 1)
         v.z = .vert(i + 2)
         
         'compute normal
@@ -117,8 +117,8 @@ Dim n As float3
         n = Normalize(v)
         
         'replace old normal
-        .vert(i + 3 + 0) = n.X
-        .vert(i + 3 + 1) = n.Y
+        .vert(i + 3 + 0) = n.x
+        .vert(i + 3 + 1) = n.y
         .vert(i + 3 + 2) = n.z
         
     End With
@@ -423,3 +423,220 @@ Public Sub BF2DeleteLod(ByRef geom As Long, ByRef lod As Long)
     frmMain.picMain_Paint
 End Sub
 
+
+Private Function GetVert(ByVal i As Long) As float3
+    With vmesh
+        GetVert.x = .vert(i * .xstride + 0)
+        GetVert.y = .vert(i * .xstride + 1)
+        GetVert.z = .vert(i * .xstride + 2)
+    End With
+End Function
+
+Private Function GetNorm(ByVal i As Long) As float3
+    With vmesh
+        GetNorm.x = .vert(i * .xstride + 3 + 0)
+        GetNorm.y = .vert(i * .xstride + 3 + 1)
+        GetNorm.z = .vert(i * .xstride + 3 + 2)
+    End With
+End Function
+
+Private Function GetTexc(ByVal i As Long) As float2
+    With vmesh 'note: the '7' may not be entirely safe
+        GetTexc.x = .vert(i * .xstride + 7 + 0)
+        GetTexc.y = .vert(i * .xstride + 7 + 1)
+    End With
+End Function
+
+
+'computes bi-tangents
+Public Sub BF2ComputeTangents()
+    With vmesh
+        If Not .loadok Then Exit Sub
+        
+        Dim i As Long
+        
+        Dim stride As Long
+        stride = .vertstride / 4
+        
+        Dim normoff As Long
+        Dim tangoff As Long
+        normoff = BF2MeshGetNormOffset()
+        tangoff = BF2MeshGetTangOffset()
+        
+        'allocate
+        ReDim .xtan(0 To .vertnum - 1)
+        For i = 0 To .vertnum - 1
+            .xtan(i).w = 0
+        Next i
+        
+        If 111 = 666 Then
+        
+            'temp tangent array
+            ReDim tan1(0 To .vertnum - 1) As float3
+            ReDim tan2(0 To .vertnum - 1) As float3
+            For i = 0 To .vertnum - 1
+                ClearFloat3 tan1(i)
+                ClearFloat3 tan2(i)
+            Next i
+            
+            'compute tangents
+            Dim facenum As Long
+            facenum = .indexnum / 3
+            For i = 0 To facenum - 1
+                
+                Dim i1 As Long
+                Dim i2 As Long
+                Dim i3 As Long
+                i1 = .Index(i * 3 + 0)
+                i2 = .Index(i * 3 + 1)
+                i3 = .Index(i * 3 + 2)
+                
+                Dim v1 As float3
+                Dim v2 As float3
+                Dim v3 As float3
+                v1 = GetVert(i1)
+                v2 = GetVert(i2)
+                v3 = GetVert(i3)
+                
+                Dim uv1 As float2
+                Dim uv2 As float2
+                Dim uv3 As float2
+                uv1 = GetTexc(i1)
+                uv2 = GetTexc(i2)
+                uv3 = GetTexc(i3)
+                
+                Dim x1 As Single
+                Dim x2 As Single
+                Dim y1 As Single
+                Dim y2 As Single
+                Dim z1 As Single
+                Dim z2 As Single
+                x1 = v2.x - v1.x
+                x2 = v3.x - v1.x
+                y1 = v2.y - v1.y
+                y2 = v3.y - v1.y
+                z1 = v2.z - v1.z
+                z2 = v3.z - v1.z
+                
+                Dim s1 As Single
+                Dim s2 As Single
+                s1 = uv2.x - uv1.x
+                s2 = uv3.x - uv1.x
+                
+                Dim t1 As Single
+                Dim t2 As Single
+                t1 = uv2.y - uv1.y
+                t2 = uv3.y - uv1.y
+                
+                Dim r As Single
+                r = 1 / (s1 * t2 - s2 * t1)
+                
+                Dim sdir As float3
+                sdir.x = (t2 * x1 - t1 * x2) * r
+                sdir.y = (t2 * y1 - t1 * y2) * r
+                sdir.z = (t2 * z1 - t1 * z2) * r
+                
+                Dim tdir As float3
+                tdir.x = (s1 * x2 - s2 * x1) * r
+                tdir.y = (s1 * y2 - s2 * y1) * r
+                tdir.z = (s1 * z2 - s2 * z1) * r
+                
+                tan1(i1) = AddFloat3(tan1(i1), sdir)
+                tan1(i2) = AddFloat3(tan1(i2), sdir)
+                tan1(i3) = AddFloat3(tan1(i3), sdir)
+                
+                tan2(i1) = AddFloat3(tan2(i1), tdir)
+                tan2(i2) = AddFloat3(tan2(i2), tdir)
+                tan2(i3) = AddFloat3(tan2(i3), tdir)
+                
+            Next i
+            
+            'ortho-normalize
+            For i = 0 To .vertnum - 1
+                Dim n As float3
+                n = GetNorm(i)
+                
+                '// Gram-Schmidt orthogonalize
+                Dim t As float3
+                t = Normalize(SubFloat3(tan1(i), ScaleFloat3(n, DotProduct(n, tan1(i)))))
+                't = Normalize(tan1(i))
+                .xtan(i).x = t.x
+                .xtan(i).y = t.y
+                .xtan(i).z = t.z
+                
+                '.xtan(i).x = tan1(i).x
+                '.xtan(i).y = tan1(i).y
+                '.xtan(i).z = tan1(i).z
+                
+                'calculate handedness
+                '.xtan.w = (DotProduct(CrossProduct(n, t), tt2[i]) < 0.0) ? -1.0 : 1.0;
+                .xtan(i).w = 1
+                
+            Next i
+                  
+        Else
+            
+            'Dim facenum As Long
+            facenum = .indexnum / 3
+            For i = 0 To facenum - 1
+                
+                'Dim i1 As Long
+                'Dim i2 As Long
+                'Dim i3 As Long
+                i1 = .Index(i * 3 + 0)
+                i2 = .Index(i * 3 + 1)
+                i3 = .Index(i * 3 + 2)
+                
+                'Dim uv1 As float2
+                'Dim uv2 As float2
+                'Dim uv3 As float2
+                uv1 = GetTexc(i1)
+                uv2 = GetTexc(i2)
+                uv3 = GetTexc(i3)
+                
+                Dim s As Single
+                s = TriangleSign(uv1, uv2, uv3)
+                .xtan(i1).w = .xtan(i1).w + s
+                .xtan(i2).w = .xtan(i2).w + s
+                .xtan(i3).w = .xtan(i3).w + s
+            Next i
+            
+            'copy tangs
+            For i = 0 To .vertnum - 1
+                
+                'get tangent
+                'Dim t As float3
+                t.x = vmesh.vert(i * stride + tangoff + 0)
+                t.y = vmesh.vert(i * stride + tangoff + 1)
+                t.z = vmesh.vert(i * stride + tangoff + 2)
+                
+                'normalize
+                Dim w As Single
+                w = .xtan(i).w
+                If w < 0 Then w = -1
+                If w > 0 Then w = 1
+                If w = 0 Then w = 1
+                
+                'store
+                .xtan(i).x = t.x
+                .xtan(i).y = t.y
+                .xtan(i).z = t.z
+                .xtan(i).w = w
+                
+            Next i
+        End If
+        
+    End With
+End Sub
+
+
+'returns sign of triangle
+Private Function TriangleSign(ByRef v1 As float2, ByRef v2 As float2, ByRef v3 As float2) As Single
+    If ((v2.y - v1.y) - (v2.x - v1.x)) + _
+       ((v3.y - v2.y) - (v3.x - v2.x)) + _
+       ((v1.y - v3.y) - (v1.x - v3.x)) > 0 Then
+        TriangleSign = 1
+    Else
+        TriangleSign = -1
+    End If
+End Function

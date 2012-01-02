@@ -16,6 +16,7 @@ varying vec3 sunvec;
 varying vec4 boneinfo;
 varying vec3 eyepos;
 varying vec3 fragpos;
+varying float debug;
 
 void main()
 {
@@ -38,6 +39,7 @@ void main()
  }
  
  // normal
+ norm = (nodetransform[ nodeid ] * vec4(gl_Normal,0.0)).xyz;
  norm = gl_Normal;
  
  // transform eye position to node space
@@ -52,12 +54,14 @@ void main()
  // tangent
  if (hasBump > 0) {
   
+  //float w = -1.0; //gl_MultiTexCoord5.w;
+  
   // compute tangents
   vec3 tan1 = gl_MultiTexCoord5.xyz;
-  vec3 tan2 = cross(norm,-tan1);
+  vec3 tan2 = cross(gl_Normal,-tan1) ;//* gl_MultiTexCoord5.w;
   
   // create tangent space rotation matrix
-  mat3 rotmat = mat3(tan1,tan2,norm);
+  mat3 rotmat = mat3(tan1,tan2,gl_Normal);
   
   // rotate local space sun vector to tangent space
   sunvec = sunvec * rotmat;
@@ -70,10 +74,8 @@ void main()
  
  eyepos = eyeposworld;
  fragpos = vert.xyz;
+ debug = gl_MultiTexCoord5.w;
  
  // vertex position
- //gl_Position = gl_ModelViewProjectionMatrix * vert;
- vec4 v = gl_ModelViewMatrix * vert;
- v.w -= 0.01;
- gl_Position = gl_ProjectionMatrix * v;
+ gl_Position = gl_ModelViewProjectionMatrix * vert;
 }

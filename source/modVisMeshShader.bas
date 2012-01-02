@@ -142,6 +142,9 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             .hasWreck = False
             .hasAnimatedUV = False
             .hasBumpAlpha = False
+            .hasEnvMap = False
+            .alphaTest = 0
+            .twosided = False
             
             If .mapnum = 3 Then
                 If InString(.map(1), "SpecularLUT") Then
@@ -160,7 +163,7 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             
             'envmap
             If InStr(1, LCase(.technique), "envmap", vbTextCompare) > 0 Then
-                .hasenvmap = True
+                .hasEnvMap = True
                 LoadEnvMap
             End If
             
@@ -210,6 +213,14 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
         'STATICMESH
         Case "staticmesh.fx"
             .glslprog = staticmesh.prog
+            .hasDirt = False
+            .hasCrack = False
+            .hasCrackN = False
+            .hasDetailN = False
+            .hasEnvMap = False
+            .alphaTest = 0
+            .twosided = False
+            
             .hasBump = True
             If InStr(1, .technique, "Dirt", vbTextCompare) Then .hasDirt = True
             If InStr(1, .technique, "Crack", vbTextCompare) Then .hasCrack = True

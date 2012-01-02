@@ -6,26 +6,26 @@ Public Const RADTODEG As Single = (180 / PI)
 Public Const DEGTORAD As Single = (PI / 180)
 
 Public Type float2
-    X As Single
-    Y As Single
+    x As Single
+    y As Single
 End Type
 
 Public Type float3
-    X As Single
-    Y As Single
+    x As Single
+    y As Single
     z As Single
 End Type
 
 Public Type float4
-    X As Single
-    Y As Single
+    x As Single
+    y As Single
     z As Single
     w As Single
 End Type
 
 Public Type quat
-    X As Single
-    Y As Single
+    x As Single
+    y As Single
     z As Single
     w As Single
 End Type
@@ -57,17 +57,17 @@ Public Sub mat4identity(ByRef m As matrix4)
 End Sub
 
 Public Sub mat4setrot(ByRef m As matrix4, ByRef q As quat)
-    m.m(0) = (1 - (2 * ((q.Y * q.Y) + (q.z * q.z))))
-    m.m(1) = (2 * ((q.X * q.Y) + (q.z * q.w)))
-    m.m(2) = (2 * ((q.X * q.z) - (q.Y * q.w)))
+    m.m(0) = (1 - (2 * ((q.y * q.y) + (q.z * q.z))))
+    m.m(1) = (2 * ((q.x * q.y) + (q.z * q.w)))
+    m.m(2) = (2 * ((q.x * q.z) - (q.y * q.w)))
     m.m(3) = 0
-    m.m(4) = (2 * ((q.X * q.Y) - (q.z * q.w)))
-    m.m(5) = (1 - (2 * ((q.X * q.X) + (q.z * q.z))))
-    m.m(6) = (2 * ((q.Y * q.z) + (q.X * q.w)))
+    m.m(4) = (2 * ((q.x * q.y) - (q.z * q.w)))
+    m.m(5) = (1 - (2 * ((q.x * q.x) + (q.z * q.z))))
+    m.m(6) = (2 * ((q.y * q.z) + (q.x * q.w)))
     m.m(7) = 0
-    m.m(8) = (2 * ((q.X * q.z) + (q.Y * q.w)))
-    m.m(9) = (2 * ((q.Y * q.z) - (q.X * q.w)))
-    m.m(10) = (1 - (2 * ((q.X * q.X) + (q.Y * q.Y))))
+    m.m(8) = (2 * ((q.x * q.z) + (q.y * q.w)))
+    m.m(9) = (2 * ((q.y * q.z) - (q.x * q.w)))
+    m.m(10) = (1 - (2 * ((q.x * q.x) + (q.y * q.y))))
     m.m(11) = 0
 End Sub
 
@@ -79,10 +79,10 @@ Public Sub mat4setrotYXZ(ByRef m As matrix4, ByRef r As float3)
     Dim cz As Single
     Dim sz As Single
     
-    cx = Cos(r.X * DEGTORAD)
-    sx = Sin(r.X * DEGTORAD)
-    cy = Cos(r.Y * DEGTORAD)
-    sy = Sin(r.Y * DEGTORAD)
+    cx = Cos(r.x * DEGTORAD)
+    sx = Sin(r.x * DEGTORAD)
+    cy = Cos(r.y * DEGTORAD)
+    sy = Sin(r.y * DEGTORAD)
     cz = Cos(r.z * DEGTORAD)
     sz = Sin(r.z * DEGTORAD)
     
@@ -100,27 +100,27 @@ Public Sub mat4setrotYXZ(ByRef m As matrix4, ByRef r As float3)
 End Sub
 
 Public Sub mat4setpos(ByRef m As matrix4, ByRef pos As float3)
-    m.m(12) = pos.X
-    m.m(13) = pos.Y
+    m.m(12) = pos.x
+    m.m(13) = pos.y
     m.m(14) = pos.z
 End Sub
 
 Public Function mat4getpos(ByRef m As matrix4) As float3
-    mat4getpos.X = m.m(12)
-    mat4getpos.Y = m.m(13)
+    mat4getpos.x = m.m(12)
+    mat4getpos.y = m.m(13)
     mat4getpos.z = m.m(14)
 End Function
 
 Public Function mat4rotvec(ByRef m As matrix4, ByRef v As float3) As float3
-    mat4rotvec.X = (m.m(0) * v.X + m.m(4) * v.Y + m.m(8) * v.z)
-    mat4rotvec.Y = (m.m(1) * v.X + m.m(5) * v.Y + m.m(9) * v.z)
-    mat4rotvec.z = (m.m(2) * v.X + m.m(6) * v.Y + m.m(10) * v.z)
+    mat4rotvec.x = (m.m(0) * v.x + m.m(4) * v.y + m.m(8) * v.z)
+    mat4rotvec.y = (m.m(1) * v.x + m.m(5) * v.y + m.m(9) * v.z)
+    mat4rotvec.z = (m.m(2) * v.x + m.m(6) * v.y + m.m(10) * v.z)
 End Function
 
 Public Function mat4transvec(ByRef m As matrix4, ByRef v As float3) As float3
-    mat4transvec.X = (m.m(0) * v.X + m.m(4) * v.Y + m.m(8) * v.z) + m.m(12)
-    mat4transvec.Y = (m.m(1) * v.X + m.m(5) * v.Y + m.m(9) * v.z) + m.m(13)
-    mat4transvec.z = (m.m(2) * v.X + m.m(6) * v.Y + m.m(10) * v.z) + m.m(14)
+    mat4transvec.x = (m.m(0) * v.x + m.m(4) * v.y + m.m(8) * v.z) + m.m(12)
+    mat4transvec.y = (m.m(1) * v.x + m.m(5) * v.y + m.m(9) * v.z) + m.m(13)
+    mat4transvec.z = (m.m(2) * v.x + m.m(6) * v.y + m.m(10) * v.z) + m.m(14)
 End Function
 
 Public Function mat4mult(ByRef a As matrix4, ByRef b As matrix4) As matrix4
@@ -150,54 +150,54 @@ Public Sub mat4lookat(ByRef m As matrix4, ByRef dir As float3, ByRef up As float
     Dim vy As float3
     Dim vz As float3
     
-    vz.X = -dir.X
-    vz.Y = -dir.Y
+    vz.x = -dir.x
+    vz.y = -dir.y
     vz.z = -dir.z
     vz = Normalize(vz)
     vx = Normalize(CrossProduct(up, vz))    'x = up cross z
     vy = CrossProduct(vz, vx)               ' y = z cross x
     
-    m.m(0) = vx.X
-    m.m(1) = vx.Y
+    m.m(0) = vx.x
+    m.m(1) = vx.y
     m.m(2) = vx.z
-    m.m(4) = vy.X
-    m.m(5) = vy.Y
+    m.m(4) = vy.x
+    m.m(5) = vy.y
     m.m(6) = vy.z
-    m.m(8) = vz.X
-    m.m(9) = vz.Y
+    m.m(8) = vz.x
+    m.m(9) = vz.y
     m.m(10) = vz.z
 End Sub
 
-Public Function float2(ByVal X As Single, ByVal Y As Single) As float2
-    float2.X = X
-    float2.Y = Y
+Public Function float2(ByVal x As Single, ByVal y As Single) As float2
+    float2.x = x
+    float2.y = y
 End Function
 
-Public Function float3(ByVal X As Single, ByVal Y As Single, ByVal z As Single) As float3
-    float3.X = X
-    float3.Y = Y
+Public Function float3(ByVal x As Single, ByVal y As Single, ByVal z As Single) As float3
+    float3.x = x
+    float3.y = y
     float3.z = z
 End Function
 
-Public Function float4(ByVal X As Single, ByVal Y As Single, ByVal z As Single, ByVal w As Single) As float4
-    float4.X = X
-    float4.Y = Y
+Public Function float4(ByVal x As Single, ByVal y As Single, ByVal z As Single, ByVal w As Single) As float4
+    float4.x = x
+    float4.y = y
     float4.z = z
     float4.w = w
 End Function
 
 Public Function DotProduct(ByRef vector1 As float3, ByRef vector2 As float3) As Single
-    DotProduct = (vector1.X * vector2.X + vector1.Y * vector2.Y + vector1.z * vector2.z)
+    DotProduct = (vector1.x * vector2.x + vector1.y * vector2.y + vector1.z * vector2.z)
 End Function
 
 Public Function CrossProduct(ByRef vec1 As float3, ByRef vec2 As float3) As float3
-    CrossProduct.X = (vec1.Y * vec2.z) - (vec1.z * vec2.Y)
-    CrossProduct.Y = (vec1.z * vec2.X) - (vec1.X * vec2.z)
-    CrossProduct.z = (vec1.X * vec2.Y) - (vec1.Y * vec2.X)
+    CrossProduct.x = (vec1.y * vec2.z) - (vec1.z * vec2.y)
+    CrossProduct.y = (vec1.z * vec2.x) - (vec1.x * vec2.z)
+    CrossProduct.z = (vec1.x * vec2.y) - (vec1.y * vec2.x)
 End Function
 
 Public Function Distance(ByRef pos1 As float3, ByRef pos2 As float3) As Single
-    Distance = Sqr((pos1.X - pos2.X) ^ 2 + (pos1.Y - pos2.Y) ^ 2 + (pos1.z - pos2.z) ^ 2)
+    Distance = Sqr((pos1.x - pos2.x) ^ 2 + (pos1.y - pos2.y) ^ 2 + (pos1.z - pos2.z) ^ 2)
 End Function
 
 Public Function IsPowerOfTwo(ByVal value As Long) As Boolean
@@ -229,24 +229,31 @@ Public Function max(ByVal a As Single, ByVal b As Single) As Single
     End If
 End Function
 
+'clear
+Public Sub ClearFloat3(ByRef v As float3)
+    v.x = 0
+    v.y = 0
+    v.z = 0
+End Sub
+
 'add
 Public Function AddFloat3(ByRef a As float3, ByRef b As float3) As float3
-    AddFloat3.X = a.X + b.X
-    AddFloat3.Y = a.Y + b.Y
+    AddFloat3.x = a.x + b.x
+    AddFloat3.y = a.y + b.y
     AddFloat3.z = a.z + b.z
 End Function
 
 'subtract
 Public Function SubFloat3(ByRef a As float3, ByRef b As float3) As float3
-    SubFloat3.X = a.X - b.X
-    SubFloat3.Y = a.Y - b.Y
+    SubFloat3.x = a.x - b.x
+    SubFloat3.y = a.y - b.y
     SubFloat3.z = a.z - b.z
 End Function
 
 'multiply
 Public Function ScaleFloat3(ByRef v As float3, ByVal s As Single) As float3
-    ScaleFloat3.X = v.X * s
-    ScaleFloat3.Y = v.Y * s
+    ScaleFloat3.x = v.x * s
+    ScaleFloat3.y = v.y * s
     ScaleFloat3.z = v.z * s
 End Function
 
@@ -260,24 +267,24 @@ Public Function Rotate(ByRef Center As float3, ByRef position As float3, ByRef r
 Dim tmp As float3
 Dim pos As float3
 Dim rot As float3
-    rot.X = rotation.X / (180 / PI)
-    rot.Y = rotation.Y / (180 / PI)
+    rot.x = rotation.x / (180 / PI)
+    rot.y = rotation.y / (180 / PI)
     rot.z = rotation.z / (180 / PI)
-    pos.X = position.X - Center.X
-    pos.Y = position.Y - Center.Y
+    pos.x = position.x - Center.x
+    pos.y = position.y - Center.y
     pos.z = position.z - Center.z
-    tmp.Y = (pos.Y * Cos(rot.X)) - (pos.z * Sin(rot.X))
-    tmp.z = (pos.z * Cos(rot.X)) + (pos.Y * Sin(rot.X))
-    pos.Y = tmp.Y
+    tmp.y = (pos.y * Cos(rot.x)) - (pos.z * Sin(rot.x))
+    tmp.z = (pos.z * Cos(rot.x)) + (pos.y * Sin(rot.x))
+    pos.y = tmp.y
     pos.z = tmp.z
-    tmp.z = (pos.z * Cos(rot.Y)) - (pos.X * Sin(rot.Y))
-    tmp.X = (pos.X * Cos(rot.Y)) + (pos.z * Sin(rot.Y))
+    tmp.z = (pos.z * Cos(rot.y)) - (pos.x * Sin(rot.y))
+    tmp.x = (pos.x * Cos(rot.y)) + (pos.z * Sin(rot.y))
     pos.z = tmp.z
-    pos.X = tmp.X
-    tmp.X = (pos.X * Cos(rot.z)) - (pos.Y * Sin(rot.z))
-    tmp.Y = (pos.Y * Cos(rot.z)) + (pos.X * Sin(rot.z))
-    Rotate.X = tmp.X + Center.X
-    Rotate.Y = tmp.Y + Center.Y
+    pos.x = tmp.x
+    tmp.x = (pos.x * Cos(rot.z)) - (pos.y * Sin(rot.z))
+    tmp.y = (pos.y * Cos(rot.z)) + (pos.x * Sin(rot.z))
+    Rotate.x = tmp.x + Center.x
+    Rotate.y = tmp.y + Center.y
     Rotate.z = tmp.z + Center.z
 End Function
 
@@ -297,10 +304,10 @@ Static sy As Single
 Static srsp As Single
 Static crsp As Single
     
-    cr = Cos(PI * rot.X / 180)
-    sr = Sin(PI * rot.X / 180)
-    cp = Cos(PI * rot.Y / 180)
-    sp = Sin(PI * rot.Y / 180)
+    cr = Cos(PI * rot.x / 180)
+    sr = Sin(PI * rot.x / 180)
+    cp = Cos(PI * rot.y / 180)
+    sp = Sin(PI * rot.y / 180)
     cy = Cos(PI * rot.z / 180)
     sy = Sin(PI * rot.z / 180)
 
@@ -401,14 +408,14 @@ End Function
 
 'creates a vector from two points
 Public Function Vector3d(ByRef p1 As float3, ByRef p2 As float3) As float3
-    Vector3d.X = p1.X - p2.X
-    Vector3d.Y = p1.Y - p2.Y
+    Vector3d.x = p1.x - p2.x
+    Vector3d.y = p1.y - p2.y
     Vector3d.z = p1.z - p2.z
 End Function
 
 'returns magnitude of a vector
 Public Function Magnitude(ByRef vector As float3) As Single
-    Magnitude = Sqr(vector.X * vector.X + vector.Y * vector.Y + vector.z * vector.z)
+    Magnitude = Sqr(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
 End Function
 
 'rescales vector to the length of one
@@ -416,8 +423,8 @@ Public Function Normalize(ByRef vector As float3) As float3
 Dim m As Single
     m = Magnitude(vector)
     If m = 0 Then Exit Function 'prevent division by zero
-    Normalize.X = vector.X / m
-    Normalize.Y = vector.Y / m
+    Normalize.x = vector.x / m
+    Normalize.y = vector.y / m
     Normalize.z = vector.z / m
 End Function
 
@@ -441,15 +448,15 @@ Dim s As Single
 Dim t As Single
 Dim d As Single
     
-    d = ((t2.X - t1.X) * (t3.Y - t1.Y) - (t2.Y - t1.Y) * (t3.X - t1.X))
+    d = ((t2.x - t1.x) * (t3.y - t1.y) - (t2.y - t1.y) * (t3.x - t1.x))
     If d = 0 Then Exit Function 'prevent division by zero
     
     i = 1 / d
-    s = i * ((t3.Y - t1.Y) * (p.X - t1.X) - (t3.X - t1.X) * (p.Y - t1.Y))
+    s = i * ((t3.y - t1.y) * (p.x - t1.x) - (t3.x - t1.x) * (p.y - t1.y))
     't = i * ((t2.y - t1.y) * (p.x - t1.x) - (t1.x - t2.x) * (p.y - t1.y))
-    t = i * (-(t2.Y - t1.Y) * (p.X - t1.X) + (t2.X - t1.X) * (p.Y - t1.Y))
-    TexelToPoint.X = v1.X + s * (v2.X - v1.X) + t * (v3.X - v1.X)
-    TexelToPoint.Y = v1.Y + s * (v2.Y - v1.Y) + t * (v3.Y - v1.Y)
+    t = i * (-(t2.y - t1.y) * (p.x - t1.x) + (t2.x - t1.x) * (p.y - t1.y))
+    TexelToPoint.x = v1.x + s * (v2.x - v1.x) + t * (v3.x - v1.x)
+    TexelToPoint.y = v1.y + s * (v2.y - v1.y) + t * (v3.y - v1.y)
     TexelToPoint.z = v1.z + s * (v2.z - v1.z) + t * (v3.z - v1.z)
 End Function
 
@@ -480,9 +487,9 @@ Public Function TrianglePointDistCW(ByRef v1 As float2, ByRef v2 As float2, ByRe
 Dim d1 As Single
 Dim d2 As Single
 Dim d3 As Single
-    d1 = (p.X - v1.X) * (v2.Y - v1.Y) - (p.Y - v1.Y) * (v2.X - v1.X) - 1
-    d2 = (p.X - v2.X) * (v3.Y - v2.Y) - (p.Y - v2.Y) * (v3.X - v2.X) - 1
-    d3 = (p.X - v3.X) * (v1.Y - v3.Y) - (p.Y - v3.Y) * (v1.X - v3.X) - 1
+    d1 = (p.x - v1.x) * (v2.y - v1.y) - (p.y - v1.y) * (v2.x - v1.x) - 1
+    d2 = (p.x - v2.x) * (v3.y - v2.y) - (p.y - v2.y) * (v3.x - v2.x) - 1
+    d3 = (p.x - v3.x) * (v1.y - v3.y) - (p.y - v3.y) * (v1.x - v3.x) - 1
     'todo
 End Function
 
@@ -490,8 +497,8 @@ End Function
 '...
 Public Function PlaneTest(ByRef plane As float4, ByRef point As float3) As Single
 Dim n As float3
-    n.X = plane.X
-    n.Y = plane.Y
+    n.x = plane.x
+    n.y = plane.y
     n.z = plane.z
     PlaneTest = DotProduct(n, point) + plane.w
 End Function
@@ -499,7 +506,7 @@ End Function
 '--- triangle-triangle overlap test ------------------------------------------------------------------------------
 
 Public Function ORIENT_2D(ByRef a As float2, ByRef b As float2, ByRef c As float2) As Single
-    ORIENT_2D = (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X)
+    ORIENT_2D = (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x)
 End Function
 
 
@@ -778,9 +785,9 @@ End Function
 
 'returns true if point lies inside triangle (clockwise vertex order)
 Public Function TriangleTestCW(ByRef v1 As float2, ByRef v2 As float2, ByRef v3 As float2, ByRef p As float2) As Boolean
-    If (p.X - v1.X) * (v2.Y - v1.Y) - (p.Y - v1.Y) * (v2.X - v1.X) > 0 Then Exit Function
-    If (p.X - v2.X) * (v3.Y - v2.Y) - (p.Y - v2.Y) * (v3.X - v2.X) > 0 Then Exit Function
-    If (p.X - v3.X) * (v1.Y - v3.Y) - (p.Y - v3.Y) * (v1.X - v3.X) > 0 Then Exit Function
+    If (p.x - v1.x) * (v2.y - v1.y) - (p.y - v1.y) * (v2.x - v1.x) > 0 Then Exit Function
+    If (p.x - v2.x) * (v3.y - v2.y) - (p.y - v2.y) * (v3.x - v2.x) > 0 Then Exit Function
+    If (p.x - v3.x) * (v1.y - v3.y) - (p.y - v3.y) * (v1.x - v3.x) > 0 Then Exit Function
     TriangleTestCW = True
 End Function
 
@@ -790,10 +797,10 @@ Public Function PointDistToSegment(p As float2, v1 As float2, v2 As float2) As S
 Dim v As float2
 Dim w As float2
     
-    v.X = v2.X - v1.X
-    v.Y = v2.Y - v1.Y
-    w.X = p.X - v1.X
-    w.Y = p.Y - v1.Y
+    v.x = v2.x - v1.x
+    v.y = v2.y - v1.y
+    w.x = p.x - v1.x
+    w.y = p.y - v1.y
     
     Dim c1 As Single
     c1 = DotProduct2d(w, v)
@@ -817,8 +824,8 @@ Dim w As float2
     End If
      
     Dim pb As float2
-    pb.X = v1.X + b * v.X
-    pb.Y = v1.Y + b * v.Y
+    pb.x = v1.x + b * v.x
+    pb.y = v1.y + b * v.y
     
     PointDistToSegment = Distance2d(p, pb)
 End Function
@@ -826,13 +833,13 @@ End Function
 
 'returns distance between two 2d points
 Public Function Distance2d(a As float2, b As float2) As Single
-    Distance2d = Sqr(((a.X - b.X) * (a.X - b.X)) + ((a.Y - b.Y) * (a.Y - b.Y)))
+    Distance2d = Sqr(((a.x - b.x) * (a.x - b.x)) + ((a.y - b.y) * (a.y - b.y)))
 End Function
 
 
 '2d dot product
 Public Function DotProduct2d(ByRef v1 As float2, ByRef v2 As float2) As Single
-    DotProduct2d = (v1.X * v2.X + v1.Y * v2.Y)
+    DotProduct2d = (v1.x * v2.x + v1.y * v2.y)
 End Function
 
 
@@ -841,11 +848,11 @@ Public Function PointDistToLine(p As float2, v1 As float2, v2 As float2) As Sing
 Dim v As float2
 Dim w As float2
     
-    v.X = v2.X - v1.X
-    v.Y = v2.Y - v1.Y
+    v.x = v2.x - v1.x
+    v.y = v2.y - v1.y
     
-    w.X = p.X - v1.X
-    w.Y = p.Y - v1.Y
+    w.x = p.x - v1.x
+    w.y = p.y - v1.y
     
 Dim c1 As Single
 Dim c2 As Single
@@ -860,8 +867,8 @@ Dim c2 As Single
     End If
     
     Dim pb As float2
-    pb.X = v1.X + b * v.X
-    pb.X = v1.X + b * v.X
+    pb.x = v1.x + b * v.x
+    pb.x = v1.x + b * v.x
     
     PointDistToLine = Distance2d(p, pb)
 End Function
@@ -872,17 +879,17 @@ Public Function ClosestPointOnLine(ByRef a As float2, ByRef b As float2, ByRef p
     Dim ap As float2
     Dim ab As float2
     
-    ap.X = p.X - a.X
-    ap.Y = p.Y - a.Y
+    ap.x = p.x - a.x
+    ap.y = p.y - a.y
     
-    ab.X = b.X - a.X
-    ab.Y = b.Y - a.Y
+    ab.x = b.x - a.x
+    ab.y = b.y - a.y
     
     Dim ab2 As Single
     Dim ap_ab As Single
     Dim t As Single
-    ab2 = ab.X * ab.X + ab.Y * ab.Y
-    ap_ab = ap.X * ab.X + ap.Y * ab.Y
+    ab2 = ab.x * ab.x + ab.y * ab.y
+    ap_ab = ap.x * ab.x + ap.y * ab.y
     
     If ab2 = 0 Then
         t = ap_ab
@@ -894,8 +901,8 @@ Public Function ClosestPointOnLine(ByRef a As float2, ByRef b As float2, ByRef p
     If t > 1 Then t = 1
     
     Dim closest As float2
-    closest.X = a.X + ab.X * t
-    closest.Y = a.Y + ab.Y * t
+    closest.x = a.x + ab.x * t
+    closest.y = a.y + ab.y * t
     
     ClosestPointOnLine = closest
 End Function
@@ -903,48 +910,48 @@ End Function
 '--- quaternions -------------------------------------------------------------------
 
 Public Sub QuatIdentity(ByRef q As quat)
-    q.X = 0
-    q.Y = 0
+    q.x = 0
+    q.y = 0
     q.z = 0
     q.w = 1
 End Sub
 
 Public Function QuatRot(ByRef r As quat, ByRef vec As float3) As float3
 Dim q As quat
-    q.X = (vec.X * r.w) + (vec.z * r.Y) - (vec.Y * r.z)
-    q.Y = (vec.Y * r.w) + (vec.X * r.z) - (vec.z * r.X)
-    q.z = (vec.z * r.w) + (vec.Y * r.X) - (vec.X * r.Y)
-    q.w = (vec.X * r.X) + (vec.Y * r.Y) + (vec.z * r.z)
-    QuatRot.X = (r.w * q.X) + (r.X * q.w) + (r.Y * q.z) - (r.z * q.Y)
-    QuatRot.Y = (r.w * q.Y) + (r.Y * q.w) + (r.z * q.X) - (r.X * q.z)
-    QuatRot.z = (r.w * q.z) + (r.z * q.w) + (r.X * q.Y) - (r.Y * q.X)
+    q.x = (vec.x * r.w) + (vec.z * r.y) - (vec.y * r.z)
+    q.y = (vec.y * r.w) + (vec.x * r.z) - (vec.z * r.x)
+    q.z = (vec.z * r.w) + (vec.y * r.x) - (vec.x * r.y)
+    q.w = (vec.x * r.x) + (vec.y * r.y) + (vec.z * r.z)
+    QuatRot.x = (r.w * q.x) + (r.x * q.w) + (r.y * q.z) - (r.z * q.y)
+    QuatRot.y = (r.w * q.y) + (r.y * q.w) + (r.z * q.x) - (r.x * q.z)
+    QuatRot.z = (r.w * q.z) + (r.z * q.w) + (r.x * q.y) - (r.y * q.x)
 End Function
 
 Public Function QuatInv(ByRef q As quat) As quat
 Dim s As Single
-    s = (1 / ((q.X * q.X) + (q.Y * q.Y) + (q.z * q.z) + (q.w * q.w)))
-    QuatInv.X = q.X * -s
-    QuatInv.Y = q.Y * -s
+    s = (1 / ((q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.w * q.w)))
+    QuatInv.x = q.x * -s
+    QuatInv.y = q.y * -s
     QuatInv.z = q.z * -s
     QuatInv.w = q.w * s
 End Function
 
 Public Function QuatMul(ByRef a As quat, ByRef b As quat) As quat
-     QuatMul.X = (a.X * b.w) + (a.Y * b.z) - (a.z * b.Y) + (a.w * b.X)
-    QuatMul.Y = (-a.X * b.z) + (a.Y * b.w) + (a.z * b.X) + (a.w * b.Y)
-     QuatMul.z = (a.X * b.Y) - (a.Y * b.X) + (a.z * b.w) + (a.w * b.z)
-    QuatMul.w = (-a.X * b.X) - (a.Y * b.Y) - (a.z * b.z) + (a.w * b.w)
+     QuatMul.x = (a.x * b.w) + (a.y * b.z) - (a.z * b.y) + (a.w * b.x)
+    QuatMul.y = (-a.x * b.z) + (a.y * b.w) + (a.z * b.x) + (a.w * b.y)
+     QuatMul.z = (a.x * b.y) - (a.y * b.x) + (a.z * b.w) + (a.w * b.z)
+    QuatMul.w = (-a.x * b.x) - (a.y * b.y) - (a.z * b.z) + (a.w * b.w)
 End Function
 
 Public Function QuatAdd(ByRef a As quat, ByRef b As quat) As quat
-    QuatAdd.X = a.X + b.X
-    QuatAdd.Y = a.Y + b.Y
+    QuatAdd.x = a.x + b.x
+    QuatAdd.y = a.y + b.y
     QuatAdd.z = a.z + b.z
     QuatAdd.w = a.w + b.w
 End Function
 
 Public Function QuatMagnitude(ByRef q As quat) As Single
-    QuatMagnitude = Sqr((q.X * q.X) + (q.Y * q.Y) + (q.z * q.z) + (q.w * q.w))
+    QuatMagnitude = Sqr((q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.w * q.w))
 End Function
 
 Public Sub QuatNormalize(ByRef q As quat)
@@ -954,8 +961,8 @@ Public Sub QuatNormalize(ByRef q As quat)
         QuatIdentity q
         Exit Sub
     End If
-    q.X = q.X / m
-    q.Y = q.Y / m
+    q.x = q.x / m
+    q.y = q.y / m
     q.z = q.z / m
     q.w = q.w / m
 End Sub
@@ -964,5 +971,5 @@ End Sub
 Public Function InsideRadius(ByRef pos As float3, ByRef ctr As float3, radius As Single) As Boolean
     Dim t As float3
     t = SubFloat3(pos, ctr)
-    InsideRadius = (((t.X * t.X) + (t.Y * t.Y) + (t.z * t.z) - (radius * radius)) < 0)
+    InsideRadius = (((t.x * t.x) + (t.y * t.y) + (t.z * t.z) - (radius * radius)) < 0)
 End Function

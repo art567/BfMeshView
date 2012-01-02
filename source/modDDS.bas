@@ -84,38 +84,53 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     'read surface descriptor
     Dim ddsd As ddsheader
     Get #ff, , ddsd
-    Echo "format: " & ddsd.ddpfPixelFormat.dwFourCC
+    
+    '...
+    Dim fcode As String
+    fcode = Left(ddsd.ddpfPixelFormat.dwFourCC, 4)
+    If Left(fcode, 3) <> "DXT" Then fcode = ""
+    'MsgBox "[" & SafeStr(fcode) & "]"
+    Echo ">>> [" & fcode & "]"
     
     'determine DSS type
+    Dim comp As Boolean
     Dim format As GLint
     Dim frags As Long
     Dim blocksize As Long
     Dim mipmapfactor As Long
-    Select Case ddsd.ddpfPixelFormat.dwFourCC
+    Select Case fcode
     Case "" 'uncompressed
-        Echo "Uncompressed DDS files not supported."
-        Close #ff
-        Exit Function
+        format = GL_BGRA
+        frags = 4
+        'frags = ddsd.ddpfPixelFormat.u1 / 8
+        blocksize = 0
+        mipmapfactor = 1
+        comp = False
     Case "DXT1" 'DXT1 compression ratio is 8:1
         format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
         frags = 4
         blocksize = 8
         mipmapfactor = 2
+        comp = True
     Case "DXT3" 'DXT3 compression ratio is 4:1
         format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
         frags = 4
         blocksize = 16
         mipmapfactor = 4
+        comp = True
     Case "DXT5" 'DXT5 compression ratio is 4:1
         format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
         frags = 4
         blocksize = 16
         mipmapfactor = 4
+        comp = True
     Case Else
         Echo "DSS format not supported."
         Close ff
         Exit Function
     End Select
+    
+    Echo "format: " & ddsd.ddpfPixelFormat.dwFourCC
     
     'copy info
     Dim mapwidth As Long
@@ -173,44 +188,51 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     'anisotropic filtering
     glTexParameterf GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxaniso
     
-    'upload mipmaps
-    Dim offset As Long
-    Dim w As Long
-    Dim h As Long
-    Dim s As Long
-    Dim i As Long
-    w = mapwidth
-    h = mapheight
-    
-    Dim dw As Long
-    Dim dh As Long
-    
-    offset = 0
-    For i = 0 To mipmapnum - 1
+    If comp Then
         
-        dw = w / 4
-        dh = h / 4
-        If w < 4 Then dw = 1
-        If h < 4 Then dh = 1
-        s = dw * dh * blocksize
+        'upload mipmaps
+        Dim offset As Long
+        Dim w As Long
+        Dim h As Long
+        Dim s As Long
+        Dim i As Long
+        w = mapwidth
+        h = mapheight
         
-        'Echo ">>> mipmap " & i & ": " & w & "x" & h
+        Dim dw As Long
+        Dim dh As Long
         
-        glCompressedTexImage2D GL_TEXTURE_2D, i, format, h, w, 0, s, ByVal VarPtr(data(offset))
-        
-        'check for errors
-        Dim r As Long
-        r = glGetError()
-        If r <> GL_NO_ERROR Then
-            Echo ">>> error on mipmap " & i & ": " & r
-        End If
-        
-        offset = offset + s
-        w = w / 2
-        h = h / 2
-        If w < 1 Then w = 1
-        If h < 1 Then h = 1
-    Next i
+        offset = 0
+        For i = 0 To mipmapnum - 1
+            
+            dw = w / 4
+            dh = h / 4
+            If w < 4 Then dw = 1
+            If h < 4 Then dh = 1
+            s = dw * dh * blocksize
+            
+            'Echo ">>> mipmap " & i & ": " & w & "x" & h
+            
+            glCompressedTexImage2D GL_TEXTURE_2D, i, format, h, w, 0, s, ByVal VarPtr(data(offset))
+            
+            'check for errors
+            Dim r As Long
+            r = glGetError()
+            If r <> GL_NO_ERROR Then
+                Echo ">>> error on mipmap " & i & ": " & r
+            End If
+            
+            offset = offset + s
+            w = w / 2
+            h = h / 2
+            If w < 1 Then w = 1
+            If h < 1 Then h = 1
+        Next i
+    Else
+        glTexParameteri GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE
+        glTexImage2D GL_TEXTURE_2D, 0, frags, mapwidth, mapheight, 0, format, GL_UNSIGNED_BYTE, ByVal VarPtr(data(0))
+        'gluBuild2DMipmaps GL_TEXTURE_2D, intformat, header.width, header.height, format, GL_UNSIGNED_BYTE, ByVal VarPtr(data(0))
+    End If
     
     'clean up
     Erase data()

@@ -151,6 +151,11 @@ Dim texchans As Long
                     If .glslprog > 0 And Not showOnlyTexture Then
                         'GLSL shader pipeline
                         
+                        If view_edges Or view_verts Then
+                            glPolygonOffset 1, 1
+                            glEnable GL_POLYGON_OFFSET_FILL
+                        End If
+                        
                         'prepare
                         glUseProgram .glslprog
                         SetUniforms .glslprog, mesh.mat(i)
@@ -181,8 +186,8 @@ Dim texchans As Long
                             glBindTexture GL_TEXTURE_CUBE_MAP, 0
                         Next j
                         If .hasEnvMap Then
-                            glActiveTexture GL_TEXTURE0 + envmapchan
-                            glClientActiveTexture GL_TEXTURE0 + envmapchan
+                            glActiveTexture GL_TEXTURE0 + envmapChan
+                            glClientActiveTexture GL_TEXTURE0 + envmapChan
                             glBindTexture GL_TEXTURE_CUBE_MAP, envmapTex
                         End If
                         
@@ -196,6 +201,10 @@ Dim texchans As Long
                         glDisable GL_BLEND
                         glEnable GL_CULL_FACE
                         glDepthMask GL_TRUE
+                        
+                        If view_edges Or view_verts Then
+                            glDisable GL_POLYGON_OFFSET_FILL
+                        End If
                     Else
                         'fixed function pipeline
                         
@@ -348,7 +357,7 @@ Dim texchans As Long
                         If vmesh.vertflag(j) Then
                             If vmesh.vertsel(j) Then
                                 If vmesh.hasSkinVerts Then
-                                    glVertex3fv vmesh.skinvert(j).X
+                                    glVertex3fv vmesh.skinvert(j).x
                                 Else
                                     glVertex3fv vmesh.vert(j * stride)
                                 End If
@@ -364,13 +373,12 @@ Dim texchans As Long
             Dim n As float3
             Dim vi As Long 'vertex index
             Dim ni As Long 'normal index
-            Dim ti As Long 'tangent index
             
             'draw tangents
             If view_tangents Then
                 Dim q As Long
                 Dim v As float3     'vertex
-                Dim t As float3     'tangent vector
+                Dim t As float4     'tangent vector
                 Dim b As float3     'binormal vector
                 
                 Dim normoff As Long
@@ -386,41 +394,47 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride)
                             
                             'get vertex
-                            v.X = vmesh.vert(vi + 0)
+                            v.x = vmesh.vert(vi + 0)
                             v.y = vmesh.vert(vi + 1)
                             v.z = vmesh.vert(vi + 2)
                             
                             'get normal
-                            n.X = vmesh.vert(vi + normoff + 0)
+                            n.x = vmesh.vert(vi + normoff + 0)
                             n.y = vmesh.vert(vi + normoff + 1)
                             n.z = vmesh.vert(vi + normoff + 2)
                             
                             'get tangent
-                            t.X = vmesh.vert(vi + tangoff + 0)
-                            t.y = vmesh.vert(vi + tangoff + 1)
-                            t.z = vmesh.vert(vi + tangoff + 2)
+                            Dim ot As float3
+                            ot.x = vmesh.vert(vi + tangoff + 0)
+                            ot.y = vmesh.vert(vi + tangoff + 1)
+                            ot.z = vmesh.vert(vi + tangoff + 2)
+                            t = vmesh.xtan(.mat(j).vstart + k)
                             
                             'get binormal
-                            b = CrossProduct(n, t)
-                            ti = ((.mat(j).vstart + k) * stride) + 20
+                            b = CrossProduct(n, float3(t.x, t.y, t.z))
                             
                             'rescale
-                            t.X = v.X + t.X * s
+                            t.x = v.x + t.x * s
                             t.y = v.y + t.y * s
                             t.z = v.z + t.z * s
-                            b.X = v.X + b.X * s
-                            b.y = v.y + b.y * s
-                            b.z = v.z + b.z * s
+                            b.x = v.x + b.x * s * t.w
+                            b.y = v.y + b.y * s * t.w
+                            b.z = v.z + b.z * s * t.w
                             
                             'draw tangent
                             glColor4f 1, 0.5, 0.5, 0.5
-                            glVertex3fv v.X
-                            glVertex3fv t.X
+                            glVertex3fv v.x
+                            glVertex3fv t.x
                             
                             'draw bitangent
                             glColor4f 0.5, 1, 0.5, 0.5
-                            glVertex3fv v.X
-                            glVertex3fv b.X
+                            glVertex3fv v.x
+                            glVertex3fv b.x
+                            
+                            'draw bitangent
+                            glColor4f 0, 0, 0, 0.5 '1, 0.5, 1, 0.5
+                            glVertex3fv v.x
+                            glVertex3f v.x + ot.x * s * 0.9, v.y + ot.y * s * 0.9, v.z + ot.z * s * 0.9
                             
                         Next k
                     Next j
@@ -440,12 +454,12 @@ Dim texchans As Long
                             vi = ((.mat(j).vstart + k) * stride) + 0
                             ni = ((.mat(j).vstart + k) * stride) + 3
                             
-                            n.X = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
+                            n.x = vmesh.vert(vi + 0) + vmesh.vert(ni + 0) * s
                             n.y = vmesh.vert(vi + 1) + vmesh.vert(ni + 1) * s
                             n.z = vmesh.vert(vi + 2) + vmesh.vert(ni + 2) * s
                             
                             glVertex3fv vmesh.vert(vi)
-                            glVertex3fv n.X
+                            glVertex3fv n.x
                             
                         Next k
                     Next j
@@ -603,7 +617,8 @@ Private Sub drawfacesX(ByVal voff As Long, vnum As Long, ByVal ioff As Long, ByV
             Case 6: 'tangent
                 glClientActiveTexture GL_TEXTURE5
                 glEnableClientState GL_TEXTURE_COORD_ARRAY
-                glTexCoordPointer 3, GL_FLOAT, .vertstride, ByVal off
+                'glTexCoordPointer 3, GL_FLOAT, .vertstride, ByVal off
+                glTexCoordPointer 4, GL_FLOAT, 0, ByVal VarPtr(.xtan(voff))
             Case 261: 'uv2
                 glClientActiveTexture GL_TEXTURE1
                 glEnableClientState GL_TEXTURE_COORD_ARRAY

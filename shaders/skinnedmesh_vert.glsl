@@ -72,8 +72,5 @@ void main()
  boneinfo = gl_Color;
  
  // vertex position
- //gl_Position = gl_ModelViewProjectionMatrix * vert;
- vec4 v = gl_ModelViewMatrix * vert;
- v.w -= 0.01;
- gl_Position = gl_ProjectionMatrix * v;
+ gl_Position = gl_ModelViewProjectionMatrix * vert;
 }

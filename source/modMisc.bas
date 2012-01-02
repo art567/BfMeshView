@@ -147,11 +147,11 @@ End Function
 
 
 'converts fixed size string into dynamic string
-Public Function safeStr(ByRef src As String) As String
+Public Function SafeStr(ByRef src As String) As String
 Dim p As Long
     p = InStr(1, src, vbNullChar)  'todo: buggy, may crash!!
     If p Then
-        safeStr = Left(src, p - 1)
+        SafeStr = Left(src, p - 1)
     End If
 End Function
 
