@@ -168,9 +168,8 @@ Public Sub BuildShader(ByRef mat As bf2mat, ByRef filename As String)
             End If
             
             'alpha in bumpmap, dunno how BF2 detects this
-            If .alphamode > 0 And LCase(.technique) = "alpha_testcolormapgloss" Then
-                .hasBumpAlpha = True
-            End If
+            If .alphamode > 0 And LCase(.technique) = "alpha_testcolormapgloss" Then .hasBumpAlpha = True
+            If .alphamode > 0 And LCase(.technique) = "colormapglossalpha_test" Then .hasBumpAlpha = True
             
             'opaque
             .layernum = 1

@@ -182,7 +182,11 @@ Dim texchans As Long
                         For j = 0 To .mapnum - 1
                             glActiveTexture GL_TEXTURE0 + j
                             glClientActiveTexture GL_TEXTURE0 + j
-                            glBindTexture GL_TEXTURE_2D, texmap(.texmapid(j)).tex
+                            If .texmapid(j) > 0 Then
+                                glBindTexture GL_TEXTURE_2D, texmap(.texmapid(j)).tex
+                            Else
+                                glBindTexture GL_TEXTURE_2D, dummytex
+                            End If
                             glBindTexture GL_TEXTURE_CUBE_MAP, 0
                         Next j
                         If .hasEnvMap Then

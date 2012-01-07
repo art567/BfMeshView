@@ -773,6 +773,7 @@ Private Sub Form_Load()
     If opt_useglsl Then
         LoadShaders
     End If
+    GenDummyTex
     
     'synchronize menu
     SyncMenu

@@ -1,6 +1,13 @@
 Attribute VB_Name = "a_Texture"
 Option Explicit
 
+Private Type byte4
+    r As Byte
+    g As Byte
+    b As Byte
+    a As Byte
+End Type
+
 
 'texture array
 Private Type texmap_type
@@ -11,6 +18,8 @@ Private Type texmap_type
 End Type
 Public texmapnum As Long
 Public texmap() As texmap_type
+
+Public dummytex As GLuint
 
 
 'loads texture from file
@@ -302,3 +311,64 @@ Public Function GenTexture(ByVal r As Byte, ByVal g As Byte, ByVal b As Byte, By
     glBindTexture GL_TEXTURE_2D, 0
     GenTexture = tex
 End Function
+
+'byte4 constructor
+Public Function byte4(ByVal r As Byte, ByVal g As Byte, ByVal b As Byte, ByVal a As Byte) As byte4
+    byte4.r = r
+    byte4.g = g
+    byte4.b = b
+    byte4.a = a
+End Function
+
+Private Function IsEven(ByVal v As Long) As Boolean
+    If v = 0 Then Exit Function
+    IsEven = (val(v) Mod 2) = 0
+End Function
+
+'gen dummy
+Public Sub GenDummyTex()
+    Dim w As Long
+    Dim h As Long
+    w = 512
+    h = 512
+    Dim size As Long
+    size = w * h
+    Dim data() As byte4
+    ReDim data(0 To size - 1)
+    Dim red As byte4
+    Dim yellow As byte4
+    red = byte4(255, 0, 0, 127)
+    yellow = byte4(255, 255, 0, 63)
+    Dim x As Long
+    Dim y As Long
+    For y = 0 To h - 1
+        For x = 0 To w - 1
+            Dim i As Long
+            i = x + w * y
+            If IsEven(CLng(x \ 8) + CLng(y \ 8)) Then
+                data(i) = red
+            Else
+                data(i) = yellow
+            End If
+        Next x
+    Next y
+    
+    'create texture
+    Dim handle As GLuint
+    glGenTextures 1, handle
+    glBindTexture GL_TEXTURE_2D, handle
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
+    glTexParameteri GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    glTexParameterf GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxaniso
+    glTexParameteri GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE
+    gluBuild2DMipmaps GL_TEXTURE_2D, GL_RGBA, w, h, GL_RGBA, GL_UNSIGNED_BYTE, ByVal VarPtr(data(0).r)
+    'glTexImage2D GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, VarPtr(data(0))
+    glBindTexture GL_TEXTURE_2D, 0
+    
+    Erase data()
+    
+    dummytex = handle
+End Sub
+

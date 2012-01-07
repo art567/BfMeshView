@@ -90,7 +90,7 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     fcode = Left(ddsd.ddpfPixelFormat.dwFourCC, 4)
     If Left(fcode, 3) <> "DXT" Then fcode = ""
     'MsgBox "[" & SafeStr(fcode) & "]"
-    Echo ">>> [" & fcode & "]"
+    'Echo ">>> [" & fcode & "]"
     
     'determine DSS type
     Dim comp As Boolean
