@@ -54,11 +54,9 @@ void main()
  // tangent
  if (hasBump > 0) {
   
-  //float w = -1.0; //gl_MultiTexCoord5.w;
-  
   // compute tangents
   vec3 tan1 = gl_MultiTexCoord5.xyz;
-  vec3 tan2 = cross(gl_Normal,-tan1) ;//* gl_MultiTexCoord5.w;
+  vec3 tan2 = cross(gl_Normal,-tan1) * gl_MultiTexCoord5.w;
   
   // create tangent space rotation matrix
   mat3 rotmat = mat3(tan1,tan2,gl_Normal);

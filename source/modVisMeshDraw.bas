@@ -105,7 +105,7 @@ Dim texchans As Long
             If .vertstride >= 36 Then tptr = VarPtr(.vert(7))
             texchans = 1
         End Select
-        iptr = VarPtr(.Index(0))
+        iptr = VarPtr(.index(0))
         stride = .vertstride / 4
     End With
     
@@ -145,16 +145,16 @@ Dim texchans As Long
                 'draw polygons
                 If view_poly Then
                     
+                    If view_edges Or view_verts Or view_tangents Then
+                        glPolygonOffset 1, 1
+                        glEnable GL_POLYGON_OFFSET_FILL
+                    End If
+                    
                     Dim showOnlyTexture As Boolean
                     showOnlyTexture = (seltex > -1 And selmat = i)
                     
                     If .glslprog > 0 And Not showOnlyTexture Then
                         'GLSL shader pipeline
-                        
-                        If view_edges Or view_verts Then
-                            glPolygonOffset 1, 1
-                            glEnable GL_POLYGON_OFFSET_FILL
-                        End If
                         
                         'prepare
                         glUseProgram .glslprog
@@ -206,9 +206,6 @@ Dim texchans As Long
                         glEnable GL_CULL_FACE
                         glDepthMask GL_TRUE
                         
-                        If view_edges Or view_verts Then
-                            glDisable GL_POLYGON_OFFSET_FILL
-                        End If
                     Else
                         'fixed function pipeline
                         
@@ -218,10 +215,6 @@ Dim texchans As Long
                         'prepare stuff
                         If view_lighting Then
                             glEnable GL_LIGHTING
-                        End If
-                        If view_edges Or view_verts Then
-                            glPolygonOffset 1, 1
-                            glEnable GL_POLYGON_OFFSET_FILL
                         End If
                         
                         'draw geometry
@@ -300,9 +293,6 @@ Dim texchans As Long
                         End If
                         
                         'reset stuff
-                        If view_edges Or view_verts Then
-                            glDisable GL_POLYGON_OFFSET_FILL
-                        End If
                         If view_lighting Then
                             glDisable GL_LIGHTING
                         End If
@@ -319,6 +309,10 @@ Dim texchans As Long
                         drawfaces vptroff, 0, 0, iptroff, icount
                         glPolygonMode GL_FRONT_AND_BACK, GL_FILL
                         EndAALine
+                    End If
+                    
+                    If view_edges Or view_verts Or view_tangents Then
+                        glDisable GL_POLYGON_OFFSET_FILL
                     End If
                     
                 End If
@@ -435,10 +429,10 @@ Dim texchans As Long
                             glVertex3fv v.x
                             glVertex3fv b.x
                             
-                            'draw bitangent
-                            glColor4f 0, 0, 0, 0.5 '1, 0.5, 1, 0.5
-                            glVertex3fv v.x
-                            glVertex3f v.x + ot.x * s * 0.9, v.y + ot.y * s * 0.9, v.z + ot.z * s * 0.9
+                            ''draw original bitangent
+                            'glColor4f 0, 0, 0, 0.5 '1, 0.5, 1, 0.5
+                            'glVertex3fv v.x
+                            'glVertex3f v.x + ot.x * s * 0.9, v.y + ot.y * s * 0.9, v.z + ot.z * s * 0.9
                             
                         Next k
                     Next j
@@ -489,8 +483,8 @@ Dim texchans As Long
                         'If vmesh.hasSkinVerts Then
                         '    glMultMatrixf .rig(i).bone(j).skinmat.m(0)
                         'Else
-                            GetInverseMat4 .rig(i).bone(j).matrix.m, im.m
-                            glMultMatrixf im.m(0)
+                            GetInverseMat4 .rig(i).bone(j).matrix.M, im.M
+                            glMultMatrixf im.M(0)
                         'End If
                         
                         glBegin GL_POINTS
@@ -592,7 +586,7 @@ Private Sub drawfacesX(ByVal voff As Long, vnum As Long, ByVal ioff As Long, ByV
         vptr = VarPtr(.vert(0)) + voff * .vertstride
         
         Dim iptr As Long
-        iptr = VarPtr(.Index(0)) + ioff * 2
+        iptr = VarPtr(.index(0)) + ioff * 2
         
         'enable vertex attributes
         Dim i As Long
@@ -685,7 +679,7 @@ End Sub
 
 'draws triangles with index color
 Private Sub DrawVisMeshIndexColors(ByRef lod As bf2lod)
-Dim m As Long
+Dim M As Long
 Dim i As Long
 Dim v1 As Long
 Dim v2 As Long
@@ -701,19 +695,19 @@ Dim stride As Long
     stride = vmesh.vertstride / 4
     
     With lod
-        For m = 0 To .matnum - 1
+        For M = 0 To .matnum - 1
             
-            With .mat(m)
+            With .mat(M)
                 glBegin GL_TRIANGLES
                 For i = 0 To .inum - 1
                     
                     w = i / .inum
                     c.r = colortable(ci).r * w
-                    c.g = colortable(ci).g * w
+                    c.G = colortable(ci).G * w
                     c.b = colortable(ci).b * w
                     glColor4fv c.r
                     
-                    v1 = (.vstart + vmesh.Index(.istart + i))
+                    v1 = (.vstart + vmesh.index(.istart + i))
                     
                     glVertex3fv vmesh.vert(v1 * stride)
                     
@@ -727,14 +721,14 @@ Dim stride As Long
                 ci = 0
             End If
             
-        Next m
+        Next M
     End With
 End Sub
 
 
 'draws LOD as overdraw mode
 Private Sub DrawVisMeshOverdraw(ByRef lod As bf2lod)
-Dim m As Long
+Dim M As Long
 Dim i As Long
 Dim v1 As Long
 Dim v2 As Long
@@ -781,14 +775,14 @@ Dim stride As Long
     glColorMask GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE
     
     Dim r As Single
-    Dim g As Single
+    Dim G As Single
     Dim b As Single
     
     For i = 1 To 10
         glStencilFunc GL_EQUAL, i, &HFFFFFFFF
         
-        ColorRamp (i - 1) / 10, r, g, b
-        glColor3f r, g, b
+        ColorRamp (i - 1) / 10, r, G, b
+        glColor3f r, G, b
         
         glRectf -1, -1, 1, 1
     Next i
@@ -813,45 +807,45 @@ End Sub
 
 '...
 Private Sub DrawPassX(ByRef lod As bf2lod)
-Dim m As Long
+Dim M As Long
 Dim i As Long
 Dim v1 As Long
 Dim stride As Long
     With lod
         stride = vmesh.vertstride / 4
         glBegin GL_TRIANGLES
-        For m = 0 To .matnum - 1
-            With .mat(m)
+        For M = 0 To .matnum - 1
+            With .mat(M)
                 For i = 0 To .inum - 1
-                    v1 = (.vstart + vmesh.Index(.istart + i))
+                    v1 = (.vstart + vmesh.index(.istart + i))
                     glVertex3fv vmesh.vert(v1 * stride)
                 Next i
             End With
-        Next m
+        Next M
         glEnd
     End With
 End Sub
 
 
 'outputs non-gamma corrected 'color rainbow'
-Public Sub ColorRamp(ByVal v As Single, ByRef r As Single, ByRef g As Single, ByRef b As Single)
+Public Sub ColorRamp(ByVal v As Single, ByRef r As Single, ByRef G As Single, ByRef b As Single)
     If v < 0 Then v = 0
     If v > 1 Then v = 1
     If v < 0.25 Then
         r = 0
-        g = 4 * v
+        G = 4 * v
         b = 1
     ElseIf v < 0.5 Then
         r = 0
-        g = 1
+        G = 1
         b = 1 + 4 * (0.25 - v)
     ElseIf v < 0.75 Then
         r = 4 * (v - 0.5)
-        g = 1
+        G = 1
         b = 0
     Else
         r = 1
-        g = 1 + 4 * (0.75 - v)
+        G = 1 + 4 * (0.75 - v)
         b = 0
     End If
 End Sub

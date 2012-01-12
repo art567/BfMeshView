@@ -184,7 +184,7 @@ Public Type bf2mesh
     
     'indices
     indexnum As Long
-    Index() As Integer
+    index() As Integer
     
     'unknown
     u2 As Long 'always 8?

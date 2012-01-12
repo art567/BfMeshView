@@ -46,8 +46,8 @@ End Sub
 Public Sub VisMeshTool_VeggieNormals()
 Dim i As Long
 Dim j As Long
-Dim g As Long
-Dim m As Long
+Dim G As Long
+Dim M As Long
     With vmesh
         
         'compute vertex stride
@@ -55,12 +55,12 @@ Dim m As Long
         stride = .vertstride / 4
         
         'compute bounding box
-        For g = 0 To .geomnum - 1
-            With .geom(g)
+        For G = 0 To .geomnum - 1
+            With .geom(G)
                 For j = 0 To .lodnum - 1
                     With .lod(j)
-                        For m = 0 To .matnum - 1
-                            With .mat(m)
+                        For M = 0 To .matnum - 1
+                            With .mat(M)
                                 If .technique = "Base" Then
                                     
                                     'todo <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -94,11 +94,11 @@ Dim m As Long
                                     
                                 End If
                             End With
-                        Next m
+                        Next M
                     End With
                 Next j
             End With
-        Next g
+        Next G
     End With
 End Sub
 
@@ -194,35 +194,35 @@ Public Sub BF2VerifyMesh()
         End If
         
         'check faces for thin triangles
-        Dim g As Long
-        For g = 0 To .geomnum - 1
+        Dim G As Long
+        For G = 0 To .geomnum - 1
             Dim L As Long
-            For L = 0 To .geom(g).lodnum - 1
+            For L = 0 To .geom(G).lodnum - 1
                 
                 'check bounds for NaNs
                 Dim nan As Long
                 nan = 0
-                If IsNaN3f(.geom(g).lod(L).min) Then nan = nan + 1
-                If IsNaN3f(.geom(g).lod(L).max) Then nan = nan + 1
+                If IsNaN3f(.geom(G).lod(L).min) Then nan = nan + 1
+                If IsNaN3f(.geom(G).lod(L).max) Then nan = nan + 1
                 If nan > 0 Then
                     errstr = errstr & "* NaNs in LOD bounds"
                 End If
                 
                 'verify materials
-                Dim m As Long
-                For m = 0 To .geom(g).lod(L).matnum - 1
-                    BF2VerifyMat .geom(g).lod(L).mat(m)
+                Dim M As Long
+                For M = 0 To .geom(G).lod(L).matnum - 1
+                    BF2VerifyMat .geom(G).lod(L).mat(M)
                     
                     nan = 0
-                    If IsNaN3f(.geom(g).lod(L).mat(m).mmin) Then nan = nan + 1
-                    If IsNaN3f(.geom(g).lod(L).mat(m).mmin) Then nan = nan + 1
+                    If IsNaN3f(.geom(G).lod(L).mat(M).mmin) Then nan = nan + 1
+                    If IsNaN3f(.geom(G).lod(L).mat(M).mmin) Then nan = nan + 1
                     If nan > 0 Then
                         errstr = errstr & "* NaNs in material bounds"
                     End If
                     
-                Next m
+                Next M
             Next L
-        Next g
+        Next G
         
         'show stats
         If Len(errstr) > 0 Then
@@ -295,17 +295,17 @@ Public Sub BF2MeshFixTexPaths()
     With vmesh
         If Not .loadok Then Exit Sub
         
-        Dim g As Long
-        For g = 0 To .geomnum - 1
-            With .geom(g)
+        Dim G As Long
+        For G = 0 To .geomnum - 1
+            With .geom(G)
             
                 Dim L As Long
                 For L = 0 To .lodnum - 1
                      With .lod(L)
                         
-                        Dim m As Long
-                        For m = 0 To .matnum - 1
-                            With .mat(m)
+                        Dim M As Long
+                        For M = 0 To .matnum - 1
+                            With .mat(M)
                                 
                                 Dim t As Long
                                 For t = 0 To .mapnum - 1
@@ -315,13 +315,13 @@ Public Sub BF2MeshFixTexPaths()
                                 Next t
                                 
                             End With
-                        Next m
+                        Next M
                         
                      End With
                 Next L
                 
             End With
-        Next g
+        Next G
         
     End With
     
@@ -441,11 +441,139 @@ Private Function GetNorm(ByVal i As Long) As float3
 End Function
 
 Private Function GetTexc(ByVal i As Long) As float2
-    With vmesh 'note: the '7' may not be entirely safe
+    With vmesh 'note: the '7' may not be entirely safe here (also need to make this work for statics)
         GetTexc.x = .vert(i * .xstride + 7 + 0)
         GetTexc.y = .vert(i * .xstride + 7 + 1)
     End With
 End Function
+
+
+Public Sub BF2MatGenTangents(ByRef mat As bf2mat)
+    With mat
+        On Error GoTo hell
+        
+        'temp tangent array
+        'ReDim tan1(0 To vmesh.vertnum - 1) As float3
+        ReDim tan2(0 To vmesh.vertnum - 1) As float3
+        
+        Dim facenum As Long
+        facenum = .inum / 3
+        
+        'compute tangents
+        Dim i As Long
+        For i = 0 To facenum - 1
+            
+            Dim i1 As Long
+            Dim i2 As Long
+            Dim i3 As Long
+            i1 = .vstart + vmesh.index(.istart + (i * 3) + 0)
+            i2 = .vstart + vmesh.index(.istart + (i * 3) + 1)
+            i3 = .vstart + vmesh.index(.istart + (i * 3) + 2)
+            
+            Dim v1 As float3
+            Dim v2 As float3
+            Dim v3 As float3
+            v1 = GetVert(i1)
+            v2 = GetVert(i2)
+            v3 = GetVert(i3)
+            
+            Dim uv1 As float2
+            Dim uv2 As float2
+            Dim uv3 As float2
+            uv1 = GetTexc(i1)
+            uv2 = GetTexc(i2)
+            uv3 = GetTexc(i3)
+            
+            Dim x1 As Single
+            Dim x2 As Single
+            Dim y1 As Single
+            Dim y2 As Single
+            Dim z1 As Single
+            Dim z2 As Single
+            x1 = v2.x - v1.x
+            x2 = v3.x - v1.x
+            y1 = v2.y - v1.y
+            y2 = v3.y - v1.y
+            z1 = v2.z - v1.z
+            z2 = v3.z - v1.z
+            
+            Dim s1 As Single
+            Dim s2 As Single
+            s1 = uv2.x - uv1.x
+            s2 = uv3.x - uv1.x
+            
+            Dim t1 As Single
+            Dim t2 As Single
+            t1 = uv2.y - uv1.y
+            t2 = uv3.y - uv1.y
+            
+            Dim r As Single
+            Dim d As Single
+            d = (s1 * t2 - s2 * t1)
+            If d = 0 Then
+                r = 0
+            Else
+                r = 1 / d
+            End If
+            
+            'Dim sdir As float3
+            'sdir.x = (t2 * x1 - t1 * x2) * r
+            'sdir.y = (t2 * y1 - t1 * y2) * r
+            'sdir.z = (t2 * z1 - t1 * z2) * r
+            
+            Dim tdir As float3
+            tdir.x = (s1 * x2 - s2 * x1) * r
+            tdir.y = (s1 * y2 - s2 * y1) * r
+            tdir.z = (s1 * z2 - s2 * z1) * r
+            
+            'tan1(i1) = AddFloat3(tan1(i1), sdir)
+            'tan1(i2) = AddFloat3(tan1(i2), sdir)
+            'tan1(i3) = AddFloat3(tan1(i3), sdir)
+            
+            tan2(i1) = AddFloat3(tan2(i1), tdir)
+            tan2(i2) = AddFloat3(tan2(i2), tdir)
+            tan2(i3) = AddFloat3(tan2(i3), tdir)
+            
+        Next i
+        
+        Dim tangoff As Long
+        tangoff = BF2MeshGetTangOffset()
+        
+        'ortho-normalize
+        For i = .vstart To .vstart + .vnum - 1
+            
+            Dim n As float3
+            n = GetNorm(i)
+            
+            Dim t As float3
+            't = Normalize(SubFloat3(tan1(i), ScaleFloat3(n, DotProduct(n, tan1(i)))))
+            t.x = vmesh.vert(i * vmesh.xstride + tangoff + 0)
+            t.y = vmesh.vert(i * vmesh.xstride + tangoff + 1)
+            t.z = vmesh.vert(i * vmesh.xstride + tangoff + 2)
+            
+            vmesh.xtan(i).x = t.x
+            vmesh.xtan(i).y = t.y
+            vmesh.xtan(i).z = t.z
+            
+            'vmesh.xtan(i).x = vmesh.vert(i * stride + tangoff + 0)
+            'vmesh.xtan(i).y = vmesh.vert(i * stride + tangoff + 1)
+            'vmesh.xtan(i).z = vmesh.vert(i * stride + tangoff + 2)
+            
+            'calculate handedness
+            If (DotProduct(CrossProduct(n, t), tan2(i)) > 0) Then
+                vmesh.xtan(i).w = 1
+            Else
+                vmesh.xtan(i).w = -1
+            End If
+            
+        Next i
+        
+    End With
+    
+    Exit Sub
+hell:
+    MsgBox "BF2MatGenTangents" & vbLf & err.description, vbCritical
+End Sub
 
 
 'computes bi-tangents
@@ -465,21 +593,26 @@ Public Sub BF2ComputeTangents()
         
         'allocate
         ReDim .xtan(0 To .vertnum - 1)
-        For i = 0 To .vertnum - 1
-            .xtan(i).w = 0
-        Next i
+        'For i = 0 To .vertnum - 1
+        '    .xtan(i).w = 0
+        'Next i
         
-        If 111 = 666 Then
-        
-            'temp tangent array
-            ReDim tan1(0 To .vertnum - 1) As float3
-            ReDim tan2(0 To .vertnum - 1) As float3
-            For i = 0 To .vertnum - 1
-                ClearFloat3 tan1(i)
-                ClearFloat3 tan2(i)
-            Next i
+        If 111 = 111 Then
             
-            'compute tangents
+            Dim G As Long
+            For G = 0 To .geomnum - 1
+                Dim L As Long
+                For L = 0 To .geom(G).lodnum - 1
+                    Dim M As Long
+                    For M = 0 To .geom(G).lod(L).matnum - 1
+                        BF2MatGenTangents .geom(G).lod(L).mat(M)
+                    Next M
+                Next L
+            Next G
+            
+        Else
+            'determine tangent W by triangle sign
+            
             Dim facenum As Long
             facenum = .indexnum / 3
             For i = 0 To facenum - 1
@@ -487,16 +620,9 @@ Public Sub BF2ComputeTangents()
                 Dim i1 As Long
                 Dim i2 As Long
                 Dim i3 As Long
-                i1 = .Index(i * 3 + 0)
-                i2 = .Index(i * 3 + 1)
-                i3 = .Index(i * 3 + 2)
-                
-                Dim v1 As float3
-                Dim v2 As float3
-                Dim v3 As float3
-                v1 = GetVert(i1)
-                v2 = GetVert(i2)
-                v3 = GetVert(i3)
+                i1 = .index(i * 3 + 0)
+                i2 = .index(i * 3 + 1)
+                i3 = .index(i * 3 + 2)
                 
                 Dim uv1 As float2
                 Dim uv2 As float2
@@ -505,123 +631,38 @@ Public Sub BF2ComputeTangents()
                 uv2 = GetTexc(i2)
                 uv3 = GetTexc(i3)
                 
-                Dim x1 As Single
-                Dim x2 As Single
-                Dim y1 As Single
-                Dim y2 As Single
-                Dim z1 As Single
-                Dim z2 As Single
-                x1 = v2.x - v1.x
-                x2 = v3.x - v1.x
-                y1 = v2.y - v1.y
-                y2 = v3.y - v1.y
-                z1 = v2.z - v1.z
-                z2 = v3.z - v1.z
-                
-                Dim s1 As Single
-                Dim s2 As Single
-                s1 = uv2.x - uv1.x
-                s2 = uv3.x - uv1.x
-                
-                Dim t1 As Single
-                Dim t2 As Single
-                t1 = uv2.y - uv1.y
-                t2 = uv3.y - uv1.y
-                
-                Dim r As Single
-                r = 1 / (s1 * t2 - s2 * t1)
-                
-                Dim sdir As float3
-                sdir.x = (t2 * x1 - t1 * x2) * r
-                sdir.y = (t2 * y1 - t1 * y2) * r
-                sdir.z = (t2 * z1 - t1 * z2) * r
-                
-                Dim tdir As float3
-                tdir.x = (s1 * x2 - s2 * x1) * r
-                tdir.y = (s1 * y2 - s2 * y1) * r
-                tdir.z = (s1 * z2 - s2 * z1) * r
-                
-                tan1(i1) = AddFloat3(tan1(i1), sdir)
-                tan1(i2) = AddFloat3(tan1(i2), sdir)
-                tan1(i3) = AddFloat3(tan1(i3), sdir)
-                
-                tan2(i1) = AddFloat3(tan2(i1), tdir)
-                tan2(i2) = AddFloat3(tan2(i2), tdir)
-                tan2(i3) = AddFloat3(tan2(i3), tdir)
-                
-            Next i
-            
-            'ortho-normalize
-            For i = 0 To .vertnum - 1
-                Dim n As float3
-                n = GetNorm(i)
-                
-                '// Gram-Schmidt orthogonalize
-                Dim t As float3
-                t = Normalize(SubFloat3(tan1(i), ScaleFloat3(n, DotProduct(n, tan1(i)))))
-                't = Normalize(tan1(i))
-                .xtan(i).x = t.x
-                .xtan(i).y = t.y
-                .xtan(i).z = t.z
-                
-                '.xtan(i).x = tan1(i).x
-                '.xtan(i).y = tan1(i).y
-                '.xtan(i).z = tan1(i).z
-                
-                'calculate handedness
-                '.xtan.w = (DotProduct(CrossProduct(n, t), tt2[i]) < 0.0) ? -1.0 : 1.0;
-                .xtan(i).w = 1
-                
-            Next i
-                  
-        Else
-            
-            'Dim facenum As Long
-            facenum = .indexnum / 3
-            For i = 0 To facenum - 1
-                
-                'Dim i1 As Long
-                'Dim i2 As Long
-                'Dim i3 As Long
-                i1 = .Index(i * 3 + 0)
-                i2 = .Index(i * 3 + 1)
-                i3 = .Index(i * 3 + 2)
-                
-                'Dim uv1 As float2
-                'Dim uv2 As float2
-                'Dim uv3 As float2
-                uv1 = GetTexc(i1)
-                uv2 = GetTexc(i2)
-                uv3 = GetTexc(i3)
-                
                 Dim s As Single
                 s = TriangleSign(uv1, uv2, uv3)
-                .xtan(i1).w = .xtan(i1).w + s
-                .xtan(i2).w = .xtan(i2).w + s
-                .xtan(i3).w = .xtan(i3).w + s
+               ' .xtan(i1).w = .xtan(i1).w + s
+               ' .xtan(i2).w = .xtan(i2).w + s
+               ' .xtan(i3).w = .xtan(i3).w + s
+                .xtan(i1).w = s
+                .xtan(i2).w = s
+                .xtan(i3).w = s
+                
             Next i
             
             'copy tangs
             For i = 0 To .vertnum - 1
                 
                 'get tangent
-                'Dim t As float3
+                Dim t As float3
                 t.x = vmesh.vert(i * stride + tangoff + 0)
                 t.y = vmesh.vert(i * stride + tangoff + 1)
                 t.z = vmesh.vert(i * stride + tangoff + 2)
                 
                 'normalize
-                Dim w As Single
-                w = .xtan(i).w
-                If w < 0 Then w = -1
-                If w > 0 Then w = 1
-                If w = 0 Then w = 1
+               ' Dim w As Single
+               ' w = .xtan(i).w
+               ' If w < 0 Then w = -1
+               ' If w > 0 Then w = 1
+               ' If w = 0 Then w = 1
                 
                 'store
                 .xtan(i).x = t.x
                 .xtan(i).y = t.y
                 .xtan(i).z = t.z
-                .xtan(i).w = w
+               ' .xtan(i).w = w
                 
             Next i
         End If
