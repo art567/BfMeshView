@@ -22,6 +22,9 @@ End Type
 Public texpathnum As Long
 Public texpath() As texpath_type
 
+Public suffixnum As Long
+Public suffix() As String
+Public suffix_sel As Long
 
 Public nmap_lastinput As String
 Public nmap_lastoutput As String
@@ -130,7 +133,13 @@ Dim skip As Boolean
                 ReDim Preserve texpath(1 To texpathnum)
                 texpath(texpathnum).use = val(str(0))
                 texpath(texpathnum).path = str(1)
-            
+                
+            'suffix
+            Case "suffix"
+                suffixnum = suffixnum + 1
+                ReDim Preserve suffix(1 To suffixnum)
+                suffix(suffixnum) = str(1)
+                
             'lightmap renderer
             Case "lmoutput":        lmoutput = str(1)
             Case "lmoutputalpha":   lmoutputalpha = val(str(1))
@@ -250,6 +259,9 @@ Dim backup As Boolean
     Print #ff, "[Texture Paths]"
     For i = 1 To texpathnum
         Print #ff, "texpath=" & Abs(texpath(i).use) & "," & texpath(i).path
+    Next i
+    For i = 1 To suffixnum
+        Print #ff, "suffix=" & suffix(i)
     Next i
     Print #ff, ""
     

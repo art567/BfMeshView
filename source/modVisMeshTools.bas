@@ -46,8 +46,8 @@ End Sub
 Public Sub VisMeshTool_VeggieNormals()
 Dim i As Long
 Dim j As Long
-Dim G As Long
-Dim M As Long
+Dim g As Long
+Dim m As Long
     With vmesh
         
         'compute vertex stride
@@ -55,12 +55,12 @@ Dim M As Long
         stride = .vertstride / 4
         
         'compute bounding box
-        For G = 0 To .geomnum - 1
-            With .geom(G)
+        For g = 0 To .geomnum - 1
+            With .geom(g)
                 For j = 0 To .lodnum - 1
                     With .lod(j)
-                        For M = 0 To .matnum - 1
-                            With .mat(M)
+                        For m = 0 To .matnum - 1
+                            With .mat(m)
                                 If .technique = "Base" Then
                                     
                                     'todo <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -94,11 +94,11 @@ Dim M As Long
                                     
                                 End If
                             End With
-                        Next M
+                        Next m
                     End With
                 Next j
             End With
-        Next G
+        Next g
     End With
 End Sub
 
@@ -194,35 +194,35 @@ Public Sub BF2VerifyMesh()
         End If
         
         'check faces for thin triangles
-        Dim G As Long
-        For G = 0 To .geomnum - 1
+        Dim g As Long
+        For g = 0 To .geomnum - 1
             Dim L As Long
-            For L = 0 To .geom(G).lodnum - 1
+            For L = 0 To .geom(g).lodnum - 1
                 
                 'check bounds for NaNs
                 Dim nan As Long
                 nan = 0
-                If IsNaN3f(.geom(G).lod(L).min) Then nan = nan + 1
-                If IsNaN3f(.geom(G).lod(L).max) Then nan = nan + 1
+                If IsNaN3f(.geom(g).lod(L).min) Then nan = nan + 1
+                If IsNaN3f(.geom(g).lod(L).max) Then nan = nan + 1
                 If nan > 0 Then
                     errstr = errstr & "* NaNs in LOD bounds"
                 End If
                 
                 'verify materials
-                Dim M As Long
-                For M = 0 To .geom(G).lod(L).matnum - 1
-                    BF2VerifyMat .geom(G).lod(L).mat(M)
+                Dim m As Long
+                For m = 0 To .geom(g).lod(L).matnum - 1
+                    BF2VerifyMat .geom(g).lod(L).mat(m)
                     
                     nan = 0
-                    If IsNaN3f(.geom(G).lod(L).mat(M).mmin) Then nan = nan + 1
-                    If IsNaN3f(.geom(G).lod(L).mat(M).mmin) Then nan = nan + 1
+                    If IsNaN3f(.geom(g).lod(L).mat(m).mmin) Then nan = nan + 1
+                    If IsNaN3f(.geom(g).lod(L).mat(m).mmin) Then nan = nan + 1
                     If nan > 0 Then
                         errstr = errstr & "* NaNs in material bounds"
                     End If
                     
-                Next M
+                Next m
             Next L
-        Next G
+        Next g
         
         'show stats
         If Len(errstr) > 0 Then
@@ -295,17 +295,17 @@ Public Sub BF2MeshFixTexPaths()
     With vmesh
         If Not .loadok Then Exit Sub
         
-        Dim G As Long
-        For G = 0 To .geomnum - 1
-            With .geom(G)
+        Dim g As Long
+        For g = 0 To .geomnum - 1
+            With .geom(g)
             
                 Dim L As Long
                 For L = 0 To .lodnum - 1
                      With .lod(L)
                         
-                        Dim M As Long
-                        For M = 0 To .matnum - 1
-                            With .mat(M)
+                        Dim m As Long
+                        For m = 0 To .matnum - 1
+                            With .mat(m)
                                 
                                 Dim t As Long
                                 For t = 0 To .mapnum - 1
@@ -315,13 +315,13 @@ Public Sub BF2MeshFixTexPaths()
                                 Next t
                                 
                             End With
-                        Next M
+                        Next m
                         
                      End With
                 Next L
                 
             End With
-        Next G
+        Next g
         
     End With
     
@@ -450,7 +450,8 @@ End Function
 
 Public Sub BF2MatGenTangents(ByRef mat As bf2mat)
     With mat
-        On Error GoTo hell
+        'On Error GoTo hell
+        On Error Resume Next
         
         'temp tangent array
         'ReDim tan1(0 To vmesh.vertnum - 1) As float3
@@ -466,9 +467,9 @@ Public Sub BF2MatGenTangents(ByRef mat As bf2mat)
             Dim i1 As Long
             Dim i2 As Long
             Dim i3 As Long
-            i1 = .vstart + vmesh.index(.istart + (i * 3) + 0)
-            i2 = .vstart + vmesh.index(.istart + (i * 3) + 1)
-            i3 = .vstart + vmesh.index(.istart + (i * 3) + 2)
+            i1 = .vstart + vmesh.Index(.istart + (i * 3) + 0)
+            i2 = .vstart + vmesh.Index(.istart + (i * 3) + 1)
+            i3 = .vstart + vmesh.Index(.istart + (i * 3) + 2)
             
             Dim v1 As float3
             Dim v2 As float3
@@ -599,16 +600,16 @@ Public Sub BF2ComputeTangents()
         
         If 111 = 111 Then
             
-            Dim G As Long
-            For G = 0 To .geomnum - 1
+            Dim g As Long
+            For g = 0 To .geomnum - 1
                 Dim L As Long
-                For L = 0 To .geom(G).lodnum - 1
-                    Dim M As Long
-                    For M = 0 To .geom(G).lod(L).matnum - 1
-                        BF2MatGenTangents .geom(G).lod(L).mat(M)
-                    Next M
+                For L = 0 To .geom(g).lodnum - 1
+                    Dim m As Long
+                    For m = 0 To .geom(g).lod(L).matnum - 1
+                        BF2MatGenTangents .geom(g).lod(L).mat(m)
+                    Next m
                 Next L
-            Next G
+            Next g
             
         Else
             'determine tangent W by triangle sign
@@ -620,9 +621,9 @@ Public Sub BF2ComputeTangents()
                 Dim i1 As Long
                 Dim i2 As Long
                 Dim i3 As Long
-                i1 = .index(i * 3 + 0)
-                i2 = .index(i * 3 + 1)
-                i3 = .index(i * 3 + 2)
+                i1 = .Index(i * 3 + 0)
+                i2 = .Index(i * 3 + 1)
+                i3 = .Index(i * 3 + 2)
                 
                 Dim uv1 As float2
                 Dim uv2 As float2

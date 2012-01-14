@@ -552,6 +552,24 @@ Begin VB.Form frmMain
       Begin VB.Menu mnuOptionsLoadCon 
          Caption         =   "Load Con"
       End
+      Begin VB.Menu mnuOptionsLine3 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuOptionsSuffix 
+         Caption         =   "Texture Suffix"
+         Begin VB.Menu mnuOptionsSuffixNone 
+            Caption         =   "None"
+            Checked         =   -1  'True
+         End
+         Begin VB.Menu mnuOptionsSuffixLine1 
+            Caption         =   "-"
+         End
+         Begin VB.Menu mnuOptionsSuffixItem 
+            Caption         =   "<should_not_see_me>"
+            Index           =   0
+            Visible         =   0   'False
+         End
+      End
       Begin VB.Menu mnuOptionsLine1 
          Caption         =   "-"
       End
@@ -777,6 +795,7 @@ Private Sub Form_Load()
     
     'synchronize menu
     SyncMenu
+    FillSuffixMenu
     
     'hook
     If IsIdeMode Then
@@ -1620,6 +1639,26 @@ Private Sub mnuOptionsLoadCon_Click()
     mnuOptionsLoadCon.Checked = opt_loadcon
 End Sub
 
+Private Sub mnuOptionsSuffixNone_Click()
+    suffix_sel = 0
+    mnuOptionsSuffixNone.Checked = True
+    Dim i As Long
+    For i = 1 To suffixnum
+        mnuOptionsSuffixItem.Item(i).Checked = False
+    Next i
+    mnuToolsReloadTextures_Click
+End Sub
+
+Private Sub mnuOptionsSuffixItem_Click(Index As Integer)
+    suffix_sel = Index
+    mnuOptionsSuffixNone.Checked = False
+    Dim i As Long
+    For i = 1 To suffixnum
+        mnuOptionsSuffixItem.Item(i).Checked = (i = suffix_sel)
+    Next i
+    mnuToolsReloadTextures_Click
+End Sub
+
 Private Sub mnuOptionsRememberViewSettings_Click()
     opt_loadviewsettings = Not opt_loadviewsettings
     mnuOptionsRememberViewSettings.Checked = opt_loadviewsettings
@@ -2355,3 +2394,14 @@ Private Sub UvEdit_Paint()
         frmUvEdit.picMain_Paint
     End If
 End Sub
+
+'fills suffix menu list
+Private Sub FillSuffixMenu()
+Dim i As Long
+    For i = 1 To suffixnum
+        Load mnuOptionsSuffixItem(i)
+        mnuOptionsSuffixItem(i).Caption = suffix(i)
+        mnuOptionsSuffixItem(i).Visible = True
+    Next i
+End Sub
+

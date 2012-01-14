@@ -59,6 +59,28 @@ Public Function LoadTexture(ByVal filename As String, ByVal origrelfilename As S
 End Function
 
 
+'returns filename string of texture to be loaded, or nothing if not found
+Private Function BF2GetTexFileName(ByRef fname As String) As String
+    
+    'first try suffixed
+    'Dim sfname As String
+    'sfname = Replace(fname, ".dds", suffix(suffix_sel) & ".dds")
+    'If FileExist(sfname) Then
+    '    BF2GetTexFileName = sfname
+    '    Exit Function
+    'End If
+   
+    'try non-suffixed
+    If FileExist(fname) Then
+        BF2GetTexFileName = fname
+        Exit Function
+    End If
+    
+    'we ain't found shit
+    BF2GetTexFileName = ""
+End Function
+
+
 'loads all mesh textures
 Public Sub LoadMeshTextures()
     On Error GoTo errorhandler
@@ -77,9 +99,12 @@ Dim filename As String
     'unload existing textures
     UnloadMeshTextures
     
-    'load textures
+    'BF2 mesh
     With vmesh
         If .loadok Then
+            
+            Dim meshfilepath As String
+            meshfilepath = GetFilePath(vmesh.filename)
             
             For i = 0 To .geomnum - 1
                 For j = 0 To .geom(i).lodnum - 1
@@ -96,19 +121,31 @@ Dim filename As String
                             
                             If Len(mapfile) > 0 Then
                                 
+                                'If suffix_sel > 0 Then
+                                '    mapfile = replace(mapfile,
+                                'end If
+                                
                                 'reset path
                                 filename = ""
                                 
                                 If opt_uselocaltexpath Then
                                     
-                                    'try mesh path first
-                                    fname = GetFilePath(vmesh.filename) & GetFileName(mapfile)
-                                    If FileExist(fname) Then filename = fname
+                                  '  'try mesh path first
+                                  '  fname = meshfilepath & GetFileName(mapfile)
+                                  '  If BF2TexFileExist(fname) Then filename = fname
                                     
-                                    'try mesh texture path
+                                  '  'try texture path
+                                  '  If Len(filename) = 0 Then
+                                  '      fname = meshfilepath & "..\Textures\" & GetFileName(mapfile)
+                                  '      If BF2TexFileExist(fname) Then filename = fname
+                                  '  End If
+                                    
+                                    'try mesh path first
+                                    filename = BF2GetTexFileName(meshfilepath & GetFileName(mapfile))
+                                    
+                                    'try texture path
                                     If Len(filename) = 0 Then
-                                        fname = GetFilePath(vmesh.filename) & "..\Textures\" & GetFileName(mapfile)
-                                        If FileExist(fname) Then filename = fname
+                                        filename = BF2GetTexFileName(meshfilepath & "..\Textures\" & GetFileName(mapfile))
                                     End If
                                     
                                 End If
@@ -119,18 +156,14 @@ Dim filename As String
                                     For p = 1 To texpathnum
                                         If texpath(p).use Then
                                             
-                                            Dim yname As String
-                                            yname = texpath(p).path & "\" & mapfile
-                                            If FileExist(yname) Then
-                                               filename = yname
-                                               Exit For
-                                            End If
+                                            'texpath+path+filename
+                                            filename = BF2GetTexFileName(texpath(p).path & "\" & mapfile)
+                                            If Len(filename) > 0 Then Exit For
                                             
-                                            Dim zname As String
-                                            zname = texpath(p).path & "\" & fname
-                                            If FileExist(zname) Then
-                                               filename = zname
-                                               Exit For
+                                            'texpath+filename
+                                            If Len(filename) = 0 Then
+                                                filename = BF2GetTexFileName(texpath(p).path & "\" & fname)
+                                                If Len(filename) > 0 Then Exit For
                                             End If
                                             
                                         End If
