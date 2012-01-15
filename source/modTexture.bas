@@ -63,12 +63,15 @@ End Function
 Private Function BF2GetTexFileName(ByRef fname As String) As String
     
     'first try suffixed
-    'Dim sfname As String
-    'sfname = Replace(fname, ".dds", suffix(suffix_sel) & ".dds")
-    'If FileExist(sfname) Then
-    '    BF2GetTexFileName = sfname
-    '    Exit Function
-    'End If
+    If suffix_sel > 0 Then
+        Dim sfname As String
+        sfname = Replace(ByVal fname, ".dds", "_" & suffix(suffix_sel) & ".dds")
+        'MsgBox sfname
+        If FileExist(sfname) Then
+            BF2GetTexFileName = sfname
+            Exit Function
+        End If
+    End If
    
     'try non-suffixed
     If FileExist(fname) Then

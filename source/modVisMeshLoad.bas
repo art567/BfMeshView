@@ -26,6 +26,7 @@ Public Function LoadBF2Mesh(ByRef filename As String) As Boolean
         'reset stuff
         .filename = filename
         .fileext = LCase(GetFileExt(filename))
+        .isStaticMesh = (.fileext = "staticmesh")
         .isBundledMesh = (.fileext = "bundledmesh")
         .isSkinnedMesh = (.fileext = "skinnedmesh")
         '.isBFP4F = InStr(1, LCase(filename), "bfp4f")

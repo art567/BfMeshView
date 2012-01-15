@@ -440,10 +440,10 @@ Private Function GetNorm(ByVal i As Long) As float3
     End With
 End Function
 
-Private Function GetTexc(ByVal i As Long) As float2
-    With vmesh 'note: the '7' may not be entirely safe here (also need to make this work for statics)
-        GetTexc.x = .vert(i * .xstride + 7 + 0)
-        GetTexc.y = .vert(i * .xstride + 7 + 1)
+Private Function GetTexc(ByVal off As Long, ByVal i As Long) As float2
+    With vmesh
+        GetTexc.x = .vert(i * .xstride + off + 0)
+        GetTexc.y = .vert(i * .xstride + off + 1)
     End With
 End Function
 
@@ -452,6 +452,13 @@ Public Sub BF2MatGenTangents(ByRef mat As bf2mat)
     With mat
         'On Error GoTo hell
         On Error Resume Next
+        
+        Dim off As Long
+        If vmesh.isStaticMesh Then
+            off = 9
+        Else
+            off = 7
+        End If
         
         'temp tangent array
         'ReDim tan1(0 To vmesh.vertnum - 1) As float3
@@ -481,9 +488,9 @@ Public Sub BF2MatGenTangents(ByRef mat As bf2mat)
             Dim uv1 As float2
             Dim uv2 As float2
             Dim uv3 As float2
-            uv1 = GetTexc(i1)
-            uv2 = GetTexc(i2)
-            uv3 = GetTexc(i3)
+            uv1 = GetTexc(off, i1)
+            uv2 = GetTexc(off, i2)
+            uv3 = GetTexc(off, i3)
             
             Dim x1 As Single
             Dim x2 As Single
@@ -628,9 +635,9 @@ Public Sub BF2ComputeTangents()
                 Dim uv1 As float2
                 Dim uv2 As float2
                 Dim uv3 As float2
-                uv1 = GetTexc(i1)
-                uv2 = GetTexc(i2)
-                uv3 = GetTexc(i3)
+                uv1 = GetTexc(1, i1)
+                uv2 = GetTexc(1, i2)
+                uv3 = GetTexc(1, i3)
                 
                 Dim s As Single
                 s = TriangleSign(uv1, uv2, uv3)

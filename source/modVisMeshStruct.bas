@@ -184,7 +184,7 @@ Public Type bf2mesh
     
     'indices
     indexnum As Long
-    index() As Integer
+    Index() As Integer
     
     'unknown
     u2 As Long 'always 8?
@@ -192,6 +192,7 @@ Public Type bf2mesh
     ''''internal
     filename As String       'current loaded mesh file
     fileext As String        'filename extension
+    isStaticMesh As Boolean  'true if file extension is "staticmesh"
     isSkinnedMesh As Boolean 'true if file extension is "skinnedmesh"
     isBundledMesh As Boolean 'true if file extension is "bundledmesh"
     isBFP4F As Boolean       'true if file is inside BFP4F directory
