@@ -122,6 +122,18 @@ Dim filename As String
                             'get map filename
                             mapfile = .geom(i).lod(j).mat(k).map(m)
                             
+                            'blow up if absolute path
+                            If InStr(1, mapfile, ":", vbTextCompare) Then
+                                Echo "WARNING: bad file path: " & Chr(34) & mapfile & Chr(34) & "!" & vbCrLf
+                                mapfile = ""
+                            End If
+                            
+                            'blow up if network path
+                            If Left(mapfile, 2) = "\\" Then
+                                Echo "WARNING: bad file path: " & Chr(34) & mapfile & Chr(34) & "!" & vbCrLf
+                                mapfile = ""
+                            End If
+                            
                             If Len(mapfile) > 0 Then
                                 
                                 'If suffix_sel > 0 Then
@@ -131,6 +143,7 @@ Dim filename As String
                                 'reset path
                                 filename = ""
                                 
+                                'try path relative to mesh file
                                 If opt_uselocaltexpath Then
                                     
                                   '  'try mesh path first
@@ -143,10 +156,10 @@ Dim filename As String
                                   '      If BF2TexFileExist(fname) Then filename = fname
                                   '  End If
                                     
-                                    'try mesh path first
+                                    'try current mesh path
                                     filename = BF2GetTexFileName(meshfilepath & GetFileName(mapfile))
                                     
-                                    'try texture path
+                                    'try asset texture path
                                     If Len(filename) = 0 Then
                                         filename = BF2GetTexFileName(meshfilepath & "..\Textures\" & GetFileName(mapfile))
                                     End If

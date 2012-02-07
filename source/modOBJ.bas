@@ -64,6 +64,7 @@ Dim i3 As Long
                 'For j = 0 To .lodnum - 1
                     With .lod(j)
                         Print #ff, "# Lod " & j
+                        Print #ff, "o Lod_" & j
                         Print #ff, "g Lod_" & j
                         'Print #ff, "s 1"
                         
