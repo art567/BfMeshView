@@ -71,6 +71,7 @@ Public Sub SetUniforms(ByRef prog As GLuint, ByRef mat As bf2mat)
     SetUniform1i prog, "hasEnvMap", Bool2Int(mat.hasEnvMap And view_envmap)
     SetUniform1i prog, "showLighting", Bool2Int(view_lighting)
     SetUniform1i prog, "showDiffuse", Bool2Int(view_textures)
+    SetUniform1f prog, "timephase", timephase
     SetNodeTransforms prog, "nodetransform"
 End Sub
 

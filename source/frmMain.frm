@@ -23,6 +23,11 @@ Begin VB.Form frmMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   884
    StartUpPosition =   2  'CenterScreen
+   Begin VB.Timer tmrMeshAnim 
+      Enabled         =   0   'False
+      Left            =   9360
+      Top             =   4680
+   End
    Begin VB.Timer tmrTime 
       Enabled         =   0   'False
       Left            =   8520
@@ -441,7 +446,6 @@ Begin VB.Form frmMain
       End
       Begin VB.Menu mnuViewAnimateMesh 
          Caption         =   "Animate Mesh"
-         Enabled         =   0   'False
       End
       Begin VB.Menu mnuViewCamAnim 
          Caption         =   "Animate Camera"
@@ -811,6 +815,7 @@ Private Sub Form_Load()
     End If
     
     'timer
+    Me.tmrMeshAnim.Interval = 1000 / 60
     Me.tmrTime.Interval = 1000 / 60
     SetTime 0
     
@@ -1301,6 +1306,11 @@ Private Sub picTime_MouseMove(Button As Integer, Shift As Integer, x As Single, 
     End If
 End Sub
 
+Private Sub tmrMeshAnim_Timer()
+    timephase = timephase + (1 / 60)
+    picMain_Paint
+End Sub
+
 Private Sub tmrTime_Timer()
     Dim frames As Single
     frames = 100
@@ -1553,6 +1563,12 @@ Private Sub mnuViewGrids_Click()
     view_grids = Not view_grids
     mnuViewGrids.Checked = view_grids
     picMain_Paint
+End Sub
+
+Private Sub mnuViewAnimateMesh_Click()
+    tmrMeshAnim.Enabled = Not tmrMeshAnim.Enabled
+    mnuViewAnimateMesh.Checked = tmrMeshAnim.Enabled
+    If tmrMeshAnim.Enabled Then timephase = 0
 End Sub
 
 Private Sub mnuViewCamAnim_Click()

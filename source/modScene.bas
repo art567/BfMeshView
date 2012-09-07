@@ -39,6 +39,8 @@ Public camasp As Single
 Public Const camnear = 0.01
 Public Const camfar = 500
 
+Public timephase As Single
+
 Private drawlock As Boolean
 
 Public eyeposworld As float3

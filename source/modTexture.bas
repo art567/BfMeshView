@@ -136,10 +136,6 @@ Dim filename As String
                             
                             If Len(mapfile) > 0 Then
                                 
-                                'If suffix_sel > 0 Then
-                                '    mapfile = replace(mapfile,
-                                'end If
-                                
                                 'reset path
                                 filename = ""
                                 
@@ -188,12 +184,7 @@ Dim filename As String
                                 
                                 'load texture
                                 If Len(filename) > 0 Then
-                                    'Echo "trying to load " & filename
-                                    
-                                    'If j = 0 Then
-                                    '    MsgBox .geom(i).lod(j).mat(k).texmapid(m)
-                                    'End If
-                                    
+                                
                                     .geom(i).lod(j).mat(k).texmapid(m) = LoadTexture(filename, mapfile)
                                     
                                     BuildShader .geom(i).lod(j).mat(k), vmesh.filename
@@ -388,19 +379,19 @@ Public Sub GenDummyTex()
     Dim yellow As byte4
     red = byte4(255, 0, 0, 127)
     yellow = byte4(255, 255, 0, 63)
-    Dim x As Long
-    Dim y As Long
-    For y = 0 To h - 1
-        For x = 0 To w - 1
+    Dim X As Long
+    Dim Y As Long
+    For Y = 0 To h - 1
+        For X = 0 To w - 1
             Dim i As Long
-            i = x + w * y
-            If IsEven(CLng(x \ 8) + CLng(y \ 8)) Then
+            i = X + w * Y
+            If IsEven(CLng(X \ 8) + CLng(Y \ 8)) Then
                 data(i) = red
             Else
                 data(i) = yellow
             End If
-        Next x
-    Next y
+        Next X
+    Next Y
     
     'create texture
     Dim handle As GLuint

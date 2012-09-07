@@ -138,6 +138,13 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     Dim mipmapnum As Long
     mapwidth = ddsd.dwWidth
     mapheight = ddsd.dwHeight
+    If Not comp Then
+        'classic microsoft anti-interop trick, width and height are swapped when uncompressed
+        Dim wtf As Long
+        wtf = mapwidth
+        mapwidth = mapheight
+        mapheight = wtf
+    End If
     If ddsd.dwMipMapCount = 0 Then
         mipmapnum = 1
     Else
@@ -148,12 +155,16 @@ Public Function LoadDDS(ByVal filename As String) As GLuint
     Echo "mipmaps: " & mipmapnum
     
     'determine data size
-    Dim datasize As Long
+    Dim datasize As Long 'TODO: wasting memory here!!!
     If mipmapnum > 1 Then
         datasize = (mapwidth * mapheight * frags) * mipmapfactor
     Else
         datasize = (mapwidth * mapheight * frags)
     End If
+    'If comp Then
+    '    datasize = (mapwidth / 4) * (mapwidth / 4) * blocksize
+    'Else
+    'End If
     
     'read data
     Dim data() As Byte
