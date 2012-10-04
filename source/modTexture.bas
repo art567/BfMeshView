@@ -25,6 +25,13 @@ Public dummytex As GLuint
 'loads texture from file
 Public Function LoadTexture(ByVal filename As String, ByVal origrelfilename As String) As Long
     
+    'ignore specular LUT
+    If Not opt_loadspeclut Then
+        If InStr(filename, "SpecularLUT") Then
+            Exit Function
+        End If
+    End If
+    
     'you wouldn't believe how badly Windows handles slashes
     filename = Replace(filename, "/", "\")
     

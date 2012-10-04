@@ -12,6 +12,7 @@ Public opt_loadcon As Boolean
 Public opt_loadviewsettings As Boolean
 Public opt_uselocaltexpath As Boolean
 Public opt_useglsl As Boolean
+Public opt_loadspeclut As Boolean
 Public bgcolor As color4f
 
 Private Type texpath_type
@@ -63,6 +64,7 @@ Public Sub LoadDefaultConfig()
     opt_loadcon = False
     opt_loadviewsettings = False
     opt_useglsl = True
+    opt_loadspeclut = False
     
     current_folder = App.path
     
@@ -118,6 +120,7 @@ Dim skip As Boolean
             Case "loadviewsettings": opt_loadviewsettings = val(str(1))
             Case "uselocaltexpath":  opt_uselocaltexpath = val(str(1))
             Case "useglsl":          opt_useglsl = val(str(1))
+            Case "loadspeclut":      opt_loadspeclut = val(str(1))
             Case "runmaximized":     opt_runmaximized = val(str(1))
             Case "bgcolor":
                 str() = Split(str(1), "/")
@@ -242,7 +245,7 @@ Dim backup As Boolean
     Print #ff, "; " & App.Title & " Configuration File"
     Print #ff, ""
     
-    'print last used path
+    'misc
     Print #ff, "[Misc]"
     Print #ff, "lastpath=" & GetFilePath(current_folder)
     Print #ff, "loadtextures=" & Abs(opt_loadtextures)
@@ -251,6 +254,7 @@ Dim backup As Boolean
     Print #ff, "loadviewsettings=" & Abs(opt_loadviewsettings)
     Print #ff, "uselocaltexpath=" & Abs(opt_uselocaltexpath)
     Print #ff, "useglsl=" & Abs(opt_useglsl)
+    Print #ff, "loadspeclut=" & Abs(opt_loadspeclut)
     Print #ff, "runmaximized=" & Abs(opt_runmaximized)
     Print #ff, "bgcolor=" & Round(bgcolor.r * 255) & "/" & Round(bgcolor.g * 255) & "/" & Round(bgcolor.b * 255)
     Print #ff, ""
